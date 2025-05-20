@@ -293,17 +293,6 @@ export default function ServerConfig() {
                         </div>
                       )}
 
-                      <div className="space-y-2">
-                        <Label htmlFor="cf-api-key">CurseForge API Key</Label>
-                        <Input
-                          id="cf-api-key"
-                          type="password"
-                          value={cfApiKey}
-                          onChange={(e) => setCfApiKey(e.target.value)}
-                          placeholder="Ingresa tu API key de CurseForge"
-                        />
-                      </div>
-
                       <div className="flex items-center space-x-2">
                         <Switch
                           id="cf-sync"
