@@ -72,7 +72,6 @@ export default function ServerConfig() {
   );
   const [cfSlug, setCfSlug] = useState("");
   const [cfFile, setCfFile] = useState("");
-  const [cfApiKey, setCfApiKey] = useState("");
   const [cfSync, setCfSync] = useState(true);
   const [cfForceInclude, setCfForceInclude] = useState("");
   const [cfExclude, setCfExclude] = useState("");
