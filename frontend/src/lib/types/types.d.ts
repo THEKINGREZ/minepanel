@@ -1,12 +1,12 @@
 export interface ServerConfig {
   id: string;
   active: boolean;
-  serverType: 'VANILLA' | 'FORGE' | 'AUTO_CURSEFORGE';
+  serverType: "VANILLA" | "FORGE" | "AUTO_CURSEFORGE";
 
   // General configuration
   serverName: string;
   port: string;
-  difficulty: 'peaceful' | 'easy' | 'normal' | 'hard';
+  difficulty: "peaceful" | "easy" | "normal" | "hard";
   maxPlayers: string;
   ops: string;
   timezone: string;
@@ -29,7 +29,7 @@ export interface ServerConfig {
   dockerImage: string;
   minecraftVersion: string;
   dockerVolumes: string;
-  restartPolicy: 'no' | 'always' | 'on-failure' | 'unless-stopped';
+  restartPolicy: "no" | "always" | "on-failure" | "unless-stopped";
   stopDelay: string;
   rollingLogs: boolean;
   execDirectly: boolean;
@@ -39,7 +39,7 @@ export interface ServerConfig {
   forgeBuild?: string;
 
   // CurseForge specific
-  cfMethod?: 'url' | 'slug' | 'file';
+  cfMethod?: "url" | "slug" | "file";
   cfUrl?: string;
   cfSlug?: string;
   cfFile?: string;

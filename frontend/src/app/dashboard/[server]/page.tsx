@@ -1,24 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import Link from "next/link";
+import { useEffect, useState, type FormEvent } from "react";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Server, Loader, BrushCleaning } from "lucide-react";
+import { toast } from "sonner";
+import { clearServerData, fetchServerConfig, getServerStatus, restartServer, updateServerConfig } from "@/services/docker/queries/queries";
+import type { ServerConfig } from "@/lib/types/types";
 
 export default function ServerConfig() {
   const params = useParams();
@@ -26,12 +13,12 @@ export default function ServerConfig() {
 
   const [isActive, setIsActive] = useState(serverId === "daily");
   const [isLoading, setIsLoading] = useState(false);
-  const [serverType, setServerType] = useState("curseforge");
+  const [serverType, setServerType] = useState<'VANILLA' | 'FORGE' | 'AUTO_CURSEFORGE'>('AUTO_CURSEFORGE');
 
   // Configuración general
   const [serverName, setServerName] = useState("TulaCraft");
   const [port, setPort] = useState(serverId === "daily" ? "25565" : "25566");
-  const [difficulty, setDifficulty] = useState("hard");
+  const [difficulty, setDifficulty] = useState<'peaceful' | 'easy' | 'normal' | 'hard'>('hard');
   const [maxPlayers, setMaxPlayers] = useState("10");
   const [ops, setOps] = useState("ketbome");
   const [timezone, setTimezone] = useState("America/Santiago");
@@ -56,7 +43,7 @@ export default function ServerConfig() {
   const [dockerVolumes, setDockerVolumes] = useState(
     "./mc-data:/data\n./modpacks:/modpacks:ro"
   );
-  const [restartPolicy, setRestartPolicy] = useState("unless-stopped");
+  const [restartPolicy, setRestartPolicy] = useState<'no' | 'always' | 'on-failure' | 'unless-stopped'>('unless-stopped');
   const [stopDelay, setStopDelay] = useState("60");
   const [rollingLogs, setRollingLogs] = useState(true);
   const [execDirectly, setExecDirectly] = useState(true);
@@ -82,10 +69,211 @@ export default function ServerConfig() {
   const containerName =
     serverId === "daily" ? "minecraft-daily" : "minecraft-weekend";
 
+  const [serverStatus, setServerStatus] = useState<
+    "running" | "stopped" | "not_found" | "loading"
+  >("loading");
+
+  useEffect(() => {
+    const loadServerConfig = async () => {
+      try {
+        setIsLoading(true);
+        const config = await fetchServerConfig(serverId);
+
+        // Update all state variables with the fetched config
+        setIsActive(config.active);
+        setServerType(config.serverType);
+        setServerName(config.serverName);
+        setPort(config.port);
+        setDifficulty(config.difficulty);
+        setMaxPlayers(config.maxPlayers);
+        setOps(config.ops);
+        setTimezone(config.timezone);
+        setIdleTimeout(config.idleTimeout);
+        setOnlineMode(config.onlineMode);
+        setPvp(config.pvp);
+        setCommandBlock(config.commandBlock);
+        setAllowFlight(config.allowFlight);
+        setInitMemory(config.initMemory);
+        setMaxMemory(config.maxMemory);
+        setCpuLimit(config.cpuLimit);
+        setCpuReservation(config.cpuReservation);
+        setMemoryReservation(config.memoryReservation);
+        setViewDistance(config.viewDistance);
+        setSimulationDistance(config.simulationDistance);
+        setDockerImage(config.dockerImage);
+        setMinecraftVersion(config.minecraftVersion);
+        setDockerVolumes(config.dockerVolumes);
+        setRestartPolicy(config.restartPolicy);
+        setStopDelay(config.stopDelay);
+        setRollingLogs(config.rollingLogs);
+        setExecDirectly(config.execDirectly);
+        setEnvVars(config.envVars ?? "");
+
+        if (config.serverType === "FORGE" && config.forgeBuild) {
+          setForgeBuild(config.forgeBuild);
+        }
+
+        if (config.serverType === "AUTO_CURSEFORGE") {
+          setCfMethod(config.cfMethod ?? "url");
+          setCfUrl(config.cfUrl ?? "");
+          setCfSlug(config.cfSlug ?? "");
+          setCfFile(config.cfFile ?? "");
+          setCfSync(config.cfSync ?? true);
+          setCfForceInclude(config.cfForceInclude ?? "");
+          setCfExclude(config.cfExclude ?? "");
+          setCfFilenameMatcher(config.cfFilenameMatcher ?? "");
+        }
+
+        // Check server status
+        await checkServerStatus();
+      } catch (error) {
+        console.error("Failed to load server config:", error);
+        toast.error("No se pudo cargar la configuración del servidor");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadServerConfig();
+
+    // Poll server status every 10 seconds
+    const statusInterval = setInterval(checkServerStatus, 10000);
+
+    return () => clearInterval(statusInterval);
+  }, [serverId]);
+
+  const checkServerStatus = async () => {
+    try {
+      const { status } = await getServerStatus(serverId);
+      setServerStatus(status);
+    } catch (error) {
+      console.error("Failed to get server status:", error);
+      setServerStatus("not_found");
+    }
+  };
+
   const handleSaveConfig = async (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
+
+      // Create config object from all state variables
+      const config: ServerConfig = {
+        id: serverId,
+        active: isActive,
+        serverType,
+        serverName,
+        port,
+        difficulty,
+        maxPlayers,
+        ops,
+        timezone,
+        idleTimeout,
+        onlineMode,
+        pvp,
+        commandBlock,
+        allowFlight,
+        initMemory,
+        maxMemory,
+        cpuLimit,
+        cpuReservation,
+        memoryReservation,
+        viewDistance,
+        simulationDistance,
+        dockerImage,
+        minecraftVersion,
+        dockerVolumes,
+        restartPolicy,
+        stopDelay,
+        rollingLogs,
+        execDirectly,
+        envVars,
+      };
+
+      // Add server type specific configurations
+      if (serverType === "FORGE") {
+        Object.assign(config, { forgeBuild });
+      } else if (serverType === "AUTO_CURSEFORGE") {
+        Object.assign(config, {
+          cfMethod,
+          cfUrl,
+          cfSlug,
+          cfFile,
+          cfSync,
+          cfForceInclude,
+          cfExclude,
+          cfFilenameMatcher,
+        });
+      }
+
+      await updateServerConfig(serverId, config);
+      toast.success("Configuración guardada correctamente");
+    } catch (error) {
+      console.error("Failed to save config:", error);
+      toast.error("No se pudo guardar la configuración");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleRestartServer = async () => {
+    try {
+      setIsLoading(true);
+      const { success, message } = await restartServer(serverId);
+
+      if (success) {
+        toast.success(message);
+      } else {
+        toast.error(message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+      setIsLoading(true);
+      const { success, message } = await clearServerData(serverId);
+
+      if (success) {
+        toast.success(message);
+      } else {
+        toast.error(message);
+      !confirm(
+        "¿Estás seguro? Esto eliminará TODOS los datos del servidor. Esta acción no se puede deshacer."
+      )
+        return;
+      }
+    }
+    setIsLoading(false);
+  };
+
+  const getStatusBadge = () => {
+    if (serverStatus === 'loading') {
+      return (
+        <Badge variant="secondary" className="bg-gray-50 text-gray-700 border-gray-200">
+          Verificando...
+        </Badge>
+      );
+    } else if (serverStatus === 'running') {
+      return (
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          En línea
+        </Badge>
+      );
+    } else if (serverStatus === 'stopped') {
+      return (
+        <Badge variant="secondary" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+          Detenido
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="secondary" className="bg-red-50 text-red-700 border-red-200">
+          No encontrado
+        </Badge>
+      );
+    }
+  };
+
+  {getStatusBadge()}
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -135,12 +323,22 @@ export default function ServerConfig() {
                 </p>
               </div>
               <div className="ml-auto gap-1 flex">
-                <Button type="submit" disabled={isLoading} className="gap-2">
+                <Button 
+                  type="button" 
+                  onClick={handleRestartServer} 
+                  disabled={isLoading || serverStatus === 'not_found'} 
+                  className="gap-2"
+                >
                   <Loader className="h-4 w-4" />
                   {isLoading ? "Reiniciando..." : "Reiniciar Servidor"}
                 </Button>
 
-                <Button type="submit" disabled={isLoading} className="gap-2">
+                <Button 
+                  type="button" 
+                  onClick={handleClearData} 
+                  disabled={isLoading} 
+                  className="gap-2"
+                >
                   <BrushCleaning className="h-4 w-4" />
                   {isLoading ? "Borrando..." : "Borrar datos"}
                 </Button>

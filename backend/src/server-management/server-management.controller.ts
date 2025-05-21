@@ -5,6 +5,7 @@ import {
   Body,
   Param,
   NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { ServerConfig } from '../models/server-config.model';
 import { DockerComposeService } from 'src/docker-compose/docker-compose.service';
@@ -31,7 +32,7 @@ export class ServerManagementController {
     return config;
   }
 
-  @Post(':id')
+  @Put(':id')
   async updateServer(
     @Param('id') id: string,
     @Body() config: Partial<ServerConfig>,
@@ -47,8 +48,8 @@ export class ServerManagementController {
   }
 
   @Post(':id/restart')
-  async restartServer() {
-    const result = await this.managementService.restartServer();
+  async restartServer(@Param('id') id: string) {
+    const result = await this.managementService.restartServer(id);
     return {
       success: result,
       message: result
@@ -74,8 +75,24 @@ export class ServerManagementController {
   }
 
   @Get(':id/status')
-  async getServerStatus() {
-    const status = await this.managementService.getServerStatus();
+  async getServerStatus(@Param('id') id: string) {
+    const status = await this.managementService.getServerStatus(id);
     return { status };
+  }
+
+  @Get(':id/info')
+  async getServerInfo(@Param('id') id: string) {
+    const serverInfo = await this.managementService.getServerInfo(id);
+    if (!serverInfo.exists) {
+      throw new NotFoundException(`Server with ID "${id}" not found`);
+    }
+
+    // Get configuration info as well
+    const config = await this.dockerComposeService.getServerConfig(id);
+
+    return {
+      ...serverInfo,
+      config: config || undefined,
+    };
   }
 }

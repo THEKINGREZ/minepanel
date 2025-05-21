@@ -6,143 +6,112 @@ import { ServerConfig } from '../models/server-config.model';
 
 @Injectable()
 export class DockerComposeService {
-  private readonly DOCKER_COMPOSE_PATH = path.join(
-    process.cwd(),
-    '..',
-    'docker-compose.yml',
-  );
-  private readonly CONFIG_DIR = path.join(process.cwd(), 'config');
-  private readonly CONFIG_FILE = 'servers.json';
+  private readonly BASE_DIR = path.join(process.cwd(), '..');
 
-  constructor() {
-    fs.ensureDirSync(this.CONFIG_DIR);
-
-    // Initialize server configs if they don't exist
-    if (!fs.existsSync(this.getConfigPath())) {
-      // Extract server configs from existing docker-compose.yml
-      this.initializeFromDockerCompose();
-    }
+  private getDockerComposePath(serverId: string): string {
+    return path.join(this.BASE_DIR, serverId, 'docker-compose.yml');
   }
 
-  private getConfigPath(): string {
-    return path.join(this.CONFIG_DIR, this.CONFIG_FILE);
+  private getMcDataPath(serverId: string): string {
+    return path.join(this.BASE_DIR, serverId, 'mc-data');
   }
 
-  private async initializeFromDockerCompose(): Promise<void> {
-    try {
-      if (!fs.existsSync(this.DOCKER_COMPOSE_PATH)) {
-        // Create default configs if docker-compose.yml doesn't exist
-        await this.saveServerConfigs([
-          this.createDefaultConfig('daily'),
-          this.createDefaultConfig('weekend'),
-        ]);
-        return;
-      }
+  private async loadServerConfigFromDockerCompose(
+    serverId: string,
+  ): Promise<ServerConfig> {
+    const dockerComposePath = this.getDockerComposePath(serverId);
 
-      const composeFileContent = await fs.readFile(
-        this.DOCKER_COMPOSE_PATH,
-        'utf8',
+    if (!fs.existsSync(dockerComposePath)) {
+      console.error(
+        `Docker compose file does not exist for server ${serverId}`,
       );
+      return this.createDefaultConfig(serverId);
+    }
+
+    try {
+      const composeFileContent = await fs.readFile(dockerComposePath, 'utf8');
       const composeConfig = yaml.load(composeFileContent) as any;
 
-      if (!composeConfig.services || !composeConfig.services.mc) {
-        // Create default configs if docker-compose.yml doesn't have mc service
-        await this.saveServerConfigs([
-          this.createDefaultConfig('daily'),
-          this.createDefaultConfig('weekend'),
-        ]);
-        return;
+      if (!composeConfig.services?.mc) {
+        // Create default config if docker-compose.yml doesn't have mc service
+        return this.createDefaultConfig(serverId);
       }
 
       const mcService = composeConfig.services.mc;
-      const env = mcService.environment || {};
-      const resources = mcService.deploy?.resources || {};
+      const env = mcService.environment ?? {};
+      const resources = mcService.deploy?.resources ?? {};
 
       // Extract server config from docker-compose
-      const dailyConfig: ServerConfig = {
-        id: 'daily',
-        active: true,
-        serverType: (env.TYPE || 'vanilla').toLowerCase(),
+      const serverConfig: ServerConfig = {
+        id: serverId,
+        active: fs.existsSync(this.getMcDataPath(serverId)),
+        serverType: env.TYPE ?? 'VANILLA',
 
         // General configuration
-        serverName: env.MOTD || 'TulaCraft',
-        port: '25565',
-        difficulty: env.DIFFICULTY || 'hard',
-        maxPlayers: env.MAX_PLAYERS || '10',
-        ops: env.OPS || 'ketbome',
-        timezone: env.TZ || 'America/Santiago',
-        idleTimeout: env.PLAYER_IDLE_TIMEOUT || '60',
+        serverName: env.MOTD ?? 'TulaCraft',
+        port: serverId === 'daily' ? '25565' : '25566',
+        difficulty: env.DIFFICULTY ?? 'hard',
+        maxPlayers: env.MAX_PLAYERS ?? '10',
+        ops: env.OPS ?? 'ketbome',
+        timezone: env.TZ ?? 'America/Santiago',
+        idleTimeout: env.PLAYER_IDLE_TIMEOUT ?? '60',
         onlineMode: env.ONLINE_MODE === 'true',
         pvp: env.PVP === 'true',
         commandBlock: env.ENABLE_COMMAND_BLOCK === 'true',
         allowFlight: env.ALLOW_FLIGHT === 'true',
 
         // Resources
-        initMemory: env.INIT_MEMORY || '6G',
-        maxMemory: env.MAX_MEMORY || '10G',
-        cpuLimit: resources.limits?.cpus || '2',
-        cpuReservation: resources.reservations?.cpus || '0.3',
-        memoryReservation: resources.reservations?.memory || '4G',
-        viewDistance: env.VIEW_DISTANCE || '6',
-        simulationDistance: env.SIMULATION_DISTANCE || '4',
+        initMemory: env.INIT_MEMORY ?? '6G',
+        maxMemory: env.MAX_MEMORY ?? '10G',
+        cpuLimit: resources.limits?.cpus ?? '2',
+        cpuReservation: resources.reservations?.cpus ?? '0.3',
+        memoryReservation: resources.reservations?.memory ?? '4G',
+        viewDistance: env.VIEW_DISTANCE ?? '6',
+        simulationDistance: env.SIMULATION_DISTANCE ?? '4',
 
         // Docker
         dockerImage: mcService.image
-          ? mcService.image.split(':')[1] || 'latest'
+          ? (mcService.image.split(':')[1] ?? 'latest')
           : 'latest',
-        minecraftVersion: env.VERSION || '1.19.2',
+        minecraftVersion: env.VERSION,
         dockerVolumes: Array.isArray(mcService.volumes)
           ? mcService.volumes.join('\n')
           : './mc-data:/data\n./modpacks:/modpacks:ro',
-        restartPolicy: mcService.restart || 'unless-stopped',
-        stopDelay: env.STOP_SERVER_ANNOUNCE_DELAY || '60',
+        restartPolicy: mcService.restart ?? 'unless-stopped',
+        stopDelay: env.STOP_SERVER_ANNOUNCE_DELAY ?? '60',
         rollingLogs: env.ENABLE_ROLLING_LOGS === 'true',
         execDirectly: env.EXEC_DIRECTLY === 'true',
         envVars: '',
       };
 
       // Add CurseForge specific config
-      if (dailyConfig.serverType === 'curseforge') {
-        dailyConfig.cfMethod = env.CF_SERVER_MOD
+      if (serverConfig.serverType === 'AUTO_CURSEFORGE') {
+        serverConfig.cfMethod = env.CF_SERVER_MOD
           ? 'file'
           : env.CF_SLUG
             ? 'slug'
             : 'url';
-        dailyConfig.cfUrl = env.CF_PAGE_URL || '';
-        dailyConfig.cfSlug = env.CF_SLUG || '';
-        dailyConfig.cfFile = env.CF_SERVER_MOD || '';
-        dailyConfig.cfApiKey = env.CF_API_KEY || '';
-        dailyConfig.cfSync = env.CF_FORCE_SYNCHRONIZE === 'true';
-        dailyConfig.cfForceInclude = env.CF_FORCE_INCLUDE_MODS || '';
-        dailyConfig.cfExclude = env.CF_EXCLUDE_MODS || '';
-        dailyConfig.cfFilenameMatcher = env.CF_FILENAME_MATCHER || '';
+        serverConfig.cfUrl = env.CF_PAGE_URL ?? '';
+        serverConfig.cfSlug = env.CF_SLUG ?? '';
+        serverConfig.cfFile = env.CF_SERVER_MOD ?? '';
+        serverConfig.cfSync = env.CF_FORCE_SYNCHRONIZE === 'true';
+        serverConfig.cfForceInclude = env.CF_FORCE_INCLUDE_MODS ?? '';
+        serverConfig.cfExclude = env.CF_EXCLUDE_MODS ?? '';
+        serverConfig.cfFilenameMatcher = env.CF_FILENAME_MATCHER ?? '';
       }
 
-      // Create weekend config as a copy of daily with different port
-      const weekendConfig = {
-        ...dailyConfig,
-        id: 'weekend',
-        active: false,
-        port: '25566',
-      };
-
-      await this.saveServerConfigs([dailyConfig, weekendConfig]);
+      return serverConfig;
     } catch (error) {
-      console.error('Error initializing from docker-compose:', error);
-
-      // Fallback to default configs
-      await this.saveServerConfigs([
-        this.createDefaultConfig('daily'),
-        this.createDefaultConfig('weekend'),
-      ]);
+      console.error(`Error loading config for server ${serverId}:`, error);
+      return this.createDefaultConfig(serverId);
     }
   }
 
   private createDefaultConfig(id: string): ServerConfig {
     return {
       id,
-      active: id === 'daily',
-      serverType: 'curseforge',
+      active: false,
+      serverType: 'VANILLA',
 
       // General configuration
       serverName: 'TulaCraft',
@@ -177,8 +146,7 @@ export class DockerComposeService {
       envVars: '',
 
       // CurseForge specific
-      cfMethod: 'url',
-      cfUrl: 'https://www.curseforge.com/minecraft/modpacks/all-the-mods-10',
+      cfUrl: '',
       cfSlug: '',
       cfFile: '',
       cfApiKey: '',
@@ -190,28 +158,29 @@ export class DockerComposeService {
   }
 
   async getAllServerConfigs(): Promise<ServerConfig[]> {
-    try {
-      const configData = await fs.readJson(this.getConfigPath());
-      return configData as ServerConfig[];
-    } catch (error) {
-      console.error('Error reading server configs:', error);
-      return [];
+    const serverIds = ['daily', 'weekend'];
+    const configs: ServerConfig[] = [];
+
+    for (const id of serverIds) {
+      const config = await this.loadServerConfigFromDockerCompose(id);
+      configs.push(config);
     }
+
+    return configs;
   }
 
   async getServerConfig(id: string): Promise<ServerConfig | null> {
-    const configs = await this.getAllServerConfigs();
-    return configs.find((config) => config.id === id) || null;
+    if (!['daily', 'weekend'].includes(id)) {
+      return null;
+    }
+
+    return this.loadServerConfigFromDockerCompose(id);
   }
 
   async saveServerConfigs(configs: ServerConfig[]): Promise<void> {
-    // Save configs to JSON file
-    await fs.writeJson(this.getConfigPath(), configs, { spaces: 2 });
-
-    // Generate docker-compose.yml from active config
-    const activeConfig = configs.find((c) => c.active);
-    if (activeConfig) {
-      await this.generateDockerComposeFile(activeConfig);
+    // Generate docker-compose.yml for each server
+    for (const config of configs) {
+      await this.generateDockerComposeFile(config);
     }
   }
 
@@ -219,30 +188,22 @@ export class DockerComposeService {
     id: string,
     config: Partial<ServerConfig>,
   ): Promise<ServerConfig | null> {
-    const configs = await this.getAllServerConfigs();
-    const index = configs.findIndex((c) => c.id === id);
-
-    if (index === -1) {
+    if (!['daily', 'weekend'].includes(id)) {
       return null;
     }
 
-    // Update config
-    configs[index] = { ...configs[index], ...config };
+    const currentConfig = await this.loadServerConfigFromDockerCompose(id);
+    const updatedConfig = { ...currentConfig, ...config };
 
-    // If this config is now active, deactivate all others
-    if (configs[index].active) {
-      for (let i = 0; i < configs.length; i++) {
-        if (i !== index) {
-          configs[i].active = false;
-        }
-      }
-    }
-
-    await this.saveServerConfigs(configs);
-    return configs[index];
+    await this.generateDockerComposeFile(updatedConfig);
+    return updatedConfig;
   }
 
   private async generateDockerComposeFile(config: ServerConfig): Promise<void> {
+    // Create server directory if it doesn't exist
+    const serverDir = path.join(this.BASE_DIR, config.id);
+    await fs.ensureDir(serverDir);
+
     // Create environment variables dictionary
     const environment: Record<string, string> = {
       EULA: 'TRUE',
@@ -268,11 +229,11 @@ export class DockerComposeService {
     };
 
     // Add type-specific environment variables
-    if (config.serverType === 'forge' && config.forgeBuild) {
+    if (config.serverType === 'FORGE' && config.forgeBuild) {
       environment['FORGE_VERSION'] = config.forgeBuild;
     }
 
-    if (config.serverType === 'curseforge') {
+    if (config.serverType === 'AUTO_CURSEFORGE') {
       if (config.cfMethod === 'url' && config.cfUrl) {
         environment['CF_PAGE_URL'] = config.cfUrl;
         environment['MODPACK_PLATFORM'] = 'AUTO_CURSEFORGE';
@@ -283,9 +244,8 @@ export class DockerComposeService {
         environment['CF_SERVER_MOD'] = config.cfFile;
       }
 
-      if (config.cfApiKey) {
-        environment['CF_API_KEY'] = config.cfApiKey;
-      }
+      environment['CF_API_KEY'] =
+        '$2a$10$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa';
 
       if (config.cfSync) {
         environment['CF_FORCE_SYNCHRONIZE'] = 'true';
@@ -327,7 +287,7 @@ export class DockerComposeService {
     const volumes = config.dockerVolumes
       .split('\n')
       .filter((line) => line.trim() !== '')
-      .map((line) => line.trim());
+      .map((line) => line.trim().replace('./mc-data', './mc-data')); // Keep relative path
 
     // Create Docker Compose configuration
     const dockerComposeConfig = {
@@ -373,7 +333,7 @@ export class DockerComposeService {
             FB_DATABASE: '/database/filebrowser.db',
           },
           volumes: ['./:/srv', './filebrowser-db:/database'],
-          ports: ['25580:80'],
+          ports: [config.id === 'daily' ? '25580:80' : '25581:80'],
           restart: 'unless-stopped',
         },
       },
@@ -385,6 +345,6 @@ export class DockerComposeService {
 
     // Save Docker Compose file
     const yamlContent = yaml.dump(dockerComposeConfig);
-    await fs.writeFile(this.DOCKER_COMPOSE_PATH, yamlContent);
+    await fs.writeFile(this.getDockerComposePath(config.id), yamlContent);
   }
 }
