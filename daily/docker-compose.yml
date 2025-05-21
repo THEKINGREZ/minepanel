@@ -12,20 +12,21 @@ services:
       SERVER_NAME: TulaCraft
       DIFFICULTY: hard
       MAX_PLAYERS: '10'
-      OPS: ketbome
+      OPS: ''
       TZ: America/Santiago
       TYPE: AUTO_CURSEFORGE
       ONLINE_MODE: 'false'
       PVP: 'true'
       ENABLE_COMMAND_BLOCK: 'true'
       ALLOW_FLIGHT: 'true'
-      VIEW_DISTANCE: '6'
+      VIEW_DISTANCE: 15
       SIMULATION_DISTANCE: '4'
       STOP_SERVER_ANNOUNCE_DELAY: 60
       ENABLE_ROLLING_LOGS: 'true'
       EXEC_DIRECTLY: 'true'
       PLAYER_IDLE_TIMEOUT: '60'
       ENTITY_BROADCAST_RANGE_PERCENTAGE: '100'
+      LEVEL_TYPE: minecraft:default
       MODE: survival
       HARDCORE: 'false'
       SPAWN_ANIMALS: 'true'

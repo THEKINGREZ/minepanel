@@ -17,7 +17,7 @@ export interface ServerConfig {
   allowFlight: boolean;
   gameMode: 'survival' | 'creative' | 'adventure' | 'spectator';
   seed?: string;
-  levelType: 'DEFAULT' | 'FLAT' | 'LARGEBIOMES' | 'AMPLIFIED' | 'CUSTOMIZED';
+  levelType: 'minecraft:default' | 'minecraft:flat' | 'minecraft:large_biomes' | 'minecraft:amplified' | 'minecraft:single_biome_surface';
   hardcore: boolean;
   spawnAnimals: boolean;
   spawnMonsters: boolean;

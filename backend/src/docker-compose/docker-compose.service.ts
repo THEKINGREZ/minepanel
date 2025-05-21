@@ -166,7 +166,7 @@ export class DockerComposeService {
       allowFlight: true,
       gameMode: 'survival',
       seed: '',
-      levelType: 'DEFAULT',
+      levelType: 'minecraft:default',
       hardcore: false,
       spawnAnimals: true,
       spawnMonsters: true,
@@ -236,7 +236,7 @@ export class DockerComposeService {
       cfUrl: '',
       cfSlug: '',
       cfFile: '',
-      cfApiKey: '',
+      cfApiKey: process.env.CF_API_KEY || '',
       cfSync: true,
       cfForceInclude: '',
       cfExclude: '',
@@ -290,19 +290,6 @@ export class DockerComposeService {
     // Create server directory if it doesn't exist
     const serverDir = path.join(this.BASE_DIR, config.id);
     await fs.ensureDir(serverDir);
-    let LevelType: string;
-
-    if (config.levelType === 'DEFAULT') {
-      LevelType = 'minecraft:default';
-    } else if (config.levelType === 'FLAT') {
-      LevelType = 'minecraft:flat';
-    } else if (config.levelType === 'LARGEBIOMES') {
-      LevelType = 'minecraft:large_biomes';
-    } else if (config.levelType === 'AMPLIFIED') {
-      LevelType = 'minecraft:amplified';
-    } else if (config.levelType === 'CUSTOMIZED') {
-      LevelType = 'minecraft:single_biome_surface';
-    }
 
     // Create environment variables dictionary
     const environment: Record<string, string> = {
@@ -325,7 +312,7 @@ export class DockerComposeService {
       EXEC_DIRECTLY: String(config.execDirectly),
       PLAYER_IDLE_TIMEOUT: config.playerIdleTimeout || config.idleTimeout,
       ENTITY_BROADCAST_RANGE_PERCENTAGE: config.entityBroadcastRange,
-      LEVEL_TYPE: LevelType,
+      LEVEL_TYPE: config.levelType,
       MODE: config.gameMode,
       HARDCORE: String(config.hardcore),
       SPAWN_ANIMALS: String(config.spawnAnimals),
@@ -441,7 +428,7 @@ export class DockerComposeService {
 
       if (config.cfApiKey) {
         environment['CF_API_KEY'] = config.cfApiKey;
-      } else if (process.env.CF_API_KEY) {
+      } else {
         environment['CF_API_KEY'] = process.env.CF_API_KEY;
       }
 
