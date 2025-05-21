@@ -1,7 +1,8 @@
 import { ServerConfig } from "@/lib/types/types";
 import api from "../axios.service";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://minecraft.ketbome.lat:8091";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://minecraft.ketbome.lat:8091";
 
 export const fetchServerConfig = async (
   serverId: string
@@ -18,7 +19,7 @@ export const updateServerConfig = async (
   return response.data;
 };
 
-export const restartServer = async (
+export const apiRestartServer = async (
   serverId: string
 ): Promise<{ success: boolean; message: string }> => {
   // Corrige esto, estabas pasando withCredentials como cuerpo de la solicitud
@@ -26,11 +27,14 @@ export const restartServer = async (
   return response.data;
 };
 
-export const clearServerData = async (
+export const apiClearServerData = async (
   serverId: string
 ): Promise<{ success: boolean; message: string }> => {
   // Corrige esto, estabas pasando withCredentials como cuerpo de la solicitud
-  const response = await api.post(`${API_URL}/servers/${serverId}/clear-data`, {});
+  const response = await api.post(
+    `${API_URL}/servers/${serverId}/clear-data`,
+    {}
+  );
   return response.data;
 };
 
@@ -49,7 +53,7 @@ export const getServerLogs = async (
     params: { lines: limit },
   });
   return response.data;
-}
+};
 
 export const executeServerCommand = async (
   serverId: string,
@@ -59,7 +63,9 @@ export const executeServerCommand = async (
   return response.data;
 };
 
-export const startServer = async (serverId: string): Promise<{
+export const startServer = async (
+  serverId: string
+): Promise<{
   success: boolean;
   message: string;
 }> => {
@@ -75,7 +81,9 @@ export const startServer = async (serverId: string): Promise<{
   }
 };
 
-export const stopServer = async (serverId: string): Promise<{
+export const stopServer = async (
+  serverId: string
+): Promise<{
   success: boolean;
   message: string;
 }> => {
