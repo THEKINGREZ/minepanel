@@ -1,5 +1,12 @@
+"use client";
+
+import { useState, FormEvent, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -8,8 +15,44 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { isAuthenticated, login } from "@/services/auth/auth.service";
+
+// Importar el servicio de autenticación
 
 export default function Home() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Redirigir al dashboard si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated()) {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const result = await login(username, password);
+
+      if (result.success) {
+        toast.success("Inicio de sesión exitoso");
+        router.push("/dashboard");
+      } else {
+        toast.error(result.error || "Credenciales incorrectas");
+      }
+    } catch (error) {
+      console.error("Error en inicio de sesión:", error);
+      toast.error("Error al intentar iniciar sesión");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="bg-background border-b">
@@ -28,48 +71,46 @@ export default function Home() {
             </p>
           </div>
           <Card>
-            <CardHeader>
-              <CardTitle>Iniciar Sesión</CardTitle>
-              <CardDescription>
-                Ingresa tus credenciales para continuar
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="email"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Usuario
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="admin@ejemplo.com"
-                  />
+            <form onSubmit={handleSubmit}>
+              <CardHeader>
+                <CardTitle>Iniciar Sesión</CardTitle>
+                <CardDescription>
+                  Ingresa tus credenciales para continuar
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Usuario</Label>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="username"
+                      required
+                      autoComplete="username"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Contraseña</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="********"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="password"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Contraseña
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Link href="/dashboard" className="w-full">
-                <Button className="w-full">Iniciar Sesión</Button>
-              </Link>
-            </CardFooter>
+              </CardContent>
+              <CardFooter className="mt-4">
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                </Button>
+              </CardFooter>
+            </form>
           </Card>
         </div>
       </main>

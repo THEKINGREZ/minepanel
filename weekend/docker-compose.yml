@@ -8,7 +8,7 @@ services:
       - '25566:25565'
     environment:
       EULA: 'TRUE'
-      MOTD: TulaCraft
+      MOTD: Vault hunters
       DIFFICULTY: hard
       MAX_PLAYERS: '10'
       OPS: ketbome
@@ -16,7 +16,6 @@ services:
       INIT_MEMORY: 4G
       MAX_MEMORY: 6G
       TYPE: VANILLA
-      VERSION: 1.19.2
       ONLINE_MODE: 'false'
       PVP: 'true'
       ENABLE_COMMAND_BLOCK: 'true'
@@ -27,6 +26,7 @@ services:
       ENABLE_ROLLING_LOGS: 'true'
       EXEC_DIRECTLY: 'true'
       PLAYER_IDLE_TIMEOUT: '60'
+      VERSION: 1.19.2
     volumes:
       - ./mc-data:/data
       - ./modpacks:/modpacks:ro

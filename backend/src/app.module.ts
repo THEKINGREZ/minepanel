@@ -5,9 +5,10 @@ import { DockerComposeService } from './docker-compose/docker-compose.service';
 import { ServerManagementService } from './server-management/server-management.service';
 import { ServerManagementController } from './server-management/server-management.controller';
 import { ServerManagementModule } from './server-management/server-management.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [ServerManagementModule],
+  imports: [ServerManagementModule, AuthModule],
   controllers: [AppController, ServerManagementController],
   providers: [AppService, DockerComposeService, ServerManagementService],
 })

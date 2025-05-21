@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,8 +40,12 @@ import {
   clearServerData,
   getServerStatus,
 } from "@/services/docker/fetchs";
+import { isAuthenticated } from "@/services/auth/auth.service";
+import { Header } from "@/components/molecules/Header";
+import { Footer } from "@/components/molecules/Footer";
 
 export default function ServerConfig() {
+  const router = useRouter();
   const params = useParams();
   const serverId = params.server as string;
 
@@ -110,6 +114,13 @@ export default function ServerConfig() {
   const serverName2 =
     serverId === "daily" ? "Servidor Diario" : "Servidor Fin de Semana";
   const containerName = serverId === "daily" ? "daily_mc_1" : "weekend_mc_1";
+
+  useEffect(() => {
+    // Verificar autenticación
+    if (!isAuthenticated()) {
+      router.push("/");
+    }
+  }, [router]);
 
   // Cargar la configuración del servidor al iniciar
   useEffect(() => {
@@ -333,19 +344,7 @@ export default function ServerConfig() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="bg-background border-b">
-        <div className="flex h-16 items-center justify-between px-4 sm:px-8">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 font-semibold"
-          >
-            <span className="text-xl">MinecraftManager</span>
-          </Link>
-          <Link href="/">
-            <Button variant="outline">Cerrar Sesión</Button>
-          </Link>
-        </div>
-      </header>
+      <Header />
       <main className="flex-1 py-12 px-4">
         <form onSubmit={handleSaveConfig}>
           <div className="space-y-8 max-w-4xl mx-auto">
@@ -1056,14 +1055,7 @@ export default function ServerConfig() {
           </div>
         </form>
       </main>
-      <footer className="border-t py-6">
-        <div className="container flex flex-col items-center justify-between gap-4 px-4 text-center md:flex-row md:text-left">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} MinecraftManager. Todos los
-            derechos reservados.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
