@@ -9,26 +9,43 @@ services:
     environment:
       EULA: 'TRUE'
       MOTD: ATM 10 Tulalandia
+      SERVER_NAME: TulaCraft
       DIFFICULTY: hard
       MAX_PLAYERS: '10'
-      OPS: ketbome
+      OPS: ''
       TZ: America/Santiago
-      INIT_MEMORY: 6G
-      MAX_MEMORY: 10G
       TYPE: AUTO_CURSEFORGE
       ONLINE_MODE: 'false'
       PVP: 'true'
       ENABLE_COMMAND_BLOCK: 'true'
       ALLOW_FLIGHT: 'true'
-      VIEW_DISTANCE: '6'
+      VIEW_DISTANCE: 18
       SIMULATION_DISTANCE: '4'
       STOP_SERVER_ANNOUNCE_DELAY: 60
       ENABLE_ROLLING_LOGS: 'true'
       EXEC_DIRECTLY: 'true'
       PLAYER_IDLE_TIMEOUT: '60'
+      ENTITY_BROADCAST_RANGE_PERCENTAGE: '100'
+      LEVEL_TYPE: minecraft:default
+      MODE: survival
+      HARDCORE: 'false'
+      SPAWN_ANIMALS: 'true'
+      SPAWN_MONSTERS: 'true'
+      SPAWN_NPCS: 'true'
+      GENERATE_STRUCTURES: 'true'
+      ALLOW_NETHER: 'true'
+      UID: '1000'
+      GID: '1000'
+      INIT_MEMORY: 6G
+      MAX_MEMORY: 10G
+      ENABLE_RCON: 'true'
+      RCON_PORT: '25575'
+      OP_PERMISSION_LEVEL: '4'
+      CF_API_KEY: $$2a$$10$$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa
       CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-10
       MODPACK_PLATFORM: AUTO_CURSEFORGE
       CF_FORCE_SYNCHRONIZE: 'true'
+      CF_PARALLEL_DOWNLOADS: '4'
     volumes:
       - ./mc-data:/data
       - ./modpacks:/modpacks:ro

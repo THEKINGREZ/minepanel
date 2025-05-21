@@ -5,16 +5,45 @@ export interface ServerConfig {
 
   // General configuration
   serverName: string;
+  motd: string;
   port: string;
   difficulty: "peaceful" | "easy" | "normal" | "hard";
   maxPlayers: string;
   ops: string;
-  timezone: string;
   idleTimeout: string;
   onlineMode: boolean;
   pvp: boolean;
   commandBlock: boolean;
   allowFlight: boolean;
+  gameMode: "survival" | "creative" | "adventure" | "spectator";
+  seed?: string;
+  levelType: "minecraft:default" | "minecraft:flat" | "minecraft:large_biomes" | "minecraft:amplified" | "minecraft:single_biome_surface";
+  hardcore: boolean;
+  spawnAnimals: boolean;
+  spawnMonsters: boolean;
+  spawnNpcs: boolean;
+  generateStructures: boolean;
+  allowNether: boolean;
+  entityBroadcastRange: string;
+
+  enableAutoStop: boolean;
+  autoStopTimeoutEst: string;
+  autoStopTimeoutInit: string;
+
+  enableAutoPause: boolean;
+  autoPauseTimeoutEst: string;
+  autoPauseTimeoutInit: string;
+  autoPauseKnockInterface: string;
+
+  playerIdleTimeout: string;
+  preventProxyConnections: boolean;
+  opPermissionLevel: string;
+
+  // RCON
+  enableRcon: boolean;
+  rconPort: string;
+  rconPassword: string;
+  broadcastRconToOps: boolean;
 
   // Resources
   initMemory: string;
@@ -24,6 +53,20 @@ export interface ServerConfig {
   memoryReservation: string;
   viewDistance: string;
   simulationDistance: string;
+  memory: string;
+  uid: string;
+  gid: string;
+
+  useAikarFlags: boolean;
+  enableJmx: boolean;
+  jmxHost: string;
+  jvmOpts: string;
+  jvmXxOpts: string;
+  jvmDdOpts: string;
+  extraArgs: string;
+  tz: string;
+  enableRollingLogs: boolean;
+  logTimestamp: boolean | undefined;
 
   // Docker
   dockerImage: string;
@@ -48,4 +91,7 @@ export interface ServerConfig {
   cfForceInclude?: string;
   cfExclude?: string;
   cfFilenameMatcher?: string;
+  cfParallelDownloads?: string;
+  cfOverridesSkipExisting?: boolean;
+  cfSetLevelFrom?: string;
 }

@@ -6,9 +6,17 @@ import { ServerManagementService } from './server-management/server-management.s
 import { ServerManagementController } from './server-management/server-management.controller';
 import { ServerManagementModule } from './server-management/server-management.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [ServerManagementModule, AuthModule],
+  imports: [
+    ServerManagementModule,
+    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+  ],
   controllers: [AppController, ServerManagementController],
   providers: [AppService, DockerComposeService, ServerManagementService],
 })
