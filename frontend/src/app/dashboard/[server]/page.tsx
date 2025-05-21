@@ -362,6 +362,8 @@ export default function ServerConfig() {
                 className={
                   isActive
                     ? "bg-green-50 text-green-700 border-green-200"
+                    : serverStatus === "starting"
+                    ? "bg-orange-50 text-orange-700 border-orange-200"
                     : "bg-red-50 text-red-700 border-red-200"
                 }
               >
@@ -369,6 +371,8 @@ export default function ServerConfig() {
                   ? "Activo"
                   : serverStatus === "stopped"
                   ? "Detenido"
+                  : serverStatus === "starting"
+                  ? "Iniciando..."
                   : serverStatus === "not_found"
                   ? "No encontrado"
                   : "Desconocido"}

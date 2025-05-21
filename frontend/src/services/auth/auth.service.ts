@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from "axios";
+import api from "../axios.service";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3002";
 
 export const login = async (username: string, password: string) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
+    const response = await api.post(`${API_URL}/auth/login`, {
       username,
       password,
-    });
+    },
+    { withCredentials: true }
+  );
 
     if (response.data.access_token) {
       // Guardar el token en localStorage
@@ -16,7 +18,7 @@ export const login = async (username: string, password: string) => {
       localStorage.setItem("username", response.data.username);
 
       // Configurar Axios para incluir el token en todas las peticiones futuras
-      axios.defaults.headers.common[
+      api.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${response.data.access_token}`;
 
@@ -36,7 +38,7 @@ export const login = async (username: string, password: string) => {
 export const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("username");
-  delete axios.defaults.headers.common["Authorization"];
+  delete api.defaults.headers.common["Authorization"];
 };
 
 export const isAuthenticated = (): boolean => {
@@ -50,11 +52,11 @@ export const setupAxiosInterceptors = () => {
   // Configurar interceptor para añadir el token a todas las peticiones
   const token = localStorage.getItem("token");
   if (token) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   }
 
   // Interceptor para manejar errores de autenticación
-  axios.interceptors.response.use(
+  api.interceptors.response.use(
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {

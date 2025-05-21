@@ -73,7 +73,7 @@ export class ServerManagementService {
 
   async getServerStatus(
     serverId: string,
-  ): Promise<'running' | 'stopped' | 'not_found'> {
+  ): Promise<'running' | 'stopped' | 'starting' | 'not_found'> {
     try {
       // First check if the directory exists
       if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
@@ -81,22 +81,35 @@ export class ServerManagementService {
       }
 
       // Container name would be something like `serverId_mc_1`
-      const containerNamePattern = `${serverId}-mc-1`;
+      const containerNamePattern = `${serverId}_mc_1`;
 
+      // Get container status with more details
       const { stdout } = await execAsync(
-        `docker ps --filter "name=${containerNamePattern}" --format "{{.Names}}"`,
+        `docker ps --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`,
       );
 
       if (stdout.trim()) {
+        // Check if the status indicates it's still starting
+        // Docker status can include "Up X seconds" or 
+        // "health: starting" for containers with health checks
+        if (stdout.includes('starting') || 
+            (stdout.includes('Up') && stdout.includes('seconds'))) {
+          return 'starting';
+        }
         return 'running';
       }
 
       // Check if container exists but not running
       const { stdout: allContainers } = await execAsync(
-        `docker ps -a --filter "name=${containerNamePattern}" --format "{{.Names}}"`,
+        `docker ps -a --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`,
       );
 
       if (allContainers.trim()) {
+        // Check if container is in a transitional state like restarting
+        if (allContainers.includes('Restarting') || 
+            allContainers.includes('Created')) {
+          return 'starting';
+        }
         return 'stopped';
       }
 
@@ -174,5 +187,36 @@ export class ServerManagementService {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
+
+  async getServerLogs(serverId: string, lines: number = 100): Promise<{ logs: string }> {
+    try {
+      // Check if the server exists
+      if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
+        return { logs: 'Server not found' };
+      }
+
+      // Container name would be something like `serverId_mc_1` or `serverId-mc-1`
+      const containerNamePattern = `${serverId}-mc-1`;
+
+      // Get container ID
+      const { stdout: containerId } = await execAsync(
+        `docker ps -a --filter "name=${containerNamePattern}" --format "{{.ID}}"`,
+      );
+
+      if (!containerId.trim()) {
+        return { logs: 'Container not found' };
+      }
+
+      // Get logs from the container
+      const { stdout: logs } = await execAsync(
+        `docker logs --tail ${lines} ${containerId.trim()}`,
+      );
+
+      return { logs };
+    } catch (error) {
+      console.error(`Failed to get logs for server ${serverId}:`, error);
+      return { logs: `Error retrieving logs: ${error.message}` };
+    }
   }
 }

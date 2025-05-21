@@ -6,6 +6,7 @@ import {
   Param,
   NotFoundException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ServerConfig } from '../models/server-config.model';
 import { DockerComposeService } from 'src/docker-compose/docker-compose.service';
@@ -94,5 +95,13 @@ export class ServerManagementController {
       ...serverInfo,
       config: config || undefined,
     };
+  }
+
+  @Get(':id/logs')
+  async getServerLogs(
+    @Param('id') id: string,
+    @Query('lines') lines?: number,
+  ) {
+    return this.managementService.getServerLogs(id, lines || 100);
   }
 }

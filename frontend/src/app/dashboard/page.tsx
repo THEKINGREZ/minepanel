@@ -20,13 +20,13 @@ import { toast } from "sonner";
 import { Header } from "@/components/molecules/Header";
 import { Footer } from "@/components/molecules/Footer";
 
-// Tipo para almacenar información de los servidores
+// Actualizar el tipo para incluir el nuevo estado "starting"
 type ServerInfo = {
   id: string;
   name: string;
   description: string;
   displayName: string;
-  status: "running" | "stopped" | "not_found" | "loading";
+  status: "running" | "stopped" | "starting" | "not_found" | "loading";
   port: string;
   containerName: string;
 };
@@ -132,6 +132,8 @@ export default function Dashboard() {
     switch (status) {
       case "running":
         return "bg-green-50 text-green-700 border-green-200";
+      case "starting":
+        return "bg-orange-50 text-orange-700 border-orange-200";
       case "stopped":
         return "bg-yellow-50 text-yellow-700 border-yellow-200";
       case "not_found":
@@ -148,6 +150,8 @@ export default function Dashboard() {
     switch (status) {
       case "running":
         return "Activo";
+      case "starting":
+        return "Iniciando...";
       case "stopped":
         return "Detenido";
       case "not_found":
@@ -203,7 +207,7 @@ export default function Dashboard() {
                       variant="outline"
                       className={getStatusBadgeClass(server.status)}
                     >
-                      {server.status === "loading" ? (
+                      {server.status === "loading" || server.status === "starting" ? (
                         <span className="flex items-center gap-1">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           {getStatusText(server.status)}
