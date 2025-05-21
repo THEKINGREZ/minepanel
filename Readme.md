@@ -66,22 +66,22 @@ docker compose up -d
 ```
 
 📋 ToDo
-* <input disabled="" type="checkbox"> Translate the interface to English (currently in Spanish)
-* <input disabled="" type="checkbox"> Support more modpack platforms (currently supports CurseForge, Forge, Vanilla)
-* <input disabled="" type="checkbox"> Add backup management system
-* <input disabled="" type="checkbox"> Implement user roles and permissions
-* <input disabled="" type="checkbox"> Add API documentation
-* <input disabled="" type="checkbox"> Create deployment guides (Docker, PM2, etc.)
+* [ ] Translate the interface to English (currently in Spanish)
+* [ ] Support more modpack platforms (currently supports CurseForge, Forge, Vanilla)
+* [ ] Add backup management system
+* [ ] Implement user roles and permissions
+* [ ] Add API documentation
+* [ ] Create deployment guides (Docker, PM2, etc.)
 
 📈 Roadmap
-* <input checked="" disabled="" type="checkbox"> Basic support for two Minecraft servers
-* <input checked="" disabled="" type="checkbox"> Server logs
-* <input checked="" disabled="" type="checkbox"> User authentication
-* <input disabled="" type="checkbox"> Resource usage dashboard
-* <input disabled="" type="checkbox"> Dynamic addition/removal of server instances
-* <input disabled="" type="checkbox"> Support for other games/containers
-* <input disabled="" type="checkbox"> Multi-language support (English/Spanish)
-* <input disabled="" type="checkbox"> Mobile-responsive design improvements
+* [X] Basic support for two Minecraft servers
+* [X] Server logs
+* [X] User authentication
+* [ ] Resource usage dashboard
+* [ ] Dynamic addition/removal of server instances
+* [ ] Support for other games/containers
+* [ ] Multi-language support (English/Spanish)
+* [ ] Mobile-responsive design improvements
 
 ❓ License
 Distributed under the MIT License. See LICENSE for more information.
