@@ -15,7 +15,7 @@ export const updateServerConfig = async (
   serverId: string,
   config: Partial<ServerConfig>
 ): Promise<ServerConfig> => {
-  const response = await axios.post(`${API_URL}/servers/${serverId}`, config);
+  const response = await axios.put(`${API_URL}/servers/${serverId}`, config);
   return response.data;
 };
 

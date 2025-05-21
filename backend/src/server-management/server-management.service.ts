@@ -81,7 +81,7 @@ export class ServerManagementService {
       }
 
       // Container name would be something like `serverId_mc_1`
-      const containerNamePattern = `${serverId}_mc`;
+      const containerNamePattern = `${serverId}-mc-1`;
 
       const { stdout } = await execAsync(
         `docker ps --filter "name=${containerNamePattern}" --format "{{.Names}}"`,

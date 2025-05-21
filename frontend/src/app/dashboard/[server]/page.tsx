@@ -1,24 +1,64 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Save, Server, RefreshCw, TrashIcon } from "lucide-react";
 import { toast } from "sonner";
-import { clearServerData, fetchServerConfig, getServerStatus, restartServer, updateServerConfig } from "@/services/docker/queries/queries";
-import type { ServerConfig } from "@/lib/types/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+// Importar los servicios de fetch
+import {
+  fetchServerConfig,
+  updateServerConfig,
+  restartServer,
+  clearServerData,
+  getServerStatus,
+} from "@/services/docker/fetchs";
 
 export default function ServerConfig() {
   const params = useParams();
   const serverId = params.server as string;
 
-  const [isActive, setIsActive] = useState(serverId === "daily");
-  const [isLoading, setIsLoading] = useState(false);
-  const [serverType, setServerType] = useState<'VANILLA' | 'FORGE' | 'AUTO_CURSEFORGE'>('AUTO_CURSEFORGE');
+  const [isActive, setIsActive] = useState(false);
+  const [isRestartingServer, setIsRestartingServer] = useState(false);
+  const [isClearingData, setIsClearingData] = useState(false);
+  const [serverStatus, setServerStatus] = useState<string>("unknown");
+  const [serverType, setServerType] = useState<
+    "VANILLA" | "FORGE" | "AUTO_CURSEFORGE"
+  >("AUTO_CURSEFORGE");
 
   // Configuración general
   const [serverName, setServerName] = useState("TulaCraft");
   const [port, setPort] = useState(serverId === "daily" ? "25565" : "25566");
-  const [difficulty, setDifficulty] = useState<'peaceful' | 'easy' | 'normal' | 'hard'>('hard');
+  const [difficulty, setDifficulty] = useState<
+    "peaceful" | "easy" | "normal" | "hard"
+  >("hard");
   const [maxPlayers, setMaxPlayers] = useState("10");
   const [ops, setOps] = useState("ketbome");
   const [timezone, setTimezone] = useState("America/Santiago");
@@ -43,7 +83,9 @@ export default function ServerConfig() {
   const [dockerVolumes, setDockerVolumes] = useState(
     "./mc-data:/data\n./modpacks:/modpacks:ro"
   );
-  const [restartPolicy, setRestartPolicy] = useState<'no' | 'always' | 'on-failure' | 'unless-stopped'>('unless-stopped');
+  const [restartPolicy, setRestartPolicy] = useState<
+    "no" | "always" | "on-failure" | "unless-stopped"
+  >("unless-stopped");
   const [stopDelay, setStopDelay] = useState("60");
   const [rollingLogs, setRollingLogs] = useState(true);
   const [execDirectly, setExecDirectly] = useState(true);
@@ -59,6 +101,7 @@ export default function ServerConfig() {
   );
   const [cfSlug, setCfSlug] = useState("");
   const [cfFile, setCfFile] = useState("");
+  const [cfApiKey, setCfApiKey] = useState("");
   const [cfSync, setCfSync] = useState(true);
   const [cfForceInclude, setCfForceInclude] = useState("");
   const [cfExclude, setCfExclude] = useState("");
@@ -66,101 +109,126 @@ export default function ServerConfig() {
 
   const serverName2 =
     serverId === "daily" ? "Servidor Diario" : "Servidor Fin de Semana";
-  const containerName =
-    serverId === "daily" ? "minecraft-daily" : "minecraft-weekend";
+  const containerName = serverId === "daily" ? "daily_mc_1" : "weekend_mc_1";
 
-  const [serverStatus, setServerStatus] = useState<
-    "running" | "stopped" | "not_found" | "loading"
-  >("loading");
-
+  // Cargar la configuración del servidor al iniciar
   useEffect(() => {
-    const loadServerConfig = async () => {
+    async function loadServerConfig() {
       try {
-        setIsLoading(true);
+        // Utilizar el servicio fetchServerConfig
         const config = await fetchServerConfig(serverId);
 
-        // Update all state variables with the fetched config
-        setIsActive(config.active);
-        setServerType(config.serverType);
-        setServerName(config.serverName);
-        setPort(config.port);
-        setDifficulty(config.difficulty);
-        setMaxPlayers(config.maxPlayers);
-        setOps(config.ops);
-        setTimezone(config.timezone);
-        setIdleTimeout(config.idleTimeout);
-        setOnlineMode(config.onlineMode);
-        setPvp(config.pvp);
-        setCommandBlock(config.commandBlock);
-        setAllowFlight(config.allowFlight);
-        setInitMemory(config.initMemory);
-        setMaxMemory(config.maxMemory);
-        setCpuLimit(config.cpuLimit);
-        setCpuReservation(config.cpuReservation);
-        setMemoryReservation(config.memoryReservation);
-        setViewDistance(config.viewDistance);
-        setSimulationDistance(config.simulationDistance);
-        setDockerImage(config.dockerImage);
-        setMinecraftVersion(config.minecraftVersion);
-        setDockerVolumes(config.dockerVolumes);
-        setRestartPolicy(config.restartPolicy);
-        setStopDelay(config.stopDelay);
-        setRollingLogs(config.rollingLogs);
-        setExecDirectly(config.execDirectly);
-        setEnvVars(config.envVars ?? "");
+        // Actualizar los estados con la configuración cargada
+        setIsActive(config.active || false);
+        setServerType(config.serverType || "AUTO_CURSEFORGE");
+        setServerName(config.serverName || "TulaCraft");
+        setPort(config.port || (serverId === "daily" ? "25565" : "25566"));
+        setDifficulty(config.difficulty || "hard");
+        setMaxPlayers(config.maxPlayers || "10");
+        setOps(config.ops || "ketbome");
+        setTimezone(config.timezone || "America/Santiago");
+        setIdleTimeout(config.idleTimeout || "60");
+        setOnlineMode(config.onlineMode || false);
+        setPvp(config.pvp || true);
+        setCommandBlock(config.commandBlock || true);
+        setAllowFlight(config.allowFlight || true);
 
-        if (config.serverType === "FORGE" && config.forgeBuild) {
+        // Recursos
+        setInitMemory(config.initMemory || "6G");
+        setMaxMemory(config.maxMemory || "10G");
+        setCpuLimit(config.cpuLimit || "2");
+        setCpuReservation(config.cpuReservation || "0.3");
+        setMemoryReservation(config.memoryReservation || "4G");
+        setViewDistance(config.viewDistance || "6");
+        setSimulationDistance(config.simulationDistance || "4");
+
+        // Docker
+        setDockerImage(config.dockerImage || "latest");
+        setMinecraftVersion(config.minecraftVersion || "1.19.2");
+        setDockerVolumes(
+          config.dockerVolumes || "./mc-data:/data\n./modpacks:/modpacks:ro"
+        );
+        setRestartPolicy(config.restartPolicy || "unless-stopped");
+        setStopDelay(config.stopDelay || "60");
+        setRollingLogs(config.rollingLogs || true);
+        setExecDirectly(config.execDirectly || true);
+        setEnvVars(config.envVars || "");
+
+        // Forge
+        if (config.forgeBuild) {
           setForgeBuild(config.forgeBuild);
         }
 
+        // CurseForge
         if (config.serverType === "AUTO_CURSEFORGE") {
-          setCfMethod(config.cfMethod ?? "url");
-          setCfUrl(config.cfUrl ?? "");
-          setCfSlug(config.cfSlug ?? "");
-          setCfFile(config.cfFile ?? "");
-          setCfSync(config.cfSync ?? true);
-          setCfForceInclude(config.cfForceInclude ?? "");
-          setCfExclude(config.cfExclude ?? "");
-          setCfFilenameMatcher(config.cfFilenameMatcher ?? "");
+          setCfMethod(config.cfMethod || "url");
+          setCfUrl(config.cfUrl || "");
+          setCfSlug(config.cfSlug || "");
+          setCfFile(config.cfFile || "");
+          setCfApiKey(config.cfApiKey || "");
+          setCfSync(config.cfSync || true);
+          setCfForceInclude(config.cfForceInclude || "");
+          setCfExclude(config.cfExclude || "");
+          setCfFilenameMatcher(config.cfFilenameMatcher || "");
         }
 
-        // Check server status
-        await checkServerStatus();
+        // Cargar el estado del servidor
+        updateServerStatus();
       } catch (error) {
-        console.error("Failed to load server config:", error);
-        toast.error("No se pudo cargar la configuración del servidor");
-      } finally {
-        setIsLoading(false);
+        console.error("Error loading server config:", error);
+        toast.error("Error al cargar la configuración del servidor");
       }
-    };
+    }
 
     loadServerConfig();
-
-    // Poll server status every 10 seconds
-    const statusInterval = setInterval(checkServerStatus, 10000);
-
-    return () => clearInterval(statusInterval);
   }, [serverId]);
 
-  const checkServerStatus = async () => {
+  const updateServerStatus = async () => {
     try {
-      const { status } = await getServerStatus(serverId);
-      setServerStatus(status);
+      // Utilizar el servicio getServerStatus
+      const data = await getServerStatus(serverId);
+      setServerStatus(data.status);
+      setIsActive(data.status === "running");
     } catch (error) {
-      console.error("Failed to get server status:", error);
-      setServerStatus("not_found");
+      console.error("Error fetching server status:", error);
     }
   };
 
   const handleSaveConfig = async (e: FormEvent) => {
     e.preventDefault();
-    try {
-      setIsLoading(true);
+    console.log("Guardando configuración...");
 
-      // Create config object from all state variables
-      const config: ServerConfig = {
-        id: serverId,
-        active: isActive,
+    try {
+      // Recopilar todos los valores de configuración
+      const config: {
+        serverType: typeof serverType;
+        serverName: string;
+        port: string;
+        difficulty: typeof difficulty;
+        maxPlayers: string;
+        ops: string;
+        timezone: string;
+        idleTimeout: string;
+        onlineMode: boolean;
+        pvp: boolean;
+        commandBlock: boolean;
+        allowFlight: boolean;
+        initMemory: string;
+        maxMemory: string;
+        cpuLimit: string;
+        cpuReservation: string;
+        memoryReservation: string;
+        viewDistance: string;
+        simulationDistance: string;
+        dockerImage: string;
+        dockerVolumes: string;
+        restartPolicy: typeof restartPolicy;
+        stopDelay: string;
+        rollingLogs: boolean;
+        execDirectly: boolean;
+        minecraftVersion?: string;
+        envVars: string;
+      } = {
         serverType,
         serverName,
         port,
@@ -181,16 +249,16 @@ export default function ServerConfig() {
         viewDistance,
         simulationDistance,
         dockerImage,
-        minecraftVersion,
         dockerVolumes,
         restartPolicy,
         stopDelay,
         rollingLogs,
         execDirectly,
+        minecraftVersion,
         envVars,
       };
 
-      // Add server type specific configurations
+      // Agregar propiedades específicas de cada tipo de servidor
       if (serverType === "FORGE") {
         Object.assign(config, { forgeBuild });
       } else if (serverType === "AUTO_CURSEFORGE") {
@@ -199,6 +267,7 @@ export default function ServerConfig() {
           cfUrl,
           cfSlug,
           cfFile,
+          cfApiKey,
           cfSync,
           cfForceInclude,
           cfExclude,
@@ -206,74 +275,61 @@ export default function ServerConfig() {
         });
       }
 
+      console.log("Configuración a guardar:", config);
       await updateServerConfig(serverId, config);
       toast.success("Configuración guardada correctamente");
+
+      // Actualizar el estado del servidor después de guardar
+      updateServerStatus();
     } catch (error) {
-      console.error("Failed to save config:", error);
-      toast.error("No se pudo guardar la configuración");
-    } finally {
-      setIsLoading(false);
+      console.error("Error saving config:", error);
+      toast.error("Error al guardar la configuración");
     }
   };
 
   const handleRestartServer = async () => {
+    setIsRestartingServer(true);
     try {
-      setIsLoading(true);
-      const { success, message } = await restartServer(serverId);
+      // Utilizar el servicio restartServer
+      const result = await restartServer(serverId);
 
-      if (success) {
-        toast.success(message);
+      if (result.success) {
+        toast.success("Servidor reiniciado correctamente");
+        // Esperar un momento y actualizar el estado
+        setTimeout(updateServerStatus, 3000);
       } else {
-        toast.error(message);
+        throw new Error(result.message || "Error al reiniciar el servidor");
       }
+    } catch (error) {
+      console.error("Error restarting server:", error);
+      toast.error("Error al reiniciar el servidor");
     } finally {
-      setIsLoading(false);
+      setIsRestartingServer(false);
     }
-      setIsLoading(true);
-      const { success, message } = await clearServerData(serverId);
+  };
 
-      if (success) {
-        toast.success(message);
+  const handleClearData = async () => {
+    setIsClearingData(true);
+    try {
+      // Utilizar el servicio clearServerData
+      const result = await clearServerData(serverId);
+
+      if (result.success) {
+        toast.success("Datos del servidor borrados correctamente");
+        // Actualizar el estado después de borrar
+        updateServerStatus();
       } else {
-        toast.error(message);
-      !confirm(
-        "¿Estás seguro? Esto eliminará TODOS los datos del servidor. Esta acción no se puede deshacer."
-      )
-        return;
+        throw new Error(
+          result.message || "Error al borrar los datos del servidor"
+        );
       }
-    }
-    setIsLoading(false);
-  };
-
-  const getStatusBadge = () => {
-    if (serverStatus === 'loading') {
-      return (
-        <Badge variant="secondary" className="bg-gray-50 text-gray-700 border-gray-200">
-          Verificando...
-        </Badge>
-      );
-    } else if (serverStatus === 'running') {
-      return (
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          En línea
-        </Badge>
-      );
-    } else if (serverStatus === 'stopped') {
-      return (
-        <Badge variant="secondary" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-          Detenido
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="secondary" className="bg-red-50 text-red-700 border-red-200">
-          No encontrado
-        </Badge>
-      );
+    } catch (error) {
+      console.error("Error clearing server data:", error);
+      toast.error("Error al borrar los datos del servidor");
+    } finally {
+      setIsClearingData(false);
     }
   };
-
-  {getStatusBadge()}
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -310,7 +366,13 @@ export default function ServerConfig() {
                     : "bg-red-50 text-red-700 border-red-200"
                 }
               >
-                {isActive ? "Activo" : "Inactivo"}
+                {serverStatus === "running"
+                  ? "Activo"
+                  : serverStatus === "stopped"
+                  ? "Detenido"
+                  : serverStatus === "not_found"
+                  ? "No encontrado"
+                  : "Desconocido"}
               </Badge>
             </div>
 
@@ -322,26 +384,54 @@ export default function ServerConfig() {
                   Docker Container
                 </p>
               </div>
-              <div className="ml-auto gap-1 flex">
-                <Button 
-                  type="button" 
-                  onClick={handleRestartServer} 
-                  disabled={isLoading || serverStatus === 'not_found'} 
+              <div className="ml-auto flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isRestartingServer}
+                  onClick={handleRestartServer}
                   className="gap-2"
                 >
-                  <Loader className="h-4 w-4" />
-                  {isLoading ? "Reiniciando..." : "Reiniciar Servidor"}
+                  <RefreshCw
+                    className={`h-4 w-4 ${
+                      isRestartingServer ? "animate-spin" : ""
+                    }`}
+                  />
+                  {isRestartingServer ? "Reiniciando..." : "Reiniciar Servidor"}
                 </Button>
 
-                <Button 
-                  type="button" 
-                  onClick={handleClearData} 
-                  disabled={isLoading} 
-                  className="gap-2"
-                >
-                  <BrushCleaning className="h-4 w-4" />
-                  {isLoading ? "Borrando..." : "Borrar datos"}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="gap-2"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                      Borrar Datos
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción eliminará todos los datos del servidor
+                        incluyendo mundos guardados, configuraciones y no puede
+                        ser revertida.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleClearData}
+                        disabled={isClearingData}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {isClearingData ? "Borrando..." : "Sí, borrar datos"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
 
@@ -365,45 +455,45 @@ export default function ServerConfig() {
                   <CardContent className="space-y-4">
                     <div className="space-y-4">
                       <div className="grid grid-cols-3 gap-4">
-                        <button
+                        <Button
+                          variant="outline"
                           type="button"
-                          className={`border rounded-md p-4 w-full text-center cursor-pointer ${
-                            serverType === "vanilla"
+                          className={`p-4 w-full text-center flex flex-col items-center justify-center h-auto ${
+                            serverType === "VANILLA"
                               ? "border-primary bg-primary/5"
                               : "hover:border-primary hover:bg-primary/5"
                           }`}
-                          onClick={() => setServerType("vanilla")}
+                          onClick={() => setServerType("VANILLA")}
                         >
                           <Server className="h-10 w-10 mx-auto mb-2" />
                           <p className="font-medium">Vanilla</p>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="outline"
                           type="button"
-                          className={`border rounded-md p-4 w-full text-center cursor-pointer ${
-                            serverType === "forge"
+                          className={`p-4 w-full text-center flex flex-col items-center justify-center h-auto ${
+                            serverType === "FORGE"
                               ? "border-primary bg-primary/5"
                               : "hover:border-primary hover:bg-primary/5"
                           }`}
-                          onClick={() => setServerType("forge")}
+                          onClick={() => setServerType("FORGE")}
                         >
                           <Server className="h-10 w-10 mx-auto mb-2" />
                           <p className="font-medium">Forge</p>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="outline"
                           type="button"
-                          className={`border rounded-md p-4 w-full text-center cursor-pointer ${
-                            serverType === "curseforge"
+                          className={`p-4 w-full text-center flex flex-col items-center justify-center h-auto ${
+                            serverType === "AUTO_CURSEFORGE"
                               ? "border-primary bg-primary/5"
                               : "hover:border-primary hover:bg-primary/5"
                           }`}
-                          onClick={() => setServerType("curseforge")}
+                          onClick={() => setServerType("AUTO_CURSEFORGE")}
                         >
                           <Server className="h-10 w-10 mx-auto mb-2" />
                           <p className="font-medium">CurseForge</p>
-                        </button>
-                        <div className="col-span-3">
-                          <p className="font-medium">CurseForge</p>
-                        </div>
+                        </Button>
                       </div>
                     </div>
 
@@ -432,7 +522,7 @@ export default function ServerConfig() {
                   </CardContent>
                 </Card>
 
-                {serverType === "curseforge" && (
+                {serverType === "AUTO_CURSEFORGE" && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Configuración de CurseForge</CardTitle>
@@ -500,11 +590,16 @@ export default function ServerConfig() {
                           Forzar sincronización (CF_FORCE_SYNCHRONIZE)
                         </Label>
                       </div>
+
+                      <Button type="submit" className="gap-2">
+                        <Save className="h-4 w-4" />
+                        Guardar Cambios
+                      </Button>
                     </CardContent>
                   </Card>
                 )}
 
-                {serverType === "vanilla" && (
+                {serverType === "VANILLA" && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Configuración de Vanilla</CardTitle>
@@ -523,11 +618,16 @@ export default function ServerConfig() {
                           onChange={(e) => setMinecraftVersion(e.target.value)}
                         />
                       </div>
+
+                      <Button type="submit" className="gap-2">
+                        <Save className="h-4 w-4" />
+                        Guardar Cambios
+                      </Button>
                     </CardContent>
                   </Card>
                 )}
 
-                {serverType === "forge" && (
+                {serverType === "FORGE" && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Configuración de Forge</CardTitle>
@@ -555,6 +655,11 @@ export default function ServerConfig() {
                           placeholder="Ej: 43.2.0"
                         />
                       </div>
+
+                      <Button type="submit" className="gap-2">
+                        <Save className="h-4 w-4" />
+                        Guardar Cambios
+                      </Button>
                     </CardContent>
                   </Card>
                 )}
@@ -613,7 +718,15 @@ export default function ServerConfig() {
                       <select
                         id="server-difficulty"
                         value={difficulty}
-                        onChange={(e) => setDifficulty(e.target.value)}
+                        onChange={(e) =>
+                          setDifficulty(
+                            e.target.value as
+                              | "peaceful"
+                              | "easy"
+                              | "normal"
+                              | "hard"
+                          )
+                        }
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="peaceful">Pacífico</option>
@@ -870,7 +983,15 @@ export default function ServerConfig() {
                       <select
                         id="restart-policy"
                         value={restartPolicy}
-                        onChange={(e) => setRestartPolicy(e.target.value)}
+                        onChange={(e) =>
+                          setRestartPolicy(
+                            e.target.value as
+                              | "no"
+                              | "always"
+                              | "on-failure"
+                              | "unless-stopped"
+                          )
+                        }
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <option value="no">No reiniciar</option>

@@ -215,7 +215,6 @@ export class DockerComposeService {
       INIT_MEMORY: config.initMemory,
       MAX_MEMORY: config.maxMemory,
       TYPE: config.serverType.toUpperCase(),
-      VERSION: config.minecraftVersion,
       ONLINE_MODE: String(config.onlineMode),
       PVP: String(config.pvp),
       ENABLE_COMMAND_BLOCK: String(config.commandBlock),
@@ -245,7 +244,7 @@ export class DockerComposeService {
       }
 
       environment['CF_API_KEY'] =
-        '$2a$10$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa';
+        '$$2a$$10$$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa';
 
       if (config.cfSync) {
         environment['CF_FORCE_SYNCHRONIZE'] = 'true';
@@ -262,6 +261,8 @@ export class DockerComposeService {
       if (config.cfFilenameMatcher) {
         environment['CF_FILENAME_MATCHER'] = config.cfFilenameMatcher;
       }
+    } else {
+      environment['VERSION'] = config.minecraftVersion;
     }
 
     // Add custom environment variables

@@ -9,7 +9,7 @@ services:
     environment:
       EULA: 'TRUE'
       MOTD: TulaCraft
-      DIFFICULTY: hard
+      DIFFICULTY: easy
       MAX_PLAYERS: '10'
       OPS: ketbome
       TZ: America/Santiago
@@ -28,7 +28,7 @@ services:
       PLAYER_IDLE_TIMEOUT: '60'
       CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-10
       MODPACK_PLATFORM: AUTO_CURSEFORGE
-      CF_API_KEY: $2a$10$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa
+      CF_API_KEY: $$2a$$10$$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa
       CF_FORCE_SYNCHRONIZE: 'true'
     volumes:
       - ./mc-data:/data
