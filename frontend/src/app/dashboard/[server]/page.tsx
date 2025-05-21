@@ -18,7 +18,14 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Server, RefreshCw, TrashIcon, PowerIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Save,
+  Server,
+  RefreshCw,
+  TrashIcon,
+  PowerIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -48,7 +55,6 @@ import { Footer } from "@/components/molecules/Footer";
 import { getServerLogs, executeServerCommand } from "@/services/docker/fetchs";
 import { Terminal, Clock, Send, RefreshCcw } from "lucide-react";
 
-
 export default function ServerConfig() {
   const router = useRouter();
   const params = useParams();
@@ -61,7 +67,8 @@ export default function ServerConfig() {
   const [command, setCommand] = useState<string>("");
   const [commandResponse, setCommandResponse] = useState<string>("");
   const [isExecutingCommand, setIsExecutingCommand] = useState<boolean>(false);
-  const [isProcessingServerAction, setIsProcessingServerAction] = useState(false);
+  const [isProcessingServerAction, setIsProcessingServerAction] =
+    useState(false);
 
   const [isActive, setIsActive] = useState(false);
   const [isRestartingServer, setIsRestartingServer] = useState(false);
@@ -214,7 +221,7 @@ export default function ServerConfig() {
 
   // Agregar este efecto para controlar el scrolling de los logs
   useEffect(() => {
-    const logElement = document.querySelector('.logs-container');
+    const logElement = document.querySelector(".logs-container");
     if (logElement && serverLogs) {
       logElement.scrollTop = logElement.scrollHeight;
     }
@@ -500,7 +507,9 @@ export default function ServerConfig() {
                     className="gap-2"
                   >
                     <PowerIcon className="h-4 w-4" />
-                    {isProcessingServerAction ? "Procesando..." : "Detener Servidor"}
+                    {isProcessingServerAction
+                      ? "Procesando..."
+                      : "Detener Servidor"}
                   </Button>
                 ) : serverStatus === "stopped" ? (
                   <Button
@@ -511,10 +520,12 @@ export default function ServerConfig() {
                     className="gap-2"
                   >
                     <PowerIcon className="h-4 w-4" />
-                    {isProcessingServerAction ? "Procesando..." : "Iniciar Servidor"}
+                    {isProcessingServerAction
+                      ? "Procesando..."
+                      : "Iniciar Servidor"}
                   </Button>
                 ) : null}
-                
+
                 <Button
                   type="button"
                   variant="outline"
@@ -767,27 +778,6 @@ export default function ServerConfig() {
               <TabsContent value="general" className="space-y-4 pt-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Estado del Servidor</CardTitle>
-                    <CardDescription>
-                      Controla si el servidor está activo o inactivo
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="server-status"
-                        checked={isActive}
-                        onCheckedChange={setIsActive}
-                      />
-                      <Label htmlFor="server-status">
-                        {isActive ? "Servidor Activo" : "Servidor Inactivo"}
-                      </Label>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
                     <CardTitle>Configuración Básica</CardTitle>
                     <CardDescription>
                       Ajusta la configuración básica del servidor
@@ -924,8 +914,8 @@ export default function ServerConfig() {
                           <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                           <AlertDialogDescription>
                             Esta acción eliminará todos los datos del servidor
-                            incluyendo mundos guardados, configuraciones y no puede
-                            ser revertida.
+                            incluyendo mundos guardados, configuraciones y no
+                            puede ser revertida.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -935,7 +925,9 @@ export default function ServerConfig() {
                             disabled={isClearingData}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
                           >
-                            {isClearingData ? "Borrando..." : "Sí, borrar datos"}
+                            {isClearingData
+                              ? "Borrando..."
+                              : "Sí, borrar datos"}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -1225,7 +1217,7 @@ export default function ServerConfig() {
                       <div className="absolute top-0 right-0 bg-muted px-2 py-1 text-xs rounded-bl-md flex items-center">
                         <Terminal className="h-3 w-3 mr-1" /> Consola
                       </div>
-                      <pre 
+                      <pre
                         className="logs-container bg-black text-green-400 p-4 rounded-md h-[400px] overflow-auto text-xs font-mono"
                         ref={(el) => {
                           if (el && serverLogs) {
@@ -1233,7 +1225,7 @@ export default function ServerConfig() {
                           }
                         }}
                       >
-                        { serverLogs ? (
+                        {serverLogs ? (
                           serverLogs
                         ) : isLoadingLogs ? (
                           <div className="flex h-full items-center justify-center">
@@ -1283,7 +1275,9 @@ export default function ServerConfig() {
                             value={command}
                             onChange={(e) => setCommand(e.target.value)}
                             placeholder="Ej: time set day"
-                            disabled={serverStatus !== "running" || isExecutingCommand}
+                            disabled={
+                              serverStatus !== "running" || isExecutingCommand
+                            }
                             onKeyDown={(e) => {
                               if (e.key === "Enter" && !e.shiftKey) {
                                 e.preventDefault();
@@ -1295,7 +1289,11 @@ export default function ServerConfig() {
                         <Button
                           type="button"
                           onClick={handleExecuteCommand}
-                          disabled={serverStatus !== "running" || isExecutingCommand || !command.trim()}
+                          disabled={
+                            serverStatus !== "running" ||
+                            isExecutingCommand ||
+                            !command.trim()
+                          }
                         >
                           {isExecutingCommand ? (
                             <RefreshCcw className="h-4 w-4 animate-spin mr-2" />
@@ -1305,10 +1303,11 @@ export default function ServerConfig() {
                           Ejecutar
                         </Button>
                       </div>
-                      
+
                       {serverStatus !== "running" && (
                         <p className="text-sm text-yellow-600 mt-2">
-                          El servidor debe estar en ejecución para ejecutar comandos
+                          El servidor debe estar en ejecución para ejecutar
+                          comandos
                         </p>
                       )}
                     </div>
@@ -1320,10 +1319,11 @@ export default function ServerConfig() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          disabled={
+                            serverStatus !== "running" || isExecutingCommand
+                          }
                           onClick={() => {
                             setCommand("time set day");
-                            handleExecuteCommand();
                           }}
                         >
                           <Clock className="h-4 w-4 mr-2" />
@@ -1333,10 +1333,11 @@ export default function ServerConfig() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          disabled={
+                            serverStatus !== "running" || isExecutingCommand
+                          }
                           onClick={() => {
                             setCommand("time set night");
-                            handleExecuteCommand();
                           }}
                         >
                           <Clock className="h-4 w-4 mr-2" />
@@ -1346,10 +1347,11 @@ export default function ServerConfig() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          disabled={
+                            serverStatus !== "running" || isExecutingCommand
+                          }
                           onClick={() => {
                             setCommand("weather clear");
-                            handleExecuteCommand();
                           }}
                         >
                           <Clock className="h-4 w-4 mr-2" />
@@ -1359,10 +1361,11 @@ export default function ServerConfig() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          disabled={
+                            serverStatus !== "running" || isExecutingCommand
+                          }
                           onClick={() => {
                             setCommand("gamemode creative @p");
-                            handleExecuteCommand();
                           }}
                         >
                           <Clock className="h-4 w-4 mr-2" />
@@ -1372,10 +1375,11 @@ export default function ServerConfig() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          disabled={
+                            serverStatus !== "running" || isExecutingCommand
+                          }
                           onClick={() => {
                             setCommand("gamemode survival @p");
-                            handleExecuteCommand();
                           }}
                         >
                           <Clock className="h-4 w-4 mr-2" />
@@ -1385,10 +1389,11 @@ export default function ServerConfig() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          disabled={
+                            serverStatus !== "running" || isExecutingCommand
+                          }
                           onClick={() => {
                             setCommand("kill @e[type=!player]");
-                            handleExecuteCommand();
                           }}
                         >
                           <Clock className="h-4 w-4 mr-2" />

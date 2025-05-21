@@ -1,11 +1,13 @@
 # Minecraft Server Manager – Docker-based Minecraft Server Manager
+
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue)
 ![Made with NestJS](https://img.shields.io/badge/Backend-NestJS-red)
 ![Made with Next.js](https://img.shields.io/badge/Frontend-Next.js-black)
 
-
 **MinePanel** is a web-based control panel for managing multiple Minecraft servers running with Docker. Inspired by [Crafty Control](https://craftycontrol.com), but fully customizable and built using modern web technologies.
+
+![Dashboard View](./assets/Animation.gif)
 
 ---
 
@@ -23,6 +25,7 @@
 ---
 
 ## 🗂️ Repository Structure
+
 ```yaml
 minecraft-server-manager/
 ├── frontend/ # Next.js frontend app
@@ -62,15 +65,25 @@ cd ../daily
 docker compose up -d
 ```
 
-📈 Roadmap
- - [x] Basic support for two Minecraft servers
- - [x] Server logs
- - [x] User authentication
- - [ ] Resource usage dashboard
- - [ ] Dynamic addition/removal of server instances
- - [ ] Support for other games/containers
+📋 ToDo
+* <input disabled="" type="checkbox"> Translate the interface to English (currently in Spanish)
+* <input disabled="" type="checkbox"> Support more modpack platforms (currently supports CurseForge, Forge, Vanilla)
+* <input disabled="" type="checkbox"> Add backup management system
+* <input disabled="" type="checkbox"> Implement user roles and permissions
+* <input disabled="" type="checkbox"> Add API documentation
+* <input disabled="" type="checkbox"> Create deployment guides (Docker, PM2, etc.)
 
-🪪 License
+📈 Roadmap
+* <input checked="" disabled="" type="checkbox"> Basic support for two Minecraft servers
+* <input checked="" disabled="" type="checkbox"> Server logs
+* <input checked="" disabled="" type="checkbox"> User authentication
+* <input disabled="" type="checkbox"> Resource usage dashboard
+* <input disabled="" type="checkbox"> Dynamic addition/removal of server instances
+* <input disabled="" type="checkbox"> Support for other games/containers
+* <input disabled="" type="checkbox"> Multi-language support (English/Spanish)
+* <input disabled="" type="checkbox"> Mobile-responsive design improvements
+
+❓ License
 Distributed under the MIT License. See LICENSE for more information.
 
 📬 Contact
