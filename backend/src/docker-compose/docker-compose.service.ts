@@ -3,10 +3,13 @@ import * as fs from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as path from 'path';
 import { ServerConfig } from '../models/server-config.model';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DockerComposeService {
   private readonly BASE_DIR = path.join(process.cwd(), '..');
+
+  constructor(private readonly configService: ConfigService) {}
 
   private getDockerComposePath(serverId: string): string {
     return path.join(this.BASE_DIR, serverId, 'docker-compose.yml');
@@ -409,6 +412,12 @@ export class DockerComposeService {
     // Add type-specific environment variables
     if (config.serverType === 'FORGE' && config.forgeBuild) {
       environment['FORGE_VERSION'] = config.forgeBuild;
+    }
+
+    if (config.cfApiKey) {
+      environment['CF_API_KEY'] = config.cfApiKey;
+    } else if (this.configService.get('CF_API_KEY')) {
+      environment['CF_API_KEY'] = this.configService.get('CF_API_KEY');
     }
 
     if (config.serverType === 'AUTO_CURSEFORGE') {

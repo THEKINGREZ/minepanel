@@ -19,7 +19,7 @@ services:
       PVP: 'true'
       ENABLE_COMMAND_BLOCK: 'true'
       ALLOW_FLIGHT: 'true'
-      VIEW_DISTANCE: 15
+      VIEW_DISTANCE: 18
       SIMULATION_DISTANCE: '4'
       STOP_SERVER_ANNOUNCE_DELAY: 60
       ENABLE_ROLLING_LOGS: 'true'
@@ -41,6 +41,7 @@ services:
       ENABLE_RCON: 'true'
       RCON_PORT: '25575'
       OP_PERMISSION_LEVEL: '4'
+      CF_API_KEY: $$2a$$10$$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa
       CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-10
       MODPACK_PLATFORM: AUTO_CURSEFORGE
       CF_FORCE_SYNCHRONIZE: 'true'

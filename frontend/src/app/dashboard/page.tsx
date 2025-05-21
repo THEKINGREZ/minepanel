@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Server, Loader2, RefreshCw } from "lucide-react";
+import { ArrowRight, Loader2, RefreshCw } from "lucide-react";
 import { isAuthenticated } from "@/services/auth/auth.service";
 import { getServerStatus, fetchServerConfig } from "@/services/docker/fetchs";
 import { toast } from "sonner";
