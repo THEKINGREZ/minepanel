@@ -243,8 +243,7 @@ export class DockerComposeService {
         environment['CF_SERVER_MOD'] = config.cfFile;
       }
 
-      environment['CF_API_KEY'] =
-        '$$2a$$10$$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa';
+      environment['CF_API_KEY'] = process.env.CF_API_KEY;
 
       if (config.cfSync) {
         environment['CF_FORCE_SYNCHRONIZE'] = 'true';
