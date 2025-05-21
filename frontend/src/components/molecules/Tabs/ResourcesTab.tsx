@@ -8,7 +8,6 @@ import { ServerConfig } from "@/lib/types/types";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -280,6 +279,7 @@ export const ResourcesTab: FC<ResourcesTabProps> = ({ config, updateConfig, onSa
                   <SelectItem value="Europe/Madrid">Europe/Madrid</SelectItem>
                   <SelectItem value="Asia/Tokyo">Asia/Tokyo</SelectItem>
                   <SelectItem value="Australia/Sydney">Australia/Sydney</SelectItem>
+                  <SelectItem value="America/Santiago">America/Santiago</SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">Zona horaria del servidor (por defecto: UTC)</p>

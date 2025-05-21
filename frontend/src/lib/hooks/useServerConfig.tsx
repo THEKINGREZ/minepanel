@@ -1,35 +1,83 @@
 import { useEffect, useState } from "react";
 import { ServerConfig } from "../types/types";
-import {
-  apiClearServerData,
-  apiRestartServer,
-  fetchServerConfig,
-  updateServerConfig,
-} from "@/services/docker/fetchs";
+import { apiClearServerData, apiRestartServer, fetchServerConfig, updateServerConfig } from "@/services/docker/fetchs";
 import { toast } from "sonner";
 
 const defaultConfig: ServerConfig = {
   id: "daily",
   active: false,
   serverType: "VANILLA",
+
+  // General configuration
   serverName: "TulaCraft",
+  motd: "Un servidor de Minecraft increíble",
   port: "25565",
   difficulty: "hard",
   maxPlayers: "10",
   ops: "ketbome",
-  timezone: "America/Santiago",
   idleTimeout: "60",
   onlineMode: false,
   pvp: true,
   commandBlock: true,
   allowFlight: true,
+  gameMode: "survival",
+  seed: "",
+  levelType: "DEFAULT",
+  hardcore: false,
+  spawnAnimals: true,
+  spawnMonsters: true,
+  spawnNpcs: true,
+  generateStructures: true,
+  allowNether: true,
+  entityBroadcastRange: "100",
+
+  // Auto-Stop
+  enableAutoStop: false,
+  autoStopTimeoutEst: "3600",
+  autoStopTimeoutInit: "1800",
+
+  // Auto-Pause
+  enableAutoPause: false,
+  autoPauseTimeoutEst: "3600",
+  autoPauseTimeoutInit: "600",
+  autoPauseKnockInterface: "eth0",
+
+  // Connectivity
+  playerIdleTimeout: "0",
+  preventProxyConnections: false,
+  opPermissionLevel: "4",
+
+  // RCON
+  enableRcon: true,
+  rconPort: "25575",
+  rconPassword: "",
+  broadcastRconToOps: false,
+
+  // Resources
   initMemory: "6G",
   maxMemory: "10G",
+  memory: "",
   cpuLimit: "2",
   cpuReservation: "0.3",
   memoryReservation: "4G",
   viewDistance: "6",
   simulationDistance: "4",
+  uid: "1000",
+  gid: "1000",
+
+  // JVM Options
+  useAikarFlags: false,
+  enableJmx: false,
+  jmxHost: "",
+  jvmOpts: "",
+  jvmXxOpts: "",
+  jvmDdOpts: "",
+  extraArgs: "",
+  tz: "UTC",
+  enableRollingLogs: false,
+  logTimestamp: false,
+
+  // Docker
   dockerImage: "latest",
   minecraftVersion: "1.19.2",
   dockerVolumes: "./mc-data:/data\n./modpacks:/modpacks:ro",
@@ -38,6 +86,20 @@ const defaultConfig: ServerConfig = {
   rollingLogs: true,
   execDirectly: true,
   envVars: "",
+
+  // CurseForge specific
+  cfMethod: "url",
+  cfUrl: "",
+  cfSlug: "",
+  cfFile: "",
+  cfApiKey: "",
+  cfSync: true,
+  cfForceInclude: "",
+  cfExclude: "",
+  cfFilenameMatcher: "",
+  cfParallelDownloads: "4",
+  cfOverridesSkipExisting: false,
+  cfSetLevelFrom: "",
 };
 
 export function useServerConfig(serverId: string) {
@@ -123,9 +185,7 @@ export function useServerConfig(serverId: string) {
         toast.success("Datos del servidor borrados correctamente");
         return true;
       } else {
-        throw new Error(
-          result.message || "Error al borrar los datos del servidor"
-        );
+        throw new Error(result.message || "Error al borrar los datos del servidor");
       }
     } catch (error) {
       console.error("Error clearing server data:", error);

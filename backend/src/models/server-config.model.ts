@@ -10,7 +10,6 @@ export interface ServerConfig {
   difficulty: 'peaceful' | 'easy' | 'normal' | 'hard';
   maxPlayers: string;
   ops: string;
-  timezone: string;
   idleTimeout: string;
   onlineMode: boolean;
   pvp: boolean;
