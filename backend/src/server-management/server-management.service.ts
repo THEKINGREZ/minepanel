@@ -197,7 +197,7 @@ export class ServerManagementService {
       }
 
       // Container name would be something like `serverId_mc_1` or `serverId-mc-1`
-      const containerNamePattern = `${serverId}-mc-1`;
+      const containerNamePattern = `${serverId}_mc_1`;
 
       // Get container ID
       const { stdout: containerId } = await execAsync(
@@ -217,6 +217,104 @@ export class ServerManagementService {
     } catch (error) {
       console.error(`Failed to get logs for server ${serverId}:`, error);
       return { logs: `Error retrieving logs: ${error.message}` };
+    }
+  }
+
+  async executeCommand(
+    serverId: string, 
+    command: string
+  ): Promise<{ success: boolean; output: string }> {
+    try {
+      // Verificar si el servidor existe
+      if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
+        return { 
+          success: false, 
+          output: 'Servidor no encontrado' 
+        };
+      }
+
+      // Obtener el ID del contenedor
+      const containerNamePattern = `${serverId}_mc_1`;
+      const { stdout: containerId } = await execAsync(
+        `docker ps --filter "name=${containerNamePattern}" --format "{{.ID}}"`
+      );
+
+      if (!containerId.trim()) {
+        return { 
+          success: false, 
+          output: 'Contenedor no encontrado o no está en ejecución' 
+        };
+      }
+
+      // Ejecutar el comando en la consola RCON del servidor Minecraft
+      // Se usa docker exec para ejecutar el comando rcon-cli dentro del contenedor
+      const { stdout, stderr } = await execAsync(
+        `docker exec ${containerId.trim()} rcon-cli ${command}`
+      );
+
+      if (stderr) {
+        return {
+          success: false,
+          output: `Error al ejecutar comando: ${stderr}`
+        };
+      }
+
+      return {
+        success: true,
+        output: stdout || 'Comando ejecutado correctamente'
+      };
+    } catch (error) {
+      console.error(`Error al ejecutar comando en servidor ${serverId}:`, error);
+      return {
+        success: false,
+        output: `Error: ${error.message}`
+      };
+    }
+  }
+
+  async startServer(serverId: string): Promise<boolean> {
+    try {
+      const dockerComposePath = this.getDockerComposePath(serverId);
+      if (!(await fs.pathExists(dockerComposePath))) {
+        console.error(
+          `Docker compose file does not exist for server ${serverId}`,
+        );
+        return false;
+      }
+
+      // Execute docker-compose commands from the directory containing the docker-compose.yml
+      const composeDir = path.dirname(dockerComposePath);
+
+      // Start the server
+      await execAsync('docker-compose up -d', { cwd: composeDir });
+
+      return true;
+    } catch (error) {
+      console.error(`Failed to start server ${serverId}:`, error);
+      return false;
+    }
+  }
+
+  async stopServer(serverId: string): Promise<boolean> {
+    try {
+      const dockerComposePath = this.getDockerComposePath(serverId);
+      if (!(await fs.pathExists(dockerComposePath))) {
+        console.error(
+          `Docker compose file does not exist for server ${serverId}`,
+        );
+        return false;
+      }
+
+      // Execute docker-compose commands from the directory containing the docker-compose.yml
+      const composeDir = path.dirname(dockerComposePath);
+
+      // Stop the server
+      await execAsync('docker-compose down', { cwd: composeDir });
+
+      return true;
+    } catch (error) {
+      console.error(`Failed to stop server ${serverId}:`, error);
+      return false;
     }
   }
 }

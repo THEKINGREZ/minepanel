@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Server, RefreshCw, TrashIcon } from "lucide-react";
+import { ArrowLeft, Save, Server, RefreshCw, TrashIcon, PowerIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -39,15 +39,29 @@ import {
   restartServer,
   clearServerData,
   getServerStatus,
+  stopServer,
+  startServer,
 } from "@/services/docker/fetchs";
 import { isAuthenticated } from "@/services/auth/auth.service";
 import { Header } from "@/components/molecules/Header";
 import { Footer } from "@/components/molecules/Footer";
+import { getServerLogs, executeServerCommand } from "@/services/docker/fetchs";
+import { Terminal, Clock, Send, RefreshCcw } from "lucide-react";
+
 
 export default function ServerConfig() {
   const router = useRouter();
   const params = useParams();
   const serverId = params.server as string;
+
+  const [serverLogs, setServerLogs] = useState<string>("");
+  const [isLoadingLogs, setIsLoadingLogs] = useState<boolean>(false);
+  const [logLines, setLogLines] = useState<number>(100);
+
+  const [command, setCommand] = useState<string>("");
+  const [commandResponse, setCommandResponse] = useState<string>("");
+  const [isExecutingCommand, setIsExecutingCommand] = useState<boolean>(false);
+  const [isProcessingServerAction, setIsProcessingServerAction] = useState(false);
 
   const [isActive, setIsActive] = useState(false);
   const [isRestartingServer, setIsRestartingServer] = useState(false);
@@ -193,6 +207,95 @@ export default function ServerConfig() {
 
     loadServerConfig();
   }, [serverId]);
+
+  useEffect(() => {
+    handleFetchLogs();
+  }, [serverStatus]);
+
+  // Agregar este efecto para controlar el scrolling de los logs
+  useEffect(() => {
+    const logElement = document.querySelector('.logs-container');
+    if (logElement && serverLogs) {
+      logElement.scrollTop = logElement.scrollHeight;
+    }
+  }, [serverLogs]);
+
+  const handleFetchLogs = async () => {
+    setIsLoadingLogs(true);
+    try {
+      const data = await getServerLogs(serverId, logLines);
+      setServerLogs(data.logs);
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+      toast.error("Error al obtener los logs del servidor");
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
+  const handleStartServer = async () => {
+    setIsProcessingServerAction(true);
+    try {
+      const result = await startServer(serverId);
+      if (result.success) {
+        toast.success("Servidor iniciado correctamente");
+        // Esperar un momento y actualizar el estado
+        setTimeout(updateServerStatus, 3000);
+      } else {
+        throw new Error(result.message || "Error al iniciar el servidor");
+      }
+    } catch (error) {
+      console.error("Error starting server:", error);
+      toast.error("Error al iniciar el servidor");
+    } finally {
+      setIsProcessingServerAction(false);
+    }
+  };
+
+  const handleStopServer = async () => {
+    setIsProcessingServerAction(true);
+    try {
+      const result = await stopServer(serverId);
+      if (result.success) {
+        toast.success("Servidor detenido correctamente");
+        // Actualizar el estado
+        updateServerStatus();
+      } else {
+        throw new Error(result.message || "Error al detener el servidor");
+      }
+    } catch (error) {
+      console.error("Error stopping server:", error);
+      toast.error("Error al detener el servidor");
+    } finally {
+      setIsProcessingServerAction(false);
+    }
+  };
+
+  const handleExecuteCommand = async () => {
+    if (!command.trim()) {
+      toast.error("Ingresa un comando para ejecutar");
+      return;
+    }
+
+    setIsExecutingCommand(true);
+    try {
+      const result = await executeServerCommand(serverId, command);
+      if (result.success) {
+        setCommandResponse(result.output);
+        toast.success("Comando ejecutado correctamente");
+        // Limpiar el campo de comando después de ejecutarlo
+        setCommand("");
+      } else {
+        setCommandResponse(result.output);
+        toast.error("Error al ejecutar el comando");
+      }
+    } catch (error) {
+      console.error("Error executing command:", error);
+      toast.error("Error al ejecutar el comando");
+    } finally {
+      setIsExecutingCommand(false);
+    }
+  };
 
   const updateServerStatus = async () => {
     try {
@@ -388,6 +491,30 @@ export default function ServerConfig() {
                 </p>
               </div>
               <div className="ml-auto flex gap-2">
+                {serverStatus === "running" ? (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleStopServer}
+                    disabled={isProcessingServerAction}
+                    className="gap-2"
+                  >
+                    <PowerIcon className="h-4 w-4" />
+                    {isProcessingServerAction ? "Procesando..." : "Detener Servidor"}
+                  </Button>
+                ) : serverStatus === "stopped" ? (
+                  <Button
+                    type="button"
+                    variant="default"
+                    onClick={handleStartServer}
+                    disabled={isProcessingServerAction}
+                    className="gap-2"
+                  >
+                    <PowerIcon className="h-4 w-4" />
+                    {isProcessingServerAction ? "Procesando..." : "Iniciar Servidor"}
+                  </Button>
+                ) : null}
+                
                 <Button
                   type="button"
                   variant="outline"
@@ -402,49 +529,18 @@ export default function ServerConfig() {
                   />
                   {isRestartingServer ? "Reiniciando..." : "Reiniciar Servidor"}
                 </Button>
-
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      className="gap-2"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                      Borrar Datos
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción eliminará todos los datos del servidor
-                        incluyendo mundos guardados, configuraciones y no puede
-                        ser revertida.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleClearData}
-                        disabled={isClearingData}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        {isClearingData ? "Borrando..." : "Sí, borrar datos"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
               </div>
             </div>
 
             <Tabs defaultValue="type">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="type">Tipo de Servidor</TabsTrigger>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="resources">Recursos</TabsTrigger>
                 <TabsTrigger value="mods">Mods</TabsTrigger>
                 <TabsTrigger value="advanced">Avanzado</TabsTrigger>
+                <TabsTrigger value="logs">Logs</TabsTrigger>
+                <TabsTrigger value="commands">Comandos</TabsTrigger>
               </TabsList>
 
               <TabsContent value="type" className="space-y-4 pt-4">
@@ -806,11 +902,44 @@ export default function ServerConfig() {
                       <Label htmlFor="allow-flight">Permitir Vuelo</Label>
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="flex justify-between">
                     <Button type="submit" className="gap-2">
                       <Save className="h-4 w-4" />
                       Guardar Cambios
                     </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          className="gap-2"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          Borrar Datos
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción eliminará todos los datos del servidor
+                            incluyendo mundos guardados, configuraciones y no puede
+                            ser revertida.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleClearData}
+                            disabled={isClearingData}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
+                          >
+                            {isClearingData ? "Borrando..." : "Sí, borrar datos"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </CardFooter>
                 </Card>
               </TabsContent>
@@ -1053,6 +1182,244 @@ export default function ServerConfig() {
                       Guardar Cambios
                     </Button>
                   </CardFooter>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="logs" className="space-y-4 pt-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div>
+                      <CardTitle>Logs del Servidor</CardTitle>
+                      <CardDescription>
+                        Visualiza los logs más recientes del servidor
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <select
+                        value={logLines}
+                        onChange={(e) => setLogLines(Number(e.target.value))}
+                        className="h-8 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value={50}>50 líneas</option>
+                        <option value={100}>100 líneas</option>
+                        <option value={500}>500 líneas</option>
+                        <option value={1000}>1000 líneas</option>
+                      </select>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleFetchLogs}
+                        disabled={isLoadingLogs}
+                      >
+                        {isLoadingLogs ? (
+                          <RefreshCcw className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <RefreshCcw className="h-4 w-4 mr-2" />
+                        )}
+                        Actualizar
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="relative">
+                      <div className="absolute top-0 right-0 bg-muted px-2 py-1 text-xs rounded-bl-md flex items-center">
+                        <Terminal className="h-3 w-3 mr-1" /> Consola
+                      </div>
+                      <pre 
+                        className="logs-container bg-black text-green-400 p-4 rounded-md h-[400px] overflow-auto text-xs font-mono"
+                        ref={(el) => {
+                          if (el && serverLogs) {
+                            el.scrollTop = el.scrollHeight;
+                          }
+                        }}
+                      >
+                        { serverLogs ? (
+                          serverLogs
+                        ) : isLoadingLogs ? (
+                          <div className="flex h-full items-center justify-center">
+                            <RefreshCcw className="h-4 w-4 animate-spin mr-2" />
+                            Cargando logs...
+                          </div>
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-muted-foreground">
+                            No hay logs disponibles
+                          </div>
+                        )}
+                      </pre>
+                    </div>
+                    <div className="flex justify-end mt-4">
+                      <Button
+                        type="button"
+                        onClick={handleFetchLogs}
+                        disabled={isLoadingLogs}
+                      >
+                        {isLoadingLogs ? (
+                          <RefreshCcw className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                          <RefreshCcw className="h-4 w-4 mr-2" />
+                        )}
+                        Actualizar Logs
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="commands" className="space-y-4 pt-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ejecutar Comandos</CardTitle>
+                    <CardDescription>
+                      Envía comandos directamente al servidor de Minecraft
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="command">Comando</Label>
+                      <div className="flex space-x-2">
+                        <div className="flex-1">
+                          <Input
+                            id="command"
+                            value={command}
+                            onChange={(e) => setCommand(e.target.value)}
+                            placeholder="Ej: time set day"
+                            disabled={serverStatus !== "running" || isExecutingCommand}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleExecuteCommand();
+                              }
+                            }}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={handleExecuteCommand}
+                          disabled={serverStatus !== "running" || isExecutingCommand || !command.trim()}
+                        >
+                          {isExecutingCommand ? (
+                            <RefreshCcw className="h-4 w-4 animate-spin mr-2" />
+                          ) : (
+                            <Send className="h-4 w-4 mr-2" />
+                          )}
+                          Ejecutar
+                        </Button>
+                      </div>
+                      
+                      {serverStatus !== "running" && (
+                        <p className="text-sm text-yellow-600 mt-2">
+                          El servidor debe estar en ejecución para ejecutar comandos
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Comandos comunes</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          onClick={() => {
+                            setCommand("time set day");
+                            handleExecuteCommand();
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Cambiar a día
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          onClick={() => {
+                            setCommand("time set night");
+                            handleExecuteCommand();
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Cambiar a noche
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          onClick={() => {
+                            setCommand("weather clear");
+                            handleExecuteCommand();
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Clima despejado
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          onClick={() => {
+                            setCommand("gamemode creative @p");
+                            handleExecuteCommand();
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Modo creativo
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          onClick={() => {
+                            setCommand("gamemode survival @p");
+                            handleExecuteCommand();
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Modo supervivencia
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={serverStatus !== "running" || isExecutingCommand}
+                          onClick={() => {
+                            setCommand("kill @e[type=!player]");
+                            handleExecuteCommand();
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Eliminar mobs
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mt-4">
+                      <div className="flex items-center justify-between">
+                        <Label>Respuesta del servidor</Label>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setCommandResponse("")}
+                          className="h-6 px-2"
+                          disabled={!commandResponse}
+                        >
+                          Limpiar
+                        </Button>
+                      </div>
+                      <pre className="bg-black text-green-400 p-4 rounded-md min-h-[200px] max-h-[300px] overflow-auto text-xs font-mono">
+                        {commandResponse || (
+                          <span className="text-muted-foreground">
+                            La respuesta del comando aparecerá aquí
+                          </span>
+                        )}
+                      </pre>
+                    </div>
+                  </CardContent>
                 </Card>
               </TabsContent>
             </Tabs>

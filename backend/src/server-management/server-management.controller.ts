@@ -104,4 +104,34 @@ export class ServerManagementController {
   ) {
     return this.managementService.getServerLogs(id, lines || 100);
   }
+
+  @Post(':id/command')
+  async executeCommand(
+    @Param('id') id: string,
+    @Body() body: { command: string }
+  ) {
+    return this.managementService.executeCommand(id, body.command);
+  }
+
+  @Post(':id/start')
+  async startServer(@Param('id') id: string) {
+    const result = await this.managementService.startServer(id);
+    return {
+      success: result,
+      message: result
+        ? 'Server started successfully'
+        : 'Failed to start server',
+    };
+  }
+
+  @Post(':id/stop')
+  async stopServer(@Param('id') id: string) {
+    const result = await this.managementService.stopServer(id);
+    return {
+      success: result,
+      message: result
+        ? 'Server stopped successfully'
+        : 'Failed to stop server',
+    };
+  }
 }

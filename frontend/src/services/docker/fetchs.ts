@@ -42,8 +42,51 @@ export const getServerStatus = async (
 };
 
 export const getServerLogs = async (
-  serverId: string
+  serverId: string,
+  limit: number = 100
 ): Promise<{ logs: string }> => {
-  const response = await api.get(`${API_URL}/servers/${serverId}/logs`);
+  const response = await api.get(`${API_URL}/servers/${serverId}/logs`, {
+    params: { lines: limit },
+  });
   return response.data;
 }
+
+export const executeServerCommand = async (
+  serverId: string,
+  command: string
+): Promise<{ success: boolean; output: string }> => {
+  const response = await api.post(`/servers/${serverId}/command`, { command });
+  return response.data;
+};
+
+export const startServer = async (serverId: string): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  try {
+    const response = await api.post(`/servers/${serverId}/start`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error starting server ${serverId}:`, error);
+    return {
+      success: false,
+      message: "Error al iniciar el servidor",
+    };
+  }
+};
+
+export const stopServer = async (serverId: string): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  try {
+    const response = await api.post(`/servers/${serverId}/stop`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error stopping server ${serverId}:`, error);
+    return {
+      success: false,
+      message: "Error al detener el servidor",
+    };
+  }
+};
