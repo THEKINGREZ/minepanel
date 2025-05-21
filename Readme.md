@@ -1,4 +1,9 @@
 # Minecraft Server Manager – Docker-based Minecraft Server Manager
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue)
+![Made with NestJS](https://img.shields.io/badge/Backend-NestJS-red)
+![Made with Next.js](https://img.shields.io/badge/Frontend-Next.js-black)
+
 
 **MinePanel** is a web-based control panel for managing multiple Minecraft servers running with Docker. Inspired by [Crafty Control](https://craftycontrol.com), but fully customizable and built using modern web technologies.
 
