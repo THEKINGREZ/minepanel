@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DockerComposeService {
-  private readonly BASE_DIR = path.join(process.cwd(), '..');
+  private readonly BASE_DIR = path.join(process.cwd(), '..', 'servers');
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -68,7 +68,6 @@ export class DockerComposeService {
         generateStructures: env.GENERATE_STRUCTURES !== 'false',
         allowNether: env.ALLOW_NETHER !== 'false',
         entityBroadcastRange: env.ENTITY_BROADCAST_RANGE_PERCENTAGE ?? '100',
-        
 
         // Auto-Stop
         enableAutoStop: env.ENABLE_AUTOSTOP === 'true',
