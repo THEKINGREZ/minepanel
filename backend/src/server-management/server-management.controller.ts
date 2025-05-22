@@ -15,6 +15,12 @@ export class ServerManagementController {
     return this.dockerComposeService.getAllServerConfigs();
   }
 
+  @Get('all-status')
+  async getAllServersStatus() {
+    const allStatus = await this.managementService.getAllServersStatus();
+    return allStatus;
+  }
+
   @Get(':id')
   async getServer(@Param('id') id: string) {
     const config = await this.dockerComposeService.getServerConfig(id);

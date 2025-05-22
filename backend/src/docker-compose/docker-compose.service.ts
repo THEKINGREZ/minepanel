@@ -155,7 +155,7 @@ export class DockerComposeService {
       serverType: 'VANILLA',
 
       // General configuration
-      serverName: 'TulaCraft',
+      serverName: id,
       motd: 'Un servidor de Minecraft increíble',
       port: '25565',
       difficulty: 'hard',

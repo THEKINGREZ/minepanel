@@ -100,7 +100,8 @@ export default function ServerConfig() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[url('/images/minecraft-bg-blur.png')] bg-cover bg-fixed bg-center">
+    <div className="flex min-h-screen flex-col bg-[url('/images/minecraft-bg-blur.png')] bg-cover bg-fixed bg-center relative">
+      <div className="absolute inset-0 bg-black/50"></div>
       <Header />
 
       <main className="flex-1 py-12 px-4 relative z-10">

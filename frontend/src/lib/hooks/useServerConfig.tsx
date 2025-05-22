@@ -5,12 +5,12 @@ import { apiClearServerData, apiRestartServer, fetchServerConfig, updateServerCo
 import { toast } from "sonner";
 
 const defaultConfig: ServerConfig = {
-  id: "daily",
+  id: "Server",
   active: false,
   serverType: "VANILLA",
 
   // General configuration
-  serverName: "TulaCraft",
+  serverName: "Minecraft Server",
   motd: "Un servidor de Minecraft increíble",
   port: "25565",
   difficulty: "hard",

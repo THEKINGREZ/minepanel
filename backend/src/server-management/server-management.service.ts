@@ -115,6 +115,42 @@ export class ServerManagementService {
     }
   }
 
+  async getAllServersStatus(): Promise<{ [serverId: string]: 'running' | 'stopped' | 'starting' | 'not_found' }> {
+    try {
+      // Primero, obtener la lista de directorios de servidores
+      const directories = await fs.readdir(this.BASE_DIR);
+      const serverDirectories = await Promise.all(
+        directories.map(async (dir) => {
+          const fullPath = path.join(this.BASE_DIR, dir);
+          const isDirectory = (await fs.stat(fullPath)).isDirectory();
+          const hasDockerCompose = await fs.pathExists(this.getDockerComposePath(dir));
+          // Solo considerar como servidor si es un directorio y tiene un docker-compose.yml
+          return isDirectory && hasDockerCompose ? dir : null;
+        }),
+      );
+
+      // Filtrar los nulos y obtener el estado de cada servidor
+      const validServerDirectories = serverDirectories.filter(Boolean);
+      const statusPromises = validServerDirectories.map(async (serverId) => {
+        return { serverId, status: await this.getServerStatus(serverId) };
+      });
+
+      // Esperar todas las promesas de estado
+      const statusResults = await Promise.all(statusPromises);
+
+      // Convertir a objeto con pares clave-valor
+      const result = statusResults.reduce((acc, { serverId, status }) => {
+        acc[serverId] = status;
+        return acc;
+      }, {});
+
+      return result;
+    } catch (error) {
+      console.error('Error al obtener el estado de todos los servidores:', error);
+      return {};
+    }
+  }
+
   async getServerInfo(serverId: string): Promise<any> {
     try {
       const status = await this.getServerStatus(serverId);
