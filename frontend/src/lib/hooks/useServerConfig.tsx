@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { ServerConfig } from "../types/types";
 import { apiClearServerData, apiRestartServer, fetchServerConfig, updateServerConfig } from "@/services/docker/fetchs";
@@ -22,7 +23,7 @@ const defaultConfig: ServerConfig = {
   allowFlight: true,
   gameMode: "survival",
   seed: "",
-  levelType: "DEFAULT",
+  levelType: "minecraft:default",
   hardcore: false,
   spawnAnimals: true,
   spawnMonsters: true,

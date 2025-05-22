@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FC } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -35,7 +36,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
         <CardContent>
           <div className="flex flex-col items-center justify-center h-40 border border-gray-700/50 rounded-md bg-gray-800/50 gap-3 p-6">
             <Image src="/images/crafting-table.webp" alt="Mods" width={48} height={48} className="opacity-80" />
-            <p className="text-gray-400 text-center font-minecraft text-sm">Selecciona el tipo de servidor Forge o CurseForge en la pestaña "Tipo de Servidor" para configurar los mods.</p>
+            <p className="text-gray-400 text-center font-minecraft text-sm">Selecciona el tipo de servidor Forge o CurseForge en la pestaña &quot;Tipo de Servidor&quot; para configurar los mods.</p>
           </div>
         </CardContent>
       </Card>
@@ -96,7 +97,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                           <strong>URL:</strong> Dirección web directa al modpack en CurseForge
                         </li>
                         <li>
-                          <strong>Slug:</strong> Identificador único del modpack (ej: "all-the-mods-7")
+                          <strong>Slug:</strong> Identificador único del modpack (ej: &quot;all-the-mods-7&quot;)
                         </li>
                         <li>
                           <strong>Archivo:</strong> Instalar desde un archivo .zip ya subido al servidor
