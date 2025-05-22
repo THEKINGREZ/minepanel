@@ -1,7 +1,7 @@
 export interface ServerConfig {
   id: string;
   active: boolean;
-  serverType: 'VANILLA' | 'FORGE' | 'AUTO_CURSEFORGE';
+  serverType: 'VANILLA' | 'FORGE' | 'AUTO_CURSEFORGE' | 'SPIGOT' | 'FABRIC' | 'MAGMA' | 'PAPER' | 'QUILT';
 
   // General configuration
   serverName: string;
@@ -10,7 +10,6 @@ export interface ServerConfig {
   difficulty: 'peaceful' | 'easy' | 'normal' | 'hard';
   maxPlayers: string;
   ops: string;
-  idleTimeout: string;
   onlineMode: boolean;
   pvp: boolean;
   commandBlock: boolean;
@@ -74,7 +73,6 @@ export interface ServerConfig {
   dockerVolumes: string;
   restartPolicy: 'no' | 'always' | 'on-failure' | 'unless-stopped';
   stopDelay: string;
-  rollingLogs: boolean;
   execDirectly: boolean;
   envVars: string;
 

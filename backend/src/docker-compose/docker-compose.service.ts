@@ -53,7 +53,7 @@ export class DockerComposeService {
         difficulty: env.DIFFICULTY ?? 'hard',
         maxPlayers: env.MAX_PLAYERS ?? '10',
         ops: env.OPS ?? '',
-        idleTimeout: env.PLAYER_IDLE_TIMEOUT ?? '60',
+        playerIdleTimeout: env.PLAYER_IDLE_TIMEOUT ?? '60',
         onlineMode: env.ONLINE_MODE === 'true',
         pvp: env.PVP === 'true',
         commandBlock: env.ENABLE_COMMAND_BLOCK === 'true',
@@ -81,7 +81,6 @@ export class DockerComposeService {
         autoPauseKnockInterface: env.AUTOPAUSE_KNOCK_INTERFACE ?? 'eth0',
 
         // Connectivity
-        playerIdleTimeout: env.PLAYER_IDLE_TIMEOUT ?? '0',
         preventProxyConnections: env.PREVENT_PROXY_CONNECTIONS === 'true',
         opPermissionLevel: env.OP_PERMISSION_LEVEL ?? '4',
 
@@ -121,7 +120,6 @@ export class DockerComposeService {
         dockerVolumes: Array.isArray(mcService.volumes) ? mcService.volumes.join('\n') : './mc-data:/data\n./modpacks:/modpacks:ro',
         restartPolicy: mcService.restart ?? 'unless-stopped',
         stopDelay: env.STOP_SERVER_ANNOUNCE_DELAY ?? '60',
-        rollingLogs: env.ENABLE_ROLLING_LOGS === 'true',
         execDirectly: env.EXEC_DIRECTLY === 'true',
         envVars: '',
       };
@@ -162,7 +160,6 @@ export class DockerComposeService {
       difficulty: 'hard',
       maxPlayers: '10',
       ops: '',
-      idleTimeout: '60',
       onlineMode: false,
       pvp: true,
       commandBlock: true,
@@ -230,7 +227,6 @@ export class DockerComposeService {
       dockerVolumes: './mc-data:/data\n./modpacks:/modpacks:ro',
       restartPolicy: 'unless-stopped',
       stopDelay: '60',
-      rollingLogs: true,
       execDirectly: true,
       envVars: '',
 
@@ -311,9 +307,9 @@ export class DockerComposeService {
       VIEW_DISTANCE: config.viewDistance,
       SIMULATION_DISTANCE: config.simulationDistance,
       STOP_SERVER_ANNOUNCE_DELAY: config.stopDelay,
-      ENABLE_ROLLING_LOGS: String(config.rollingLogs),
+      ENABLE_ROLLING_LOGS: String(config.enableRollingLogs),
       EXEC_DIRECTLY: String(config.execDirectly),
-      PLAYER_IDLE_TIMEOUT: config.playerIdleTimeout || config.idleTimeout,
+      PLAYER_IDLE_TIMEOUT: config.playerIdleTimeout,
       ENTITY_BROADCAST_RANGE_PERCENTAGE: config.entityBroadcastRange,
       LEVEL_TYPE: config.levelType,
       MODE: config.gameMode,

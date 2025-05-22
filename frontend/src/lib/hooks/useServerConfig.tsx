@@ -84,7 +84,6 @@ const defaultConfig: ServerConfig = {
   dockerVolumes: "./mc-data:/data\n./modpacks:/modpacks:ro",
   restartPolicy: "unless-stopped",
   stopDelay: "60",
-  rollingLogs: true,
   execDirectly: true,
   envVars: "",
 

@@ -54,7 +54,7 @@ export const BasicSettingsTab: FC<BasicSettingsTabProps> = ({ config, updateConf
             </SelectItem>
             <SelectItem value="normal">
               <div className="flex items-center gap-2">
-                <Image src="/images/normal.png" alt="Normal" width={16} height={16} />
+                <Image src="/images/easy.png" alt="Normal" width={16} height={16} />
                 <span>Normal</span>
               </div>
             </SelectItem>
@@ -85,19 +85,19 @@ export const BasicSettingsTab: FC<BasicSettingsTabProps> = ({ config, updateConf
             </SelectItem>
             <SelectItem value="creative">
               <div className="flex items-center gap-2">
-                <Image src="/images/creative.png" alt="Creativo" width={16} height={16} />
+                <Image src="/images/easy.png" alt="Creativo" width={16} height={16} />
                 <span>Creativo</span>
               </div>
             </SelectItem>
             <SelectItem value="adventure">
               <div className="flex items-center gap-2">
-                <Image src="/images/adventure.png" alt="Aventura" width={16} height={16} />
+                <Image src="/images/easy.png" alt="Aventura" width={16} height={16} />
                 <span>Aventura</span>
               </div>
             </SelectItem>
             <SelectItem value="spectator">
               <div className="flex items-center gap-2">
-                <Image src="/images/spectator.png" alt="Espectador" width={16} height={16} />
+                <Image src="/images/hard.png" alt="Espectador" width={16} height={16} />
                 <span>Espectador</span>
               </div>
             </SelectItem>

@@ -5,26 +5,26 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - '25565:25565'
+      - '25562:25565'
     environment:
       EULA: 'TRUE'
       MOTD: ATM 10 Tulalandia
       SERVER_NAME: TulaCraft
       DIFFICULTY: hard
-      MAX_PLAYERS: '10'
+      MAX_PLAYERS: '20'
       OPS: ''
       TZ: America/Santiago
-      TYPE: AUTO_CURSEFORGE
+      TYPE: FORGE
       ONLINE_MODE: 'false'
       PVP: 'true'
       ENABLE_COMMAND_BLOCK: 'true'
       ALLOW_FLIGHT: 'true'
       VIEW_DISTANCE: 18
       SIMULATION_DISTANCE: '4'
-      STOP_SERVER_ANNOUNCE_DELAY: 60
-      ENABLE_ROLLING_LOGS: 'true'
+      STOP_SERVER_ANNOUNCE_DELAY: '60'
+      ENABLE_ROLLING_LOGS: 'false'
       EXEC_DIRECTLY: 'true'
-      PLAYER_IDLE_TIMEOUT: '60'
+      PLAYER_IDLE_TIMEOUT: '19'
       ENTITY_BROADCAST_RANGE_PERCENTAGE: '100'
       LEVEL_TYPE: minecraft:default
       MODE: survival
@@ -36,16 +36,17 @@ services:
       ALLOW_NETHER: 'true'
       UID: '1000'
       GID: '1000'
-      INIT_MEMORY: 6G
-      MAX_MEMORY: 10G
+      INIT_MEMORY: 2G
+      MAX_MEMORY: 6G
+      ENABLE_AUTOPAUSE: 'true'
+      AUTOPAUSE_TIMEOUT_EST: '3600'
+      AUTOPAUSE_TIMEOUT_INIT: '600'
+      AUTOPAUSE_KNOCK_INTERFACE: eth0
       ENABLE_RCON: 'true'
-      RCON_PORT: '25575'
+      RCON_PORT: 25575
       OP_PERMISSION_LEVEL: '4'
       CF_API_KEY: $$2a$$10$$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa
-      CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-10
-      MODPACK_PLATFORM: AUTO_CURSEFORGE
-      CF_FORCE_SYNCHRONIZE: 'true'
-      CF_PARALLEL_DOWNLOADS: '4'
+      VERSION: 1.19.2
     volumes:
       - ./mc-data:/data
       - ./modpacks:/modpacks:ro
@@ -54,7 +55,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 10G
+          memory: 6G
         reservations:
           cpus: '0.3'
           memory: 4G

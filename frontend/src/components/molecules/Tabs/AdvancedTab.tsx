@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Save, HelpCircle } from "lucide-react";
 import { ServerConfig } from "@/lib/types/types";
@@ -49,7 +48,7 @@ export const AdvancedTab: FC<AdvancedTabProps> = ({ config, updateConfig, onSave
               </Tooltip>
             </TooltipProvider>
           </div>
-          <Input id="dockerImage" value={config.dockerImage} onChange={(e) => updateConfig("dockerImage", e.target.value)} placeholder="itzg/minecraft-server:latest" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+          <Input id="dockerImage" value={config.dockerImage} onChange={(e) => updateConfig("dockerImage", e.target.value)} placeholder="java17" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
           <p className="text-xs text-gray-400">Imagen Docker a utilizar (por defecto: itzg/minecraft-server:latest)</p>
         </div>
 
@@ -96,7 +95,7 @@ export const AdvancedTab: FC<AdvancedTabProps> = ({ config, updateConfig, onSave
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <Input id="idleTimeout" type="number" value={config.idleTimeout} onChange={(e) => updateConfig("idleTimeout", e.target.value)} placeholder="60" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+            <Input id="playerIdleTimeout" type="number" value={config.playerIdleTimeout} onChange={(e) => updateConfig("playerIdleTimeout", e.target.value)} placeholder="60" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
             <p className="text-xs text-gray-400">Tiempo en minutos antes de expulsar a jugadores inactivos (0 para desactivar)</p>
           </div>
 
@@ -155,30 +154,6 @@ export const AdvancedTab: FC<AdvancedTabProps> = ({ config, updateConfig, onSave
             </SelectContent>
           </Select>
           <p className="text-xs text-gray-400">Política de reinicio del contenedor Docker</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="rollingLogs" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
-                <Image src="/images/paper.webp" alt="Logs" width={16} height={16} />
-                Logs Rotativos
-              </Label>
-              <Switch id="rollingLogs" checked={config.rollingLogs} onCheckedChange={(checked) => updateConfig("rollingLogs", checked)} />
-            </div>
-            <p className="text-xs text-gray-400">Activar rotación de logs para evitar que crezcan demasiado</p>
-          </div>
-
-          <div className="space-y-3 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="execDirectly" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
-                <Image src="/images/lapis.webp" alt="Directo" width={16} height={16} />
-                Ejecución Directa
-              </Label>
-              <Switch id="execDirectly" checked={config.execDirectly} onCheckedChange={(checked) => updateConfig("execDirectly", checked)} />
-            </div>
-            <p className="text-xs text-gray-400">Ejecutar Java directamente en lugar de usar scripts de inicio (mejor rendimiento)</p>
-          </div>
         </div>
 
         <div className="space-y-2 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
