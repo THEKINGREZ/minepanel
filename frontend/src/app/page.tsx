@@ -47,7 +47,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[url('/images/minecraft-bg.jpg')] bg-cover bg-center relative">
+    <div className="min-h-screen flex flex-col bg-[url('/images/minecraft-bg-blur.png')] bg-cover bg-center relative">
       {/* Overlay oscuro para mejorar legibilidad */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
