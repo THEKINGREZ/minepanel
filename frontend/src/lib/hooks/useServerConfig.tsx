@@ -56,7 +56,6 @@ const defaultConfig: ServerConfig = {
   // Resources
   initMemory: "6G",
   maxMemory: "10G",
-  memory: "",
   cpuLimit: "2",
   cpuReservation: "0.3",
   memoryReservation: "4G",

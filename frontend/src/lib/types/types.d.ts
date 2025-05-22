@@ -52,7 +52,6 @@ export interface ServerConfig {
   memoryReservation: string;
   viewDistance: string;
   simulationDistance: string;
-  memory: string;
   uid: string;
   gid: string;
 

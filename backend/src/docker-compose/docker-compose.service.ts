@@ -93,7 +93,6 @@ export class DockerComposeService {
         // Resources
         initMemory: env.INIT_MEMORY ?? '6G',
         maxMemory: env.MAX_MEMORY ?? '10G',
-        memory: env.MEMORY ?? '',
         cpuLimit: resources.limits?.cpus ?? '2',
         cpuReservation: resources.reservations?.cpus ?? '0.3',
         memoryReservation: resources.reservations?.memory ?? '4G',
@@ -200,7 +199,6 @@ export class DockerComposeService {
       // Resources
       initMemory: '6G',
       maxMemory: '10G',
-      memory: '',
       cpuLimit: '2',
       cpuReservation: '0.3',
       memoryReservation: '4G',
@@ -329,12 +327,8 @@ export class DockerComposeService {
     }
 
     // Add memory configuration
-    if (config.memory) {
-      environment['MEMORY'] = config.memory;
-    } else {
-      environment['INIT_MEMORY'] = config.initMemory;
-      environment['MAX_MEMORY'] = config.maxMemory;
-    }
+    environment['INIT_MEMORY'] = config.initMemory;
+    environment['MAX_MEMORY'] = config.maxMemory;
 
     // Add JVM options
     if (config.useAikarFlags) {

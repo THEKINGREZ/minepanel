@@ -64,42 +64,6 @@ export const MemoryCpuTab: FC<MemoryCpuTabProps> = ({ config, updateConfig }) =>
         </div>
       </div>
 
-      <div className="p-4 rounded-md bg-gray-800/50 border border-gray-700/50 space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="memory" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
-            <Image src="/images/golden-apple.webp" alt="Memoria General" width={16} height={16} />
-            Memoria (General)
-          </Label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
-                  <HelpCircle className="h-4 w-4 text-gray-400" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
-                <p>Establece tanto la memoria inicial como máxima al mismo valor</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Input
-          id="memory"
-          value={config.memory || "1G"}
-          onChange={(e) => {
-            updateConfig("memory", e.target.value);
-            // Si se establece memory, actualizar también initMemory y maxMemory
-            if (e.target.value) {
-              updateConfig("initMemory", e.target.value);
-              updateConfig("maxMemory", e.target.value);
-            }
-          }}
-          placeholder="1G"
-          className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30"
-        />
-        <p className="text-xs text-gray-400">Configura tanto la memoria inicial como máxima con un solo valor (anula valores individuales)</p>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
