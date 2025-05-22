@@ -61,6 +61,10 @@ cd ../frontend
 npm install
 npm run build
 pm2 start npm --name "frontend" -- run start
+
+# pm2 save
+pm2 save
+pm2 startup
 ```
 
 📋 ToDo
