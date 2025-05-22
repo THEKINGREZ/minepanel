@@ -76,6 +76,14 @@ const defaultConfig: ServerConfig = {
   enableRollingLogs: false,
   logTimestamp: false,
 
+  enableBackup: false,
+  backupInterval: "24h",
+  backupMethod: "tar",
+  backupInitialDelay: "2m",
+  backupPruneDays: "7",
+  backupDestDir: "/backups",
+  backupName: "world",
+
   // Docker
   dockerImage: "latest",
   minecraftVersion: "1.19.2",

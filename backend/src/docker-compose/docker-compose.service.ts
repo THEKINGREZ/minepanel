@@ -68,6 +68,7 @@ export class DockerComposeService {
         generateStructures: env.GENERATE_STRUCTURES !== 'false',
         allowNether: env.ALLOW_NETHER !== 'false',
         entityBroadcastRange: env.ENTITY_BROADCAST_RANGE_PERCENTAGE ?? '100',
+        
 
         // Auto-Stop
         enableAutoStop: env.ENABLE_AUTOSTOP === 'true',
@@ -206,6 +207,14 @@ export class DockerComposeService {
       simulationDistance: '4',
       uid: '1000',
       gid: '1000',
+
+      enableBackup: false,
+      backupInterval: '24h',
+      backupMethod: 'tar',
+      backupInitialDelay: '2m',
+      backupPruneDays: '7',
+      backupDestDir: '/backups',
+      backupName: 'world',
 
       // JVM Options
       useAikarFlags: false,

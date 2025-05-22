@@ -55,6 +55,15 @@ export interface ServerConfig {
   uid: string;
   gid: string;
 
+  // Backup configuration
+  enableBackup?: boolean;
+  backupInterval?: string;
+  backupMethod?: string;
+  backupInitialDelay?: string;
+  backupPruneDays?: string;
+  backupDestDir?: string;
+  backupName?: string;
+
   useAikarFlags: boolean;
   enableJmx: boolean;
   jmxHost: string;
