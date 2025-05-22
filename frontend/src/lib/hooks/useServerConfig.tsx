@@ -16,7 +16,6 @@ const defaultConfig: ServerConfig = {
   difficulty: "hard",
   maxPlayers: "10",
   ops: "ketbome",
-  idleTimeout: "60",
   onlineMode: false,
   pvp: true,
   commandBlock: true,
