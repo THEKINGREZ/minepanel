@@ -8,7 +8,7 @@ const execAsync = promisify(exec);
 
 @Injectable()
 export class ServerManagementService {
-  private readonly BASE_DIR = path.join(process.cwd(), '..');
+  private readonly BASE_DIR = path.join(process.cwd(), '..', 'servers');
 
   private getDockerComposePath(serverId: string): string {
     return path.join(this.BASE_DIR, serverId, 'docker-compose.yml');
@@ -22,9 +22,7 @@ export class ServerManagementService {
     try {
       const dockerComposePath = this.getDockerComposePath(serverId);
       if (!(await fs.pathExists(dockerComposePath))) {
-        console.error(
-          `Docker compose file does not exist for server ${serverId}`,
-        );
+        console.error(`Docker compose file does not exist for server ${serverId}`);
         return false;
       }
 
@@ -71,9 +69,7 @@ export class ServerManagementService {
     }
   }
 
-  async getServerStatus(
-    serverId: string,
-  ): Promise<'running' | 'stopped' | 'starting' | 'not_found'> {
+  async getServerStatus(serverId: string): Promise<'running' | 'stopped' | 'starting' | 'not_found'> {
     try {
       // First check if the directory exists
       if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
@@ -84,30 +80,24 @@ export class ServerManagementService {
       const containerNamePattern = `${serverId}_mc_1`;
 
       // Get container status with more details
-      const { stdout } = await execAsync(
-        `docker ps --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`,
-      );
+      const { stdout } = await execAsync(`docker ps --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`);
 
       if (stdout.trim()) {
         // Check if the status indicates it's still starting
-        // Docker status can include "Up X seconds" or 
+        // Docker status can include "Up X seconds" or
         // "health: starting" for containers with health checks
-        if (stdout.includes('starting') || 
-            (stdout.includes('Up') && stdout.includes('seconds'))) {
+        if (stdout.includes('starting') || (stdout.includes('Up') && stdout.includes('seconds'))) {
           return 'starting';
         }
         return 'running';
       }
 
       // Check if container exists but not running
-      const { stdout: allContainers } = await execAsync(
-        `docker ps -a --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`,
-      );
+      const { stdout: allContainers } = await execAsync(`docker ps -a --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`);
 
       if (allContainers.trim()) {
         // Check if container is in a transitional state like restarting
-        if (allContainers.includes('Restarting') || 
-            allContainers.includes('Created')) {
+        if (allContainers.includes('Restarting') || allContainers.includes('Created')) {
           return 'starting';
         }
         return 'stopped';
@@ -122,6 +112,42 @@ export class ServerManagementService {
     } catch (error) {
       console.error(`Failed to get status for server ${serverId}:`, error);
       return 'not_found';
+    }
+  }
+
+  async getAllServersStatus(): Promise<{ [serverId: string]: 'running' | 'stopped' | 'starting' | 'not_found' }> {
+    try {
+      // Primero, obtener la lista de directorios de servidores
+      const directories = await fs.readdir(this.BASE_DIR);
+      const serverDirectories = await Promise.all(
+        directories.map(async (dir) => {
+          const fullPath = path.join(this.BASE_DIR, dir);
+          const isDirectory = (await fs.stat(fullPath)).isDirectory();
+          const hasDockerCompose = await fs.pathExists(this.getDockerComposePath(dir));
+          // Solo considerar como servidor si es un directorio y tiene un docker-compose.yml
+          return isDirectory && hasDockerCompose ? dir : null;
+        }),
+      );
+
+      // Filtrar los nulos y obtener el estado de cada servidor
+      const validServerDirectories = serverDirectories.filter(Boolean);
+      const statusPromises = validServerDirectories.map(async (serverId) => {
+        return { serverId, status: await this.getServerStatus(serverId) };
+      });
+
+      // Esperar todas las promesas de estado
+      const statusResults = await Promise.all(statusPromises);
+
+      // Convertir a objeto con pares clave-valor
+      const result = statusResults.reduce((acc, { serverId, status }) => {
+        acc[serverId] = status;
+        return acc;
+      }, {});
+
+      return result;
+    } catch (error) {
+      console.error('Error al obtener el estado de todos los servidores:', error);
+      return {};
     }
   }
 
@@ -200,18 +226,14 @@ export class ServerManagementService {
       const containerNamePattern = `${serverId}_mc_1`;
 
       // Get container ID
-      const { stdout: containerId } = await execAsync(
-        `docker ps -a --filter "name=${containerNamePattern}" --format "{{.ID}}"`,
-      );
+      const { stdout: containerId } = await execAsync(`docker ps -a --filter "name=${containerNamePattern}" --format "{{.ID}}"`);
 
       if (!containerId.trim()) {
         return { logs: 'Container not found' };
       }
 
       // Get logs from the container
-      const { stdout: logs } = await execAsync(
-        `docker logs --tail ${lines} ${containerId.trim()}`,
-      );
+      const { stdout: logs } = await execAsync(`docker logs --tail ${lines} ${containerId.trim()}`);
 
       return { logs };
     } catch (error) {
@@ -220,54 +242,47 @@ export class ServerManagementService {
     }
   }
 
-  async executeCommand(
-    serverId: string, 
-    command: string
-  ): Promise<{ success: boolean; output: string }> {
+  async executeCommand(serverId: string, command: string): Promise<{ success: boolean; output: string }> {
     try {
       // Verificar si el servidor existe
       if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
-        return { 
-          success: false, 
-          output: 'Servidor no encontrado' 
+        return {
+          success: false,
+          output: 'Servidor no encontrado',
         };
       }
 
       // Obtener el ID del contenedor
       const containerNamePattern = `${serverId}_mc_1`;
-      const { stdout: containerId } = await execAsync(
-        `docker ps --filter "name=${containerNamePattern}" --format "{{.ID}}"`
-      );
+      const { stdout: containerId } = await execAsync(`docker ps --filter "name=${containerNamePattern}" --format "{{.ID}}"`);
 
       if (!containerId.trim()) {
-        return { 
-          success: false, 
-          output: 'Contenedor no encontrado o no está en ejecución' 
+        return {
+          success: false,
+          output: 'Contenedor no encontrado o no está en ejecución',
         };
       }
 
       // Ejecutar el comando en la consola RCON del servidor Minecraft
       // Se usa docker exec para ejecutar el comando rcon-cli dentro del contenedor
-      const { stdout, stderr } = await execAsync(
-        `docker exec ${containerId.trim()} rcon-cli ${command}`
-      );
+      const { stdout, stderr } = await execAsync(`docker exec ${containerId.trim()} rcon-cli ${command}`);
 
       if (stderr) {
         return {
           success: false,
-          output: `Error al ejecutar comando: ${stderr}`
+          output: `Error al ejecutar comando: ${stderr}`,
         };
       }
 
       return {
         success: true,
-        output: stdout || 'Comando ejecutado correctamente'
+        output: stdout || 'Comando ejecutado correctamente',
       };
     } catch (error) {
       console.error(`Error al ejecutar comando en servidor ${serverId}:`, error);
       return {
         success: false,
-        output: `Error: ${error.message}`
+        output: `Error: ${error.message}`,
       };
     }
   }
@@ -276,14 +291,14 @@ export class ServerManagementService {
     try {
       const dockerComposePath = this.getDockerComposePath(serverId);
       if (!(await fs.pathExists(dockerComposePath))) {
-        console.error(
-          `Docker compose file does not exist for server ${serverId}`,
-        );
+        console.error(`Docker compose file does not exist for server ${serverId}`);
         return false;
       }
 
       // Execute docker-compose commands from the directory containing the docker-compose.yml
       const composeDir = path.dirname(dockerComposePath);
+
+      await execAsync('docker-compose down', { cwd: composeDir });
 
       // Start the server
       await execAsync('docker-compose up -d', { cwd: composeDir });
@@ -299,9 +314,7 @@ export class ServerManagementService {
     try {
       const dockerComposePath = this.getDockerComposePath(serverId);
       if (!(await fs.pathExists(dockerComposePath))) {
-        console.error(
-          `Docker compose file does not exist for server ${serverId}`,
-        );
+        console.error(`Docker compose file does not exist for server ${serverId}`);
         return false;
       }
 

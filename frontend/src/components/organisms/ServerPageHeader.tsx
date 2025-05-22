@@ -16,8 +16,8 @@ interface ServerPageHeaderProps {
 }
 
 export function ServerPageHeader({ serverId, serverName, serverStatus, isProcessing, onStartServer, onStopServer, onRestartServer }: ServerPageHeaderProps) {
-  const containerName = serverId === "daily" ? "daily_mc_1" : "weekend_mc_1";
-  const serverDisplayName = serverId === "daily" ? "Servidor Diario" : "Servidor Fin de Semana";
+  const containerName = serverId;
+  const serverDisplayName = serverName || "Minecraft Server";
 
   // Función para obtener el ícono basado en el estado
   const getStatusIcon = (status: string) => {

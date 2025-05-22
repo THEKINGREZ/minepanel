@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as path from 'path';
-import { ServerConfig } from '../models/server-config.model';
 import { ConfigService } from '@nestjs/config';
+import { ServerConfig, UpdateServerConfig } from 'src/server-management/dto/server-config.model';
 
 @Injectable()
 export class DockerComposeService {
-  private readonly BASE_DIR = path.join(process.cwd(), '..');
+  private readonly BASE_DIR = path.join(process.cwd(), '..', 'servers');
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+    fs.ensureDirSync(this.BASE_DIR);
+  }
 
   private getDockerComposePath(serverId: string): string {
     return path.join(this.BASE_DIR, serverId, 'docker-compose.yml');
@@ -49,11 +51,11 @@ export class DockerComposeService {
         // General configuration
         serverName: env.SERVER_NAME ?? 'Minecraft Server',
         motd: env.MOTD ?? 'Un servidor de Minecraft increíble',
-        port: serverId === 'daily' ? '25565' : '25566',
+        port: env.PORT ?? '25565',
         difficulty: env.DIFFICULTY ?? 'hard',
         maxPlayers: env.MAX_PLAYERS ?? '10',
         ops: env.OPS ?? '',
-        idleTimeout: env.PLAYER_IDLE_TIMEOUT ?? '60',
+        playerIdleTimeout: env.PLAYER_IDLE_TIMEOUT ?? '60',
         onlineMode: env.ONLINE_MODE === 'true',
         pvp: env.PVP === 'true',
         commandBlock: env.ENABLE_COMMAND_BLOCK === 'true',
@@ -81,7 +83,6 @@ export class DockerComposeService {
         autoPauseKnockInterface: env.AUTOPAUSE_KNOCK_INTERFACE ?? 'eth0',
 
         // Connectivity
-        playerIdleTimeout: env.PLAYER_IDLE_TIMEOUT ?? '0',
         preventProxyConnections: env.PREVENT_PROXY_CONNECTIONS === 'true',
         opPermissionLevel: env.OP_PERMISSION_LEVEL ?? '4',
 
@@ -94,7 +95,6 @@ export class DockerComposeService {
         // Resources
         initMemory: env.INIT_MEMORY ?? '6G',
         maxMemory: env.MAX_MEMORY ?? '10G',
-        memory: env.MEMORY ?? '',
         cpuLimit: resources.limits?.cpus ?? '2',
         cpuReservation: resources.reservations?.cpus ?? '0.3',
         memoryReservation: resources.reservations?.memory ?? '4G',
@@ -121,7 +121,6 @@ export class DockerComposeService {
         dockerVolumes: Array.isArray(mcService.volumes) ? mcService.volumes.join('\n') : './mc-data:/data\n./modpacks:/modpacks:ro',
         restartPolicy: mcService.restart ?? 'unless-stopped',
         stopDelay: env.STOP_SERVER_ANNOUNCE_DELAY ?? '60',
-        rollingLogs: env.ENABLE_ROLLING_LOGS === 'true',
         execDirectly: env.EXEC_DIRECTLY === 'true',
         envVars: '',
       };
@@ -156,13 +155,12 @@ export class DockerComposeService {
       serverType: 'VANILLA',
 
       // General configuration
-      serverName: 'TulaCraft',
+      serverName: id,
       motd: 'Un servidor de Minecraft increíble',
-      port: id === 'daily' ? '25565' : '25566',
+      port: '25565',
       difficulty: 'hard',
       maxPlayers: '10',
       ops: '',
-      idleTimeout: '60',
       onlineMode: false,
       pvp: true,
       commandBlock: true,
@@ -203,7 +201,6 @@ export class DockerComposeService {
       // Resources
       initMemory: '6G',
       maxMemory: '10G',
-      memory: '',
       cpuLimit: '2',
       cpuReservation: '0.3',
       memoryReservation: '4G',
@@ -211,6 +208,14 @@ export class DockerComposeService {
       simulationDistance: '4',
       uid: '1000',
       gid: '1000',
+
+      enableBackup: false,
+      backupInterval: '24h',
+      backupMethod: 'tar',
+      backupInitialDelay: '2m',
+      backupPruneDays: '7',
+      backupDestDir: '/backups',
+      backupName: 'world',
 
       // JVM Options
       useAikarFlags: false,
@@ -230,7 +235,6 @@ export class DockerComposeService {
       dockerVolumes: './mc-data:/data\n./modpacks:/modpacks:ro',
       restartPolicy: 'unless-stopped',
       stopDelay: '60',
-      rollingLogs: true,
       execDirectly: true,
       envVars: '',
 
@@ -250,8 +254,25 @@ export class DockerComposeService {
     };
   }
 
+  async getAllServerIds(): Promise<string[]> {
+    try {
+      if (!fs.existsSync(this.BASE_DIR)) {
+        await fs.ensureDir(this.BASE_DIR);
+        return [];
+      }
+
+      const entries = await fs.readdir(this.BASE_DIR, { withFileTypes: true });
+      const serverIds = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+
+      return serverIds;
+    } catch (error) {
+      console.error('Error getting server IDs:', error);
+      return [];
+    }
+  }
+
   async getAllServerConfigs(): Promise<ServerConfig[]> {
-    const serverIds = ['daily', 'weekend'];
+    const serverIds = await this.getAllServerIds();
     const configs: ServerConfig[] = [];
 
     for (const id of serverIds) {
@@ -263,7 +284,8 @@ export class DockerComposeService {
   }
 
   async getServerConfig(id: string): Promise<ServerConfig | null> {
-    if (!['daily', 'weekend'].includes(id)) {
+    const serverPath = path.join(this.BASE_DIR, id);
+    if (!fs.existsSync(serverPath)) {
       return null;
     }
 
@@ -275,6 +297,34 @@ export class DockerComposeService {
     for (const config of configs) {
       await this.generateDockerComposeFile(config);
     }
+  }
+
+  async createServer(id: string, config: UpdateServerConfig = {}): Promise<ServerConfig> {
+    // Validar el ID del servidor (solo permitir caracteres alfanuméricos, guiones y guiones bajos)
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+      throw new Error('El ID del servidor solo puede contener letras, números, guiones y guiones bajos');
+    }
+
+    // Verificar si el servidor ya existe
+    const serverPath = path.join(this.BASE_DIR, id);
+    if (fs.existsSync(serverPath)) {
+      throw new Error(`El servidor "${id}" ya existe`);
+    }
+
+    // Crear el directorio del servidor
+    await fs.ensureDir(serverPath);
+
+    // Crear el directorio de datos de Minecraft
+    await fs.ensureDir(path.join(serverPath, 'mc-data'));
+
+    // Crear configuración por defecto y aplicar sobrescrituras
+    const defaultConfig = this.createDefaultConfig(id);
+    const serverConfig = { ...defaultConfig, ...config };
+
+    // Generar el archivo docker-compose.yml
+    await this.generateDockerComposeFile(serverConfig);
+
+    return serverConfig;
   }
 
   async updateServerConfig(id: string, config: Partial<ServerConfig>): Promise<ServerConfig | null> {
@@ -311,9 +361,9 @@ export class DockerComposeService {
       VIEW_DISTANCE: config.viewDistance,
       SIMULATION_DISTANCE: config.simulationDistance,
       STOP_SERVER_ANNOUNCE_DELAY: config.stopDelay,
-      ENABLE_ROLLING_LOGS: String(config.rollingLogs),
+      ENABLE_ROLLING_LOGS: String(config.enableRollingLogs),
       EXEC_DIRECTLY: String(config.execDirectly),
-      PLAYER_IDLE_TIMEOUT: config.playerIdleTimeout || config.idleTimeout,
+      PLAYER_IDLE_TIMEOUT: config.playerIdleTimeout,
       ENTITY_BROADCAST_RANGE_PERCENTAGE: config.entityBroadcastRange,
       LEVEL_TYPE: config.levelType,
       MODE: config.gameMode,
@@ -333,12 +383,8 @@ export class DockerComposeService {
     }
 
     // Add memory configuration
-    if (config.memory) {
-      environment['MEMORY'] = config.memory;
-    } else {
-      environment['INIT_MEMORY'] = config.initMemory;
-      environment['MAX_MEMORY'] = config.maxMemory;
-    }
+    environment['INIT_MEMORY'] = config.initMemory;
+    environment['MAX_MEMORY'] = config.maxMemory;
 
     // Add JVM options
     if (config.useAikarFlags) {

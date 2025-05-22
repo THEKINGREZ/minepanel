@@ -53,16 +53,14 @@ cd minemanager
 # Start the backend
 cd backend
 npm install
-npm run start:dev
+npm run build
+pm2 start npm --name "backend" -- run start:prod
 
 # Start the frontend
 cd ../frontend
 npm install
-npm run dev
-
-# Start a Minecraft server
-cd ../daily
-docker compose up -d
+npm run build
+pm2 start npm --name "frontend" -- run start
 ```
 
 📋 ToDo

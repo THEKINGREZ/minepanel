@@ -1,16 +1,7 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  NotFoundException,
-  Put,
-  Query,
-} from '@nestjs/common';
-import { ServerConfig } from '../models/server-config.model';
+import { Controller, Get, Post, Body, Param, NotFoundException, Put, Query, BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DockerComposeService } from 'src/docker-compose/docker-compose.service';
 import { ServerManagementService } from './server-management.service';
+import { UpdateServerConfigDto } from './dto/server-config.model';
 
 @Controller('servers')
 export class ServerManagementController {
@@ -24,6 +15,12 @@ export class ServerManagementController {
     return this.dockerComposeService.getAllServerConfigs();
   }
 
+  @Get('all-status')
+  async getAllServersStatus() {
+    const allStatus = await this.managementService.getAllServersStatus();
+    return allStatus;
+  }
+
   @Get(':id')
   async getServer(@Param('id') id: string) {
     const config = await this.dockerComposeService.getServerConfig(id);
@@ -33,15 +30,37 @@ export class ServerManagementController {
     return config;
   }
 
+  @Post()
+  async createServer(@Body(new ValidationPipe()) data: UpdateServerConfigDto) {
+    try {
+      const id = data.id;
+
+      if (!id) {
+        throw new BadRequestException('Server ID is required');
+      }
+
+      // Validar el ID del servidor (solo caracteres alfanuméricos, guiones y guiones bajos)
+      if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+        throw new BadRequestException('Server ID can only contain letters, numbers, hyphens, and underscores');
+      }
+
+      const serverConfig = await this.dockerComposeService.createServer(id, data);
+      return {
+        success: true,
+        message: `Server "${id}" created successfully`,
+        server: serverConfig,
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(error.message || 'Failed to create server');
+    }
+  }
+
   @Put(':id')
-  async updateServer(
-    @Param('id') id: string,
-    @Body() config: Partial<ServerConfig>,
-  ) {
-    const updatedConfig = await this.dockerComposeService.updateServerConfig(
-      id,
-      config,
-    );
+  async updateServer(@Param('id') id: string, @Body(new ValidationPipe()) config: UpdateServerConfigDto) {
+    const updatedConfig = await this.dockerComposeService.updateServerConfig(id, config);
     if (!updatedConfig) {
       throw new NotFoundException(`Server with ID "${id}" not found`);
     }
@@ -53,9 +72,7 @@ export class ServerManagementController {
     const result = await this.managementService.restartServer(id);
     return {
       success: result,
-      message: result
-        ? 'Server restarted successfully'
-        : 'Failed to restart server',
+      message: result ? 'Server restarted successfully' : 'Failed to restart server',
     };
   }
 
@@ -69,9 +86,7 @@ export class ServerManagementController {
     const result = await this.managementService.clearServerData(id);
     return {
       success: result,
-      message: result
-        ? 'Server data cleared successfully'
-        : 'Failed to clear server data',
+      message: result ? 'Server data cleared successfully' : 'Failed to clear server data',
     };
   }
 
@@ -98,18 +113,12 @@ export class ServerManagementController {
   }
 
   @Get(':id/logs')
-  async getServerLogs(
-    @Param('id') id: string,
-    @Query('lines') lines?: number,
-  ) {
+  async getServerLogs(@Param('id') id: string, @Query('lines') lines?: number) {
     return this.managementService.getServerLogs(id, lines || 100);
   }
 
   @Post(':id/command')
-  async executeCommand(
-    @Param('id') id: string,
-    @Body() body: { command: string }
-  ) {
+  async executeCommand(@Param('id') id: string, @Body() body: { command: string }) {
     return this.managementService.executeCommand(id, body.command);
   }
 
@@ -118,9 +127,7 @@ export class ServerManagementController {
     const result = await this.managementService.startServer(id);
     return {
       success: result,
-      message: result
-        ? 'Server started successfully'
-        : 'Failed to start server',
+      message: result ? 'Server started successfully' : 'Failed to start server',
     };
   }
 
@@ -129,9 +136,7 @@ export class ServerManagementController {
     const result = await this.managementService.stopServer(id);
     return {
       success: result,
-      message: result
-        ? 'Server stopped successfully'
-        : 'Failed to stop server',
+      message: result ? 'Server stopped successfully' : 'Failed to stop server',
     };
   }
 }

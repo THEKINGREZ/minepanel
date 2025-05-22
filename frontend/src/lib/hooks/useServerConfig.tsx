@@ -5,18 +5,17 @@ import { apiClearServerData, apiRestartServer, fetchServerConfig, updateServerCo
 import { toast } from "sonner";
 
 const defaultConfig: ServerConfig = {
-  id: "daily",
+  id: "Server",
   active: false,
   serverType: "VANILLA",
 
   // General configuration
-  serverName: "TulaCraft",
+  serverName: "Minecraft Server",
   motd: "Un servidor de Minecraft increíble",
   port: "25565",
   difficulty: "hard",
   maxPlayers: "10",
   ops: "ketbome",
-  idleTimeout: "60",
   onlineMode: false,
   pvp: true,
   commandBlock: true,
@@ -57,7 +56,6 @@ const defaultConfig: ServerConfig = {
   // Resources
   initMemory: "6G",
   maxMemory: "10G",
-  memory: "",
   cpuLimit: "2",
   cpuReservation: "0.3",
   memoryReservation: "4G",
@@ -78,13 +76,20 @@ const defaultConfig: ServerConfig = {
   enableRollingLogs: false,
   logTimestamp: false,
 
+  enableBackup: false,
+  backupInterval: "24h",
+  backupMethod: "tar",
+  backupInitialDelay: "2m",
+  backupPruneDays: "7",
+  backupDestDir: "/backups",
+  backupName: "world",
+
   // Docker
   dockerImage: "latest",
   minecraftVersion: "1.19.2",
   dockerVolumes: "./mc-data:/data\n./modpacks:/modpacks:ro",
   restartPolicy: "unless-stopped",
   stopDelay: "60",
-  rollingLogs: true,
   execDirectly: true,
   envVars: "",
 
