@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs-extra';
 import * as yaml from 'js-yaml';
 import * as path from 'path';
-import { ServerConfig } from '../models/server-config.model';
 import { ConfigService } from '@nestjs/config';
+import { ServerConfig, UpdateServerConfig } from 'src/server-management/dto/server-config.model';
 
 @Injectable()
 export class DockerComposeService {
   private readonly BASE_DIR = path.join(process.cwd(), '..', 'servers');
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+    fs.ensureDirSync(this.BASE_DIR);
+  }
 
   private getDockerComposePath(serverId: string): string {
     return path.join(this.BASE_DIR, serverId, 'docker-compose.yml');
@@ -49,7 +51,7 @@ export class DockerComposeService {
         // General configuration
         serverName: env.SERVER_NAME ?? 'Minecraft Server',
         motd: env.MOTD ?? 'Un servidor de Minecraft increíble',
-        port: serverId === 'daily' ? '25565' : '25566',
+        port: env.PORT ?? '25565',
         difficulty: env.DIFFICULTY ?? 'hard',
         maxPlayers: env.MAX_PLAYERS ?? '10',
         ops: env.OPS ?? '',
@@ -155,7 +157,7 @@ export class DockerComposeService {
       // General configuration
       serverName: 'TulaCraft',
       motd: 'Un servidor de Minecraft increíble',
-      port: id === 'daily' ? '25565' : '25566',
+      port: '25565',
       difficulty: 'hard',
       maxPlayers: '10',
       ops: '',
@@ -252,8 +254,25 @@ export class DockerComposeService {
     };
   }
 
+  async getAllServerIds(): Promise<string[]> {
+    try {
+      if (!fs.existsSync(this.BASE_DIR)) {
+        await fs.ensureDir(this.BASE_DIR);
+        return [];
+      }
+
+      const entries = await fs.readdir(this.BASE_DIR, { withFileTypes: true });
+      const serverIds = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+
+      return serverIds;
+    } catch (error) {
+      console.error('Error getting server IDs:', error);
+      return [];
+    }
+  }
+
   async getAllServerConfigs(): Promise<ServerConfig[]> {
-    const serverIds = ['daily', 'weekend'];
+    const serverIds = await this.getAllServerIds();
     const configs: ServerConfig[] = [];
 
     for (const id of serverIds) {
@@ -265,7 +284,8 @@ export class DockerComposeService {
   }
 
   async getServerConfig(id: string): Promise<ServerConfig | null> {
-    if (!['daily', 'weekend'].includes(id)) {
+    const serverPath = path.join(this.BASE_DIR, id);
+    if (!fs.existsSync(serverPath)) {
       return null;
     }
 
@@ -277,6 +297,34 @@ export class DockerComposeService {
     for (const config of configs) {
       await this.generateDockerComposeFile(config);
     }
+  }
+
+  async createServer(id: string, config: UpdateServerConfig = {}): Promise<ServerConfig> {
+    // Validar el ID del servidor (solo permitir caracteres alfanuméricos, guiones y guiones bajos)
+    if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+      throw new Error('El ID del servidor solo puede contener letras, números, guiones y guiones bajos');
+    }
+
+    // Verificar si el servidor ya existe
+    const serverPath = path.join(this.BASE_DIR, id);
+    if (fs.existsSync(serverPath)) {
+      throw new Error(`El servidor "${id}" ya existe`);
+    }
+
+    // Crear el directorio del servidor
+    await fs.ensureDir(serverPath);
+
+    // Crear el directorio de datos de Minecraft
+    await fs.ensureDir(path.join(serverPath, 'mc-data'));
+
+    // Crear configuración por defecto y aplicar sobrescrituras
+    const defaultConfig = this.createDefaultConfig(id);
+    const serverConfig = { ...defaultConfig, ...config };
+
+    // Generar el archivo docker-compose.yml
+    await this.generateDockerComposeFile(serverConfig);
+
+    return serverConfig;
   }
 
   async updateServerConfig(id: string, config: Partial<ServerConfig>): Promise<ServerConfig | null> {
