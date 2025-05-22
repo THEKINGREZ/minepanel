@@ -5,7 +5,7 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - '25562:25565'
+      - '25565:25565'
     environment:
       EULA: 'TRUE'
       MOTD: ATM 10 Tulalandia
@@ -14,7 +14,7 @@ services:
       MAX_PLAYERS: '20'
       OPS: ''
       TZ: America/Santiago
-      TYPE: FORGE
+      TYPE: AUTO_CURSEFORGE
       ONLINE_MODE: 'false'
       PVP: 'true'
       ENABLE_COMMAND_BLOCK: 'true'
@@ -46,7 +46,10 @@ services:
       RCON_PORT: 25575
       OP_PERMISSION_LEVEL: '4'
       CF_API_KEY: $$2a$$10$$T6sGluhpKpqowKQg6ZSFQ.ZabIa4UGcAxtaQSBd1TiF3ExzWqzcMa
-      VERSION: 1.19.2
+      CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-10
+      MODPACK_PLATFORM: AUTO_CURSEFORGE
+      CF_FORCE_SYNCHRONIZE: 'true'
+      CF_PARALLEL_DOWNLOADS: '4'
     volumes:
       - ./mc-data:/data
       - ./modpacks:/modpacks:ro

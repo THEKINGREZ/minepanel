@@ -21,7 +21,7 @@ services:
       ALLOW_FLIGHT: 'true'
       VIEW_DISTANCE: 16
       SIMULATION_DISTANCE: 12
-      STOP_SERVER_ANNOUNCE_DELAY: '120'
+      STOP_SERVER_ANNOUNCE_DELAY: '150'
       ENABLE_ROLLING_LOGS: 'true'
       EXEC_DIRECTLY: 'true'
       PLAYER_IDLE_TIMEOUT: '60'
@@ -36,8 +36,10 @@ services:
       ALLOW_NETHER: 'true'
       UID: '1000'
       GID: '1000'
-      INIT_MEMORY: 4G
-      MAX_MEMORY: 6G
+      MEMORY: '1'
+      ENABLE_AUTOSTOP: 'true'
+      AUTOSTOP_TIMEOUT_EST: '3600'
+      AUTOSTOP_TIMEOUT_INIT: '1800'
       ENABLE_RCON: 'true'
       RCON_PORT: '25575'
       OP_PERMISSION_LEVEL: '4'
@@ -54,7 +56,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 6G
+          memory: 12G
         reservations:
           cpus: '0.3'
           memory: 4G
