@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, NotFoundException, Put, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, NotFoundException, Put, Query, BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DockerComposeService } from 'src/docker-compose/docker-compose.service';
 import { ServerManagementService } from './server-management.service';
 import { UpdateServerConfigDto } from './dto/server-config.model';
@@ -31,7 +31,7 @@ export class ServerManagementController {
   }
 
   @Post()
-  async createServer(@Body() data: UpdateServerConfigDto) {
+  async createServer(@Body(new ValidationPipe()) data: UpdateServerConfigDto) {
     try {
       const id = data.id;
 
@@ -59,7 +59,7 @@ export class ServerManagementController {
   }
 
   @Put(':id')
-  async updateServer(@Param('id') id: string, @Body() config: UpdateServerConfigDto) {
+  async updateServer(@Param('id') id: string, @Body(new ValidationPipe()) config: UpdateServerConfigDto) {
     const updatedConfig = await this.dockerComposeService.updateServerConfig(id, config);
     if (!updatedConfig) {
       throw new NotFoundException(`Server with ID "${id}" not found`);
