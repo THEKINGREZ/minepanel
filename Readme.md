@@ -67,6 +67,24 @@ pm2 save
 pm2 startup
 ```
 
+## 🔐 Environment Variables
+
+### Backend (.env)
+
+```
+FRONTEND_URL= # URL of the frontend application
+CF_API_KEY= # CurseForge API key for authentication
+CLIENT_PASSWORD= # Password for the client
+CLIENT_USERNAME= # Username for the client
+```
+
+### Frontend (.env.local)
+
+```
+NEXT_PUBLIC_API_URL='localhost:8091' # URL of the backend API
+```
+
+
 📋 ToDo
 * [ ] Translate the interface to English (currently in Spanish)
 * [ ] Support more modpack platforms (currently supports CurseForge, Forge, Vanilla)
@@ -80,7 +98,7 @@ pm2 startup
 * [X] Server logs
 * [X] User authentication
 * [ ] Resource usage dashboard
-* [ ] Dynamic addition/removal of server instances
+* [X] Dynamic addition/removal of server instances
 * [ ] Support for other games/containers
 * [ ] Multi-language support (English/Spanish)
 * [ ] Mobile-responsive design improvements

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, NotFoundException, Put, Query, BadRequestException, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, NotFoundException, Put, Query, BadRequestException, ValidationPipe, Delete } from '@nestjs/common';
 import { DockerComposeService } from 'src/docker-compose/docker-compose.service';
 import { ServerManagementService } from './server-management.service';
 import { UpdateServerConfigDto } from './dto/server-config.model';
@@ -56,6 +56,49 @@ export class ServerManagementController {
       }
       throw new BadRequestException(error.message || 'Failed to create server');
     }
+  }
+
+  @Delete(':id')
+  async deleteServer(@Param('id') id: string) {
+    const config = await this.dockerComposeService.getServerConfig(id);
+    if (!config) {
+      throw new NotFoundException(`Server with ID "${id}" not found`);
+    }
+
+    const result = await this.managementService.deleteServer(id);
+    return {
+      success: result,
+      message: result ? `Server "${id}" deleted successfully` : `Failed to delete server "${id}"`,
+    };
+  }
+
+  @Get(':id/resources')
+  async getServerResources(@Param('id') id: string) {
+    const serverExists = await this.dockerComposeService.getServerConfig(id);
+    if (!serverExists) {
+      throw new NotFoundException(`Server with ID "${id}" not found`);
+    }
+
+    const status = await this.managementService.getServerStatus(id);
+    if (status === 'not_found') {
+      throw new NotFoundException(`Server with ID "${id}" not found`);
+    }
+
+    if (status !== 'running') {
+      return {
+        cpuUsage: 'N/A',
+        memoryUsage: 'N/A',
+        memoryLimit: 'N/A',
+        diskUsage: 'N/A',
+        status: status,
+      };
+    }
+
+    const resources = await this.managementService.getServerResources(id);
+    return {
+      ...resources,
+      status: status,
+    };
   }
 
   @Put(':id')

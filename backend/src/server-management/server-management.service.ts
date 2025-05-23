@@ -202,6 +202,109 @@ export class ServerManagementService {
     }
   }
 
+  async deleteServer(serverId: string): Promise<boolean> {
+    try {
+      const serverDir = path.join(this.BASE_DIR, serverId);
+      const dockerComposePath = this.getDockerComposePath(serverId);
+
+      // Check if server exists
+      if (!(await fs.pathExists(serverDir))) {
+        console.error(`Server directory does not exist for server ${serverId}`);
+        return false;
+      }
+
+      // If docker-compose exists, stop the server first
+      if (await fs.pathExists(dockerComposePath)) {
+        const composeDir = path.dirname(dockerComposePath);
+        try {
+          // Stop any running containers
+          await execAsync('docker-compose down', { cwd: composeDir });
+        } catch (error) {
+          console.warn(`Warning: Could not stop server ${serverId} before deletion:`, error);
+          // Continue with deletion even if stopping fails
+        }
+      }
+
+      // Delete the server directory
+      await fs.remove(serverDir);
+
+      // Remove any docker volumes associated with this server
+      try {
+        // Look for volumes with this server name pattern
+        const { stdout: volumeList } = await execAsync(`docker volume ls --filter "name=${serverId}" --format "{{.Name}}"`);
+
+        if (volumeList.trim()) {
+          const volumes = volumeList.trim().split('\n');
+          for (const volume of volumes) {
+            await execAsync(`docker volume rm ${volume}`);
+          }
+        }
+      } catch (error) {
+        console.warn(`Warning: Could not clean up docker volumes for ${serverId}:`, error);
+        // Continue with deletion even if volume cleanup fails
+      }
+
+      return true;
+    } catch (error) {
+      console.error(`Failed to delete server ${serverId}:`, error);
+      return false;
+    }
+  }
+
+  async getServerResources(serverId: string): Promise<{
+    cpuUsage: string;
+    memoryUsage: string;
+    memoryLimit: string;
+    diskUsage: string;
+  }> {
+    try {
+      // Container name pattern
+      const containerNamePattern = `${serverId}_mc_1`;
+
+      // Get container ID
+      const { stdout: containerId } = await execAsync(`docker ps --filter "name=${containerNamePattern}" --format "{{.ID}}"`);
+
+      if (!containerId.trim()) {
+        throw new Error('Container not found or not running');
+      }
+
+      // Get CPU usage
+      const { stdout: cpuStats } = await execAsync(`docker stats ${containerId.trim()} --no-stream --format "{{.CPUPerc}}"`);
+
+      // Get memory usage
+      const { stdout: memStats } = await execAsync(`docker stats ${containerId.trim()} --no-stream --format "{{.MemUsage}}"`);
+
+      // Split memory usage into used and limit
+      const memoryParts = memStats.trim().split(' / ');
+      const memoryUsage = memoryParts[0];
+      const memoryLimit = memoryParts[1] || 'N/A';
+
+      // Get disk usage for the server directory
+      const mcDataPath = this.getMcDataPath(serverId);
+      let diskUsage = 'N/A';
+
+      if (await fs.pathExists(mcDataPath)) {
+        const { stdout: diskStats } = await execAsync(`du -sh "${mcDataPath}" | cut -f1`);
+        diskUsage = diskStats.trim();
+      }
+
+      return {
+        cpuUsage: cpuStats.trim(),
+        memoryUsage,
+        memoryLimit,
+        diskUsage,
+      };
+    } catch (error) {
+      console.error(`Failed to get resource usage for server ${serverId}:`, error);
+      return {
+        cpuUsage: 'N/A',
+        memoryUsage: 'N/A',
+        memoryLimit: 'N/A',
+        diskUsage: 'N/A',
+      };
+    }
+  }
+
   // Helper to format bytes to a human-readable format
   private formatBytes(bytes: number, decimals = 2): string {
     if (bytes === 0) return '0 Bytes';
