@@ -18,6 +18,19 @@ export class ServerManagementService {
     return path.join(this.BASE_DIR, serverId, 'mc-data');
   }
 
+  private async findContainerId(serverId: string): Promise<string> {
+    // First try direct match (container named exactly as serverId)
+    const { stdout } = await execAsync(`docker ps -a --filter "name=^/${serverId}$" --format "{{.ID}}"`);
+
+    if (stdout.trim()) {
+      return stdout.trim();
+    }
+
+    // Fallback: if exact match fails, try partial match
+    const { stdout: partialMatch } = await execAsync(`docker ps -a --filter "name=${serverId}" --format "{{.ID}}"`);
+    return partialMatch.trim();
+  }
+
   async restartServer(serverId: string): Promise<boolean> {
     try {
       const dockerComposePath = this.getDockerComposePath(serverId);
@@ -76,30 +89,22 @@ export class ServerManagementService {
         return 'not_found';
       }
 
-      // Container name would be something like `serverId_mc_1`
-      const containerNamePattern = `${serverId}_mc_1`;
+      // Get container ID using our flexible pattern helper
+      const containerId = await this.findContainerId(serverId);
 
-      // Get container status with more details
-      const { stdout } = await execAsync(`docker ps --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`);
+      if (containerId) {
+        // Get container status details
+        const { stdout } = await execAsync(`docker inspect --format="{{.State.Status}}:{{.State.Health.Status}}" ${containerId}`);
 
-      if (stdout.trim()) {
         // Check if the status indicates it's still starting
-        // Docker status can include "Up X seconds" or
-        // "health: starting" for containers with health checks
-        if (stdout.includes('starting') || (stdout.includes('Up') && stdout.includes('seconds'))) {
+        if (stdout.includes('starting') || stdout.includes('health: starting')) {
           return 'starting';
         }
-        return 'running';
-      }
 
-      // Check if container exists but not running
-      const { stdout: allContainers } = await execAsync(`docker ps -a --filter "name=${containerNamePattern}" --format "{{.Names}}:{{.Status}}"`);
-
-      if (allContainers.trim()) {
-        // Check if container is in a transitional state like restarting
-        if (allContainers.includes('Restarting') || allContainers.includes('Created')) {
-          return 'starting';
+        if (stdout.includes('running')) {
+          return 'running';
         }
+
         return 'stopped';
       }
 
@@ -255,44 +260,30 @@ export class ServerManagementService {
     cpuUsage: string;
     memoryUsage: string;
     memoryLimit: string;
-    diskUsage: string;
   }> {
     try {
-      // Container name pattern
-      const containerNamePattern = `${serverId}_mc_1`;
+      // Get container ID using our flexible pattern helper
+      const containerId = await this.findContainerId(serverId);
 
-      // Get container ID
-      const { stdout: containerId } = await execAsync(`docker ps --filter "name=${containerNamePattern}" --format "{{.ID}}"`);
-
-      if (!containerId.trim()) {
+      if (!containerId) {
         throw new Error('Container not found or not running');
       }
 
       // Get CPU usage
-      const { stdout: cpuStats } = await execAsync(`docker stats ${containerId.trim()} --no-stream --format "{{.CPUPerc}}"`);
+      const { stdout: cpuStats } = await execAsync(`docker stats ${containerId} --no-stream --format "{{.CPUPerc}}"`);
 
       // Get memory usage
-      const { stdout: memStats } = await execAsync(`docker stats ${containerId.trim()} --no-stream --format "{{.MemUsage}}"`);
+      const { stdout: memStats } = await execAsync(`docker stats ${containerId} --no-stream --format "{{.MemUsage}}"`);
 
       // Split memory usage into used and limit
       const memoryParts = memStats.trim().split(' / ');
       const memoryUsage = memoryParts[0];
       const memoryLimit = memoryParts[1] || 'N/A';
 
-      // Get disk usage for the server directory
-      const mcDataPath = this.getMcDataPath(serverId);
-      let diskUsage = 'N/A';
-
-      if (await fs.pathExists(mcDataPath)) {
-        const { stdout: diskStats } = await execAsync(`du -sh "${mcDataPath}" | cut -f1`);
-        diskUsage = diskStats.trim();
-      }
-
       return {
         cpuUsage: cpuStats.trim(),
         memoryUsage,
         memoryLimit,
-        diskUsage,
       };
     } catch (error) {
       console.error(`Failed to get resource usage for server ${serverId}:`, error);
@@ -300,7 +291,6 @@ export class ServerManagementService {
         cpuUsage: 'N/A',
         memoryUsage: 'N/A',
         memoryLimit: 'N/A',
-        diskUsage: 'N/A',
       };
     }
   }
@@ -325,18 +315,15 @@ export class ServerManagementService {
         return { logs: 'Server not found' };
       }
 
-      // Container name would be something like `serverId_mc_1` or `serverId-mc-1`
-      const containerNamePattern = `${serverId}_mc_1`;
+      // Get container ID using our flexible pattern helper
+      const containerId = await this.findContainerId(serverId);
 
-      // Get container ID
-      const { stdout: containerId } = await execAsync(`docker ps -a --filter "name=${containerNamePattern}" --format "{{.ID}}"`);
-
-      if (!containerId.trim()) {
+      if (!containerId) {
         return { logs: 'Container not found' };
       }
 
       // Get logs from the container
-      const { stdout: logs } = await execAsync(`docker logs --tail ${lines} ${containerId.trim()}`);
+      const { stdout: logs } = await execAsync(`docker logs --tail ${lines} ${containerId}`);
 
       return { logs };
     } catch (error) {
@@ -355,11 +342,10 @@ export class ServerManagementService {
         };
       }
 
-      // Obtener el ID del contenedor
-      const containerNamePattern = `${serverId}_mc_1`;
-      const { stdout: containerId } = await execAsync(`docker ps --filter "name=${containerNamePattern}" --format "{{.ID}}"`);
+      // Get container ID using our flexible pattern helper
+      const containerId = await this.findContainerId(serverId);
 
-      if (!containerId.trim()) {
+      if (!containerId) {
         return {
           success: false,
           output: 'Contenedor no encontrado o no está en ejecución',
@@ -367,8 +353,7 @@ export class ServerManagementService {
       }
 
       // Ejecutar el comando en la consola RCON del servidor Minecraft
-      // Se usa docker exec para ejecutar el comando rcon-cli dentro del contenedor
-      const { stdout, stderr } = await execAsync(`docker exec ${containerId.trim()} rcon-cli ${command}`);
+      const { stdout, stderr } = await execAsync(`docker exec ${containerId} rcon-cli ${command}`);
 
       if (stderr) {
         return {

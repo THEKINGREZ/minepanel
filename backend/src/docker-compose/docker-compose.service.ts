@@ -44,7 +44,7 @@ export class DockerComposeService {
 
       // Extract server config from docker-compose
       const serverConfig: ServerConfig = {
-        id: serverId,
+        id: env.ID_MANAGER ?? serverId,
         active: fs.existsSync(this.getMcDataPath(serverId)),
         serverType: env.TYPE ?? 'VANILLA',
 
@@ -328,10 +328,6 @@ export class DockerComposeService {
   }
 
   async updateServerConfig(id: string, config: Partial<ServerConfig>): Promise<ServerConfig | null> {
-    if (!['daily', 'weekend'].includes(id)) {
-      return null;
-    }
-
     const currentConfig = await this.loadServerConfigFromDockerCompose(id);
     const updatedConfig = { ...currentConfig, ...config };
 
@@ -346,6 +342,7 @@ export class DockerComposeService {
 
     // Create environment variables dictionary
     const environment: Record<string, string> = {
+      ID_MANAGER: config.id,
       EULA: 'TRUE',
       MOTD: config.motd || config.serverName,
       SERVER_NAME: config.serverName,
@@ -547,6 +544,7 @@ export class DockerComposeService {
           image: `itzg/minecraft-server:${config.dockerImage}`,
           tty: true,
           stdin_open: true,
+          container_name: config.id,
           ports: [`${config.port}:25565`],
           environment,
           volumes,

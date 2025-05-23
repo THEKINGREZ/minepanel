@@ -1,9 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Terminal, RefreshCcw, ChevronDown } from "lucide-react";
+import { Terminal, RefreshCcw, ChevronDown, Cpu, Server } from "lucide-react";
 import { useServerLogs } from "@/lib/hooks/useServerLogs";
+import { getResources } from "@/services/docker/fetchs";
 import Image from "next/image";
+
+interface ResourcesData {
+  cpuUsage: string;
+  memoryUsage: string;
+  memoryLimit: string;
+  status?: string;
+}
 
 interface LogsTabProps {
   serverId: string;
@@ -12,9 +20,21 @@ interface LogsTabProps {
 export function LogsTab({ serverId }: Readonly<LogsTabProps>) {
   const { logs, loading, lineCount, fetchLogs, setLogLines } = useServerLogs(serverId);
   const logsContainerRef = useRef<HTMLPreElement>(null);
+  const [resources, setResources] = useState<ResourcesData | null>(null);
+  const [loadingResources, setLoadingResources] = useState(false);
 
   useEffect(() => {
     fetchLogs();
+    fetchServerResources();
+
+    // Set up intervals for auto-refresh
+    const logsInterval = setInterval(fetchLogs, 30000); // Refresh logs every 30 seconds
+    const resourcesInterval = setInterval(fetchServerResources, 10000); // Refresh resources every 10 seconds
+
+    return () => {
+      clearInterval(logsInterval);
+      clearInterval(resourcesInterval);
+    };
   }, []);
 
   // Auto-scroll to bottom when logs update
@@ -23,6 +43,18 @@ export function LogsTab({ serverId }: Readonly<LogsTabProps>) {
       logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
     }
   }, [logs]);
+
+  const fetchServerResources = async () => {
+    setLoadingResources(true);
+    try {
+      const resourceData = await getResources(serverId);
+      setResources(resourceData);
+    } catch (error) {
+      console.error("Error fetching server resources:", error);
+    } finally {
+      setLoadingResources(false);
+    }
+  };
 
   return (
     <Card className="bg-gray-900/60 border-gray-700/50 shadow-lg">
@@ -50,6 +82,32 @@ export function LogsTab({ serverId }: Readonly<LogsTabProps>) {
           </Button>
         </div>
       </CardHeader>
+
+      {/* Server Resources Section */}
+      <CardContent className="pb-2">
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-gray-800/70 rounded-md p-3 border border-gray-700/50 flex items-center">
+            <div className="bg-blue-500/20 p-2 rounded-md mr-3">
+              <Cpu className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">CPU</p>
+              <p className="text-sm font-medium text-white">{loadingResources ? <RefreshCcw className="h-3 w-3 animate-spin inline mr-1" /> : resources?.status !== "running" && resources?.cpuUsage === "N/A" ? "Servidor inactivo" : resources?.cpuUsage || "N/A"}</p>
+            </div>
+          </div>
+
+          <div className="bg-gray-800/70 rounded-md p-3 border border-gray-700/50 flex items-center">
+            <div className="bg-purple-500/20 p-2 rounded-md mr-3">
+              <Server className="h-5 w-5 text-purple-400" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Memoria</p>
+              <p className="text-sm font-medium text-white">{loadingResources ? <RefreshCcw className="h-3 w-3 animate-spin inline mr-1" /> : resources?.status !== "running" && resources?.memoryUsage === "N/A" ? "Servidor inactivo" : `${resources?.memoryUsage || "N/A"} / ${resources?.memoryLimit || "N/A"}`}</p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+
       <CardContent className="pt-0">
         <div className="relative border border-gray-700/50 rounded-md shadow-inner">
           <div className="absolute top-0 right-0 bg-gray-800/80 px-3 py-1 text-xs font-minecraft rounded-bl-md flex items-center text-emerald-400 border-l border-b border-gray-700/50">
@@ -80,10 +138,16 @@ export function LogsTab({ serverId }: Readonly<LogsTabProps>) {
             <div className="w-4 h-4 rounded-full bg-emerald-500 animate-pulse mr-2"></div>
             <span className="text-xs text-gray-400 font-minecraft">Auto-scroll activado</span>
           </div>
-          <Button type="button" onClick={fetchLogs} disabled={loading} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-minecraft">
-            {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
-            Actualizar Logs
-          </Button>
+          <div className="flex gap-2">
+            <Button type="button" onClick={fetchServerResources} disabled={loadingResources} variant="outline" className="gap-2 bg-blue-600/20 border-blue-600/30 hover:bg-blue-600/30 text-blue-400 font-minecraft">
+              {loadingResources ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+              Actualizar Recursos
+            </Button>
+            <Button type="button" onClick={fetchLogs} disabled={loading} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-minecraft">
+              {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+              Actualizar Logs
+            </Button>
+          </div>
         </div>
       </CardContent>
 

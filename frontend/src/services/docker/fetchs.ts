@@ -40,7 +40,7 @@ export const getServerStatus = async (serverId: string): Promise<{ status: "runn
   return response.data;
 };
 
-export const getAllServersStatus = async (): Promise<{ [serverId: string]: 'running' | 'stopped' | 'starting' | 'not_found' }> => {
+export const getAllServersStatus = async (): Promise<{ [serverId: string]: "running" | "stopped" | "starting" | "not_found" }> => {
   const response = await api.get(`${API_URL}/servers/all-status`);
   return response.data;
 };
@@ -49,6 +49,16 @@ export const getServerLogs = async (serverId: string, limit: number = 100): Prom
   const response = await api.get(`${API_URL}/servers/${serverId}/logs`, {
     params: { lines: limit },
   });
+  return response.data;
+};
+
+export const deleteServer = async (serverId: string): Promise<{ success: boolean; message: string }> => {
+  const response = await api.delete(`${API_URL}/servers/${serverId}`);
+  return response.data;
+};
+
+export const getResources = async (serverId: string): Promise<{ cpuUsage: string; memoryUsage: string; memoryLimit: string }> => {
+  const response = await api.get(`${API_URL}/servers/${serverId}/resources`);
   return response.data;
 };
 

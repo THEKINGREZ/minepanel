@@ -8,9 +8,9 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Loader2, Plus, RefreshCw } from "lucide-react";
+import { ArrowRight, Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { isAuthenticated } from "@/services/auth/auth.service";
-import { fetchServerList, createServer, getAllServersStatus } from "@/services/docker/fetchs";
+import { fetchServerList, createServer, getAllServersStatus, deleteServer } from "@/services/docker/fetchs";
 import { toast } from "sonner";
 import { Header } from "@/components/molecules/Header";
 import { Footer } from "@/components/molecules/Footer";
@@ -21,6 +21,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 // Esquema de validación para el formulario de creación de servidor
 const createServerSchema = z.object({
@@ -50,6 +51,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingServer, setIsCreatingServer] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeletingServer, setIsDeletingServer] = useState<string | null>(null);
 
   // Configurar el formulario
   const form = useForm<z.infer<typeof createServerSchema>>({
@@ -88,7 +90,7 @@ export default function Dashboard() {
         displayName: server.serverName || `minecraft-${server.id}`,
         status: "loading",
         port: server.port || "25565",
-        containerName: `${server.id}_mc_1`,
+        containerName: `${server.id}`,
       }));
 
       // Actualizar el estado con los servidores formateados
@@ -127,6 +129,26 @@ export default function Dashboard() {
       console.error("Error processing server statuses:", error);
       toast.error("Error al procesar los estados de los servidores");
       return serversList.map((server) => ({ ...server, status: "not_found" }));
+    }
+  };
+
+  const handleDeleteServer = async (serverId: string) => {
+    setIsDeletingServer(serverId);
+    try {
+      const response = await deleteServer(serverId);
+
+      if (response.success) {
+        toast.success(`Servidor "${serverId}" eliminado correctamente`);
+        // Refresh the server list
+        await fetchServersFromBackend();
+      } else {
+        toast.error(`Error al eliminar el servidor: ${response.message}`);
+      }
+    } catch (error: any) {
+      console.error("Error deleting server:", error);
+      toast.error(error.response?.data?.message || "Error al eliminar el servidor");
+    } finally {
+      setIsDeletingServer(null);
     }
   };
 
@@ -322,7 +344,7 @@ export default function Dashboard() {
                     <div className={`h-1 ${server.status === "running" ? "bg-emerald-500" : server.status === "stopped" ? "bg-amber-500" : server.status === "starting" ? "bg-orange-500" : "bg-gray-500"}`}></div>
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-gray-100 font-minecraft">{server.name}</CardTitle>
+                        <CardTitle className="text-gray-100 font-minecraft">{server.id}</CardTitle>
                         <Badge variant="outline" className={`px-3 py-1 ${getStatusBadgeClass(server.status)}`}>
                           {server.status === "loading" || server.status === "starting" ? (
                             <span className="flex items-center gap-1">
@@ -351,13 +373,51 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter>
-                      <Link href={`/dashboard/${server.id}`} className="w-full">
+                    <CardFooter className="flex gap-2">
+                      <Link href={`/dashboard/${server.id}`} className="flex-1">
                         <Button className="w-full gap-1 bg-emerald-600 hover:bg-emerald-700 font-minecraft text-white">
                           Configurar
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="icon" className="bg-red-600/20 text-red-500 hover:bg-red-700/30 hover:text-red-400 border-red-600/30">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-gray-900 border-gray-700 text-white">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="font-minecraft">Eliminar Servidor</AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-400">
+                              ¿Estás seguro que deseas eliminar el servidor &quot;{server.name}&quot;?
+                              <br />
+                              Esta acción no se puede deshacer y eliminará todos los datos del servidor.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600">Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleDeleteServer(server.id);
+                              }}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                              disabled={isDeletingServer === server.id}
+                            >
+                              {isDeletingServer === server.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Eliminando...
+                                </>
+                              ) : (
+                                "Eliminar"
+                              )}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </CardFooter>
                   </Card>
                 </motion.div>

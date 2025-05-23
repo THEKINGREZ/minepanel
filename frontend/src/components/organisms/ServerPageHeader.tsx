@@ -17,7 +17,6 @@ interface ServerPageHeaderProps {
 
 export function ServerPageHeader({ serverId, serverName, serverStatus, isProcessing, onStartServer, onStopServer, onRestartServer }: ServerPageHeaderProps) {
   const containerName = serverId;
-  const serverDisplayName = serverName || "Minecraft Server";
 
   // Función para obtener el ícono basado en el estado
   const getStatusIcon = (status: string) => {
@@ -75,7 +74,7 @@ export function ServerPageHeader({ serverId, serverName, serverStatus, isProcess
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-minecraft">{serverDisplayName}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-minecraft">{serverId}</h1>
         <Badge variant="outline" className={`px-3 py-1 ${getStatusBadgeClass(serverStatus)}`}>
           {serverStatus === "starting" ? (
             <span className="flex items-center gap-1">
