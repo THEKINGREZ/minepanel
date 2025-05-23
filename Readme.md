@@ -20,6 +20,7 @@
 - Initial support for many instances
 - Scalable design to support more Docker containers in the future
 - Real-time server status, logs, and controls
+- 🔧 **Manual file access and editing via Filebrowser**
 
 ---
 
@@ -29,8 +30,8 @@
 minecraft-server-manager/
 ├── frontend/ # Next.js frontend app
 ├── backend/ # NestJS backend API
-├── daily/ # docker-compose for Minecraft server 1
-├── weekend/ # docker-compose for Minecraft server 2
+├── servers/ # docker-compose for Minecraft servers
+├── filebrowser/      # Filebrowser service (manual startup)
 ```
 
 ---
@@ -65,6 +66,34 @@ pm2 start npm --name "frontend" -- run start
 pm2 save
 pm2 startup
 ```
+
+📂 File Access with Filebrowser
+Filebrowser is included for manual inspection and editing of server files through a web interface.
+
+To start Filebrowser:
+
+```bash
+cd filebrowser
+docker-compose up -d
+Then, access it in your browser at:
+http://localhost:25580
+```
+Default credentials:
+
+User: `admin`
+
+Password: `admin`
+
+⚠️ Make sure to change the default credentials after first login.
+
+Filebrowser will allow you to:
+
+Browse individual Minecraft server files
+
+Edit configuration files (e.g., server.properties, ops.json, add mods, etc.)
+
+Upload/download mods, plugins, or world data
+
 
 ## 🔐 Environment Variables
 
