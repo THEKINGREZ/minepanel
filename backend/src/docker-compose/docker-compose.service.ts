@@ -39,8 +39,10 @@ export class DockerComposeService {
       }
 
       const mcService = composeConfig.services.mc;
+      const backupService = composeConfig.services.backup;
       const env = mcService.environment ?? {};
       const resources = mcService.deploy?.resources ?? {};
+      const backupEnv = backupService?.environment ?? {};
 
       // Extract server config from docker-compose
       const serverConfig: ServerConfig = {
@@ -91,6 +93,23 @@ export class DockerComposeService {
         rconPort: env.RCON_PORT ?? '25575',
         rconPassword: env.RCON_PASSWORD ?? '',
         broadcastRconToOps: env.BROADCAST_RCON_TO_OPS === 'true',
+
+        // Backup configuration.
+        enableBackup: !!backupService,
+        backupInterval: backupEnv.BACKUP_INTERVAL ?? '24h',
+        backupMethod: backupEnv.BACKUP_METHOD ?? 'tar',
+        backupInitialDelay: backupEnv.INITIAL_DELAY ?? '2m',
+        backupPruneDays: backupEnv.PRUNE_BACKUPS_DAYS ?? '7',
+        backupDestDir: backupEnv.DEST_DIR ?? '/backups',
+        backupName: backupEnv.BACKUP_NAME ?? 'world',
+        backupOnStartup: backupEnv.BACKUP_ON_STARTUP !== 'false',
+        pauseIfNoPlayers: backupEnv.PAUSE_IF_NO_PLAYERS === 'true',
+        playersOnlineCheckInterval: backupEnv.PLAYERS_ONLINE_CHECK_INTERVAL ?? '5m',
+        rconRetries: backupEnv.RCON_RETRIES ?? '5',
+        rconRetryInterval: backupEnv.RCON_RETRY_INTERVAL ?? '10s',
+        backupIncludes: backupEnv.INCLUDES ?? '.',
+        backupExcludes: backupEnv.EXCLUDES ?? '*.jar,cache,logs,*.tmp',
+        tarCompressMethod: backupEnv.TAR_COMPRESS_METHOD ?? 'gzip',
 
         // Resources
         initMemory: env.INIT_MEMORY ?? '6G',
@@ -198,6 +217,23 @@ export class DockerComposeService {
       rconPassword: '',
       broadcastRconToOps: false,
 
+      // Backup configuration
+      enableBackup: false,
+      backupInterval: '24h',
+      backupMethod: 'tar',
+      backupInitialDelay: '2m',
+      backupPruneDays: '7',
+      backupDestDir: '/backups',
+      backupName: 'world',
+      backupOnStartup: true,
+      pauseIfNoPlayers: false,
+      playersOnlineCheckInterval: '5m',
+      rconRetries: '5',
+      rconRetryInterval: '10s',
+      backupIncludes: '.',
+      backupExcludes: '*.jar,cache,logs,*.tmp',
+      tarCompressMethod: 'gzip',
+
       // Resources
       initMemory: '6G',
       maxMemory: '10G',
@@ -208,14 +244,6 @@ export class DockerComposeService {
       simulationDistance: '4',
       uid: '1000',
       gid: '1000',
-
-      enableBackup: false,
-      backupInterval: '24h',
-      backupMethod: 'tar',
-      backupInitialDelay: '2m',
-      backupPruneDays: '7',
-      backupDestDir: '/backups',
-      backupName: 'world',
 
       // JVM Options
       useAikarFlags: false,
@@ -537,7 +565,35 @@ export class DockerComposeService {
       .map((line) => line.trim().replace('./mc-data', './mc-data')); // Keep relative path
 
     // Create Docker Compose configuration
-    const dockerComposeConfig = {
+    const dockerComposeConfig: {
+      version: string;
+      services: {
+        mc: {
+          image: string;
+          tty: boolean;
+          stdin_open: boolean;
+          container_name: string;
+          ports: string[];
+          environment: Record<string, string>;
+          volumes: string[];
+          restart: string;
+          deploy: {
+            resources: {
+              limits: {
+                cpus: string;
+                memory: string;
+              };
+              reservations: {
+                cpus: string;
+                memory: string;
+              };
+            };
+          };
+        };
+        [key: string]: any;
+      };
+      volumes: Record<string, any>;
+    } = {
       version: '3',
       services: {
         mc: {
@@ -567,6 +623,83 @@ export class DockerComposeService {
         'mc-data': {},
       },
     };
+
+    if (config.enableBackup) {
+      // Create backup environment variables
+      const backupEnvironment: Record<string, string> = {
+        BACKUP_METHOD: config.backupMethod || 'tar',
+        BACKUP_NAME: config.backupName || 'world',
+        BACKUP_INTERVAL: config.backupInterval || '24h',
+        INITIAL_DELAY: config.backupInitialDelay || '2m',
+        RCON_HOST: 'mc',
+        RCON_PORT: config.rconPort || '25575',
+        PRUNE_BACKUPS_DAYS: config.backupPruneDays || '7',
+        DEST_DIR: config.backupDestDir || '/backups',
+      };
+
+      // Add RCON password if present
+      if (config.rconPassword) {
+        backupEnvironment['RCON_PASSWORD'] = config.rconPassword;
+      }
+
+      // Add backup options if present
+      if (config.pauseIfNoPlayers !== undefined) {
+        backupEnvironment['PAUSE_IF_NO_PLAYERS'] = String(config.pauseIfNoPlayers);
+      }
+
+      if (config.playersOnlineCheckInterval) {
+        backupEnvironment['PLAYERS_ONLINE_CHECK_INTERVAL'] = config.playersOnlineCheckInterval;
+      }
+
+      if (config.backupOnStartup !== undefined) {
+        backupEnvironment['BACKUP_ON_STARTUP'] = String(config.backupOnStartup);
+      }
+
+      if (config.rconRetries) {
+        backupEnvironment['RCON_RETRIES'] = config.rconRetries;
+      }
+
+      if (config.rconRetryInterval) {
+        backupEnvironment['RCON_RETRY_INTERVAL'] = config.rconRetryInterval;
+      }
+
+      if (config.backupIncludes) {
+        backupEnvironment['INCLUDES'] = config.backupIncludes;
+      }
+
+      if (config.backupExcludes) {
+        backupEnvironment['EXCLUDES'] = config.backupExcludes;
+      }
+
+      if (config.tarCompressMethod && config.backupMethod === 'tar') {
+        backupEnvironment['TAR_COMPRESS_METHOD'] = config.tarCompressMethod;
+      }
+
+      // Add backup service to docker compose
+      dockerComposeConfig.services.backup = {
+        image: 'itzg/mc-backup',
+        container_name: `${config.id}-backup`,
+        depends_on: {
+          mc: {
+            condition: 'service_healthy',
+          },
+        },
+        environment: backupEnvironment,
+        volumes: [
+          './mc-data:/data:ro', // Read-only access to minecraft data
+          './backups:/backups', // Directory for backups
+        ],
+        restart: 'unless-stopped',
+      };
+
+      dockerComposeConfig.volumes = {
+        'mc-data': {},
+        backups: {},
+      };
+
+      // Create backup volume if it doesn't exist
+      await fs.ensureDir(path.join(serverDir, 'backups'));
+    }
 
     // Save Docker Compose file
     const yamlContent = yaml.dump(dockerComposeConfig);

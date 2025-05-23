@@ -287,6 +287,39 @@ export class ServerConfigDto {
   @IsOptional()
   envVars?: string;
 
+  // Backup includes/excludes
+  @IsString()
+  @IsOptional()
+  backupIncludes?: string;
+
+  @IsString()
+  @IsOptional()
+  backupExcludes?: string;
+
+  @IsEnum(['gzip', 'bzip2', 'zstd'])
+  @IsOptional()
+  tarCompressMethod?: 'gzip' | 'bzip2' | 'zstd';
+
+  @IsBoolean()
+  @IsOptional()
+  backupOnStartup?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  pauseIfNoPlayers?: boolean;
+
+  @IsString()
+  @IsOptional()
+  playersOnlineCheckInterval?: string;
+
+  @IsString()
+  @IsOptional()
+  rconRetries?: string;
+
+  @IsString()
+  @IsOptional()
+  rconRetryInterval?: string;
+
   // Forge specific
   @IsString()
   @IsOptional()

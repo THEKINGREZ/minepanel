@@ -7,9 +7,10 @@ import { ServerConfig } from "@/lib/types/types";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from "next/image";
-import { HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AlertCircle, HelpCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ConnectivitySettingsTabProps {
   config: ServerConfig;
@@ -131,6 +132,13 @@ export const ConnectivitySettingsTab: FC<ConnectivitySettingsTabProps> = ({ conf
                 <Switch id="enableRcon" checked={config.enableRcon !== false} onCheckedChange={(checked) => updateConfig("enableRcon", checked)} />
               </div>
               <p className="text-xs text-gray-400">Permite el control remoto del servidor a través del protocolo RCON</p>
+
+              {config.enableBackup && !config.enableRcon && (
+                <Alert variant="destructive" className="bg-red-900/30 border-red-800 text-red-200 mt-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>Las copias de seguridad requieren RCON activado para funcionar correctamente.</AlertDescription>
+                </Alert>
+              )}
             </div>
 
             {config.enableRcon !== false && (
@@ -149,6 +157,13 @@ export const ConnectivitySettingsTab: FC<ConnectivitySettingsTabProps> = ({ conf
                   <Input id="rconPassword" type="password" value={config.rconPassword || ""} onChange={(e) => updateConfig("rconPassword", e.target.value)} placeholder="Contraseña segura requerida" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
                   <p className="text-xs text-red-400 font-medium">¡Importante! Debes cambiar la contraseña por defecto</p>
                 </div>
+
+                {config.enableBackup && (
+                  <Alert className="bg-amber-900/30 border-amber-800 text-amber-200 mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>El servicio de backup RCON para realizar copias de seguridad.</AlertDescription>
+                  </Alert>
+                )}
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">

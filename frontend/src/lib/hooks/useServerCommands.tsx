@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { executeServerCommand } from "@/services/docker/fetchs";
 
-export function useServerCommands(serverId: string) {
+export function useServerCommands(serverId: string, rconPort: string, rconPassword: string) {
   const [command, setCommand] = useState<string>("");
   const [response, setResponse] = useState<string>("");
   const [executing, setExecuting] = useState<boolean>(false);
@@ -12,10 +12,20 @@ export function useServerCommands(serverId: string) {
       toast.error("Ingresa un comando para ejecutar");
       return false;
     }
+    if (!rconPort) {
+      toast.error("El puerto RCON no está configurado");
+      return false;
+    }
+
+    const body = {
+      command: commandToExecute,
+      rconPort: rconPort,
+      rconPassword: rconPassword,
+    };
 
     setExecuting(true);
     try {
-      const result = await executeServerCommand(serverId, commandToExecute);
+      const result = await executeServerCommand(serverId, body);
       if (result.success) {
         setResponse(result.output);
         toast.success("Comando ejecutado correctamente");

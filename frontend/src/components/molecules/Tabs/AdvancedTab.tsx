@@ -10,6 +10,7 @@ import { Save, HelpCircle } from "lucide-react";
 import { ServerConfig } from "@/lib/types/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Image from "next/image";
+import { Switch } from "@/components/ui/switch";
 
 interface AdvancedTabProps {
   config: ServerConfig;
@@ -214,6 +215,270 @@ MAX_TICK_TIME=60000"
             className="min-h-20 bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30"
           />
           <p className="text-xs text-gray-400">Variables de entorno adicionales para el contenedor (una por línea, formato: CLAVE=VALOR)</p>
+        </div>
+
+        <div className="space-y-4 p-5 rounded-md bg-gray-800/70 border border-gray-700/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Image src="/images/ender_chest.webp" alt="Backup" width={20} height={20} />
+              <h3 className="text-emerald-400 font-minecraft text-md">Configuración de Copias de Seguridad</h3>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-gray-300 text-sm">Activar Backups</span>
+              <Switch checked={config.enableBackup || false} onCheckedChange={(checked: boolean) => updateConfig("enableBackup", checked)} className="data-[state=checked]:bg-emerald-500" />
+            </div>
+          </div>
+
+          {config.enableBackup && (
+            <div className="space-y-5 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="backupMethod" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/chest.webp" alt="Método" width={16} height={16} />
+                      Método de Backup
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Método utilizado para realizar las copias de seguridad</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Select value={config.backupMethod || "tar"} onValueChange={(value) => updateConfig("backupMethod", value)}>
+                    <SelectTrigger id="backupMethod" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:ring-emerald-500/30">
+                      <SelectValue placeholder="Selecciona el método" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
+                      <SelectItem value="tar">tar (compresión)</SelectItem>
+                      <SelectItem value="rsync">rsync (incremental)</SelectItem>
+                      <SelectItem value="restic">restic (incremental encriptado)</SelectItem>
+                      <SelectItem value="rclone">rclone (remoto)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="backupName" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/name_tag.webp" alt="Nombre" width={16} height={16} />
+                      Nombre de Backup
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Nombre usado para identificar los archivos de backup</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input id="backupName" value={config.backupName || "world"} onChange={(e) => updateConfig("backupName", e.target.value)} placeholder="world" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="backupInterval" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/clock.webp" alt="Intervalo" width={16} height={16} />
+                      Intervalo de Backup
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Tiempo entre cada backup (ej: 24h, 2h 30m)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input id="backupInterval" value={config.backupInterval || "24h"} onChange={(e) => updateConfig("backupInterval", e.target.value)} placeholder="24h" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="backupInitialDelay" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/compass.webp" alt="Retardo" width={16} height={16} />
+                      Retardo Inicial
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Tiempo de espera antes del primer backup</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input id="backupInitialDelay" value={config.backupInitialDelay || "2m"} onChange={(e) => updateConfig("backupInitialDelay", e.target.value)} placeholder="2m" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="backupPruneDays" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/shears.webp" alt="Poda" width={16} height={16} />
+                      Días de Retención
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Eliminar backups más antiguos que este número de días</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input id="backupPruneDays" type="number" value={config.backupPruneDays || "7"} onChange={(e) => updateConfig("backupPruneDays", e.target.value)} placeholder="7" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="backupDestDir" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/ender_chest.webp" alt="Destino" width={16} height={16} />
+                      Directorio Destino
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Ruta donde se guardarán los backups</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input id="backupDestDir" value={config.backupDestDir || "/backups"} onChange={(e) => updateConfig("backupDestDir", e.target.value)} placeholder="/backups" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="backupExcludes" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/barrier.webp" alt="Excluir" width={16} height={16} />
+                      Archivos a Excluir
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Patrones de archivos a excluir del backup (separados por comas)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input id="backupExcludes" value={config.backupExcludes || "*.jar,cache,logs,*.tmp"} onChange={(e) => updateConfig("backupExcludes", e.target.value)} placeholder="*.jar,cache,logs,*.tmp" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+                  <p className="text-xs text-gray-400">Archivos y directorios que no se incluirán en el backup</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center gap-3">
+                  <Switch id="backupOnStartup" checked={config.backupOnStartup !== false} onCheckedChange={(checked) => updateConfig("backupOnStartup", checked)} className="data-[state=checked]:bg-emerald-500" />
+                  <Label htmlFor="backupOnStartup" className="text-gray-200 font-minecraft text-sm">
+                    Realizar backup al iniciar
+                  </Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                          <HelpCircle className="h-4 w-4 text-gray-400" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                        <p>Realizar un backup inmediatamente después de iniciar el servidor</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Switch id="pauseIfNoPlayers" checked={config.pauseIfNoPlayers || false} onCheckedChange={(checked) => updateConfig("pauseIfNoPlayers", checked)} className="data-[state=checked]:bg-emerald-500" />
+                  <Label htmlFor="pauseIfNoPlayers" className="text-gray-200 font-minecraft text-sm">
+                    Pausar backups cuando no hay jugadores
+                  </Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                          <HelpCircle className="h-4 w-4 text-gray-400" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                        <p>No realizar backups automáticos cuando no hay jugadores conectados</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              </div>
+
+              {config.backupMethod === "tar" && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="tarCompressMethod" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                      <Image src="/images/anvil.webp" alt="Compresión" width={16} height={16} />
+                      Método de Compresión
+                    </Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                            <HelpCircle className="h-4 w-4 text-gray-400" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                          <p>Algoritmo de compresión para los archivos tar</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Select value={config.tarCompressMethod || "gzip"} onValueChange={(value) => updateConfig("tarCompressMethod", value as "gzip" | "bzip2" | "zstd")}>
+                    <SelectTrigger id="tarCompressMethod" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:ring-emerald-500/30">
+                      <SelectValue placeholder="Método de compresión" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
+                      <SelectItem value="gzip">gzip (estándar)</SelectItem>
+                      <SelectItem value="bzip2">bzip2 (mejor compresión)</SelectItem>
+                      <SelectItem value="zstd">zstd (rápido)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
 

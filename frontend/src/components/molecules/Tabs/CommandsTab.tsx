@@ -9,10 +9,12 @@ import Image from "next/image";
 interface CommandsTabProps {
   serverId: string;
   serverStatus: string;
+  rconPort: string;
+  rconPassword: string;
 }
 
-export const CommandsTab: FC<CommandsTabProps> = ({ serverId, serverStatus }) => {
-  const { command, response, executing, executeCommand, setCommand, clearResponse } = useServerCommands(serverId);
+export const CommandsTab: FC<CommandsTabProps> = ({ serverId, serverStatus, rconPort, rconPassword }) => {
+  const { command, response, executing, executeCommand, setCommand, clearResponse } = useServerCommands(serverId, rconPort, rconPassword);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredCommands, setFilteredCommands] = useState<Array<{ label: string; command: string }>>([]);

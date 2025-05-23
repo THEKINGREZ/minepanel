@@ -83,6 +83,14 @@ const defaultConfig: ServerConfig = {
   backupPruneDays: "7",
   backupDestDir: "/backups",
   backupName: "world",
+  backupOnStartup: false,
+  pauseIfNoPlayers: false,
+  playersOnlineCheckInterval: "5m",
+  rconRetries: "3",
+  rconRetryInterval: "5s",
+  backupIncludes: "",
+  backupExcludes: "",
+  tarCompressMethod: "gzip",
 
   // Docker
   dockerImage: "latest",

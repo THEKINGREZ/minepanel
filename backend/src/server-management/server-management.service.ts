@@ -332,7 +332,7 @@ export class ServerManagementService {
     }
   }
 
-  async executeCommand(serverId: string, command: string): Promise<{ success: boolean; output: string }> {
+  async executeCommand(serverId: string, command: string, rconPort: string, rconPassword?: string): Promise<{ success: boolean; output: string }> {
     try {
       // Verificar si el servidor existe
       if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
@@ -352,8 +352,13 @@ export class ServerManagementService {
         };
       }
 
+      let rconConfig = `-P ${rconPort}`;
+      if (rconPassword) {
+        rconConfig += ` -p ${rconPassword}`;
+      }
+
       // Ejecutar el comando en la consola RCON del servidor Minecraft
-      const { stdout, stderr } = await execAsync(`docker exec ${containerId} rcon-cli ${command}`);
+      const { stdout, stderr } = await execAsync(`docker exec -i ${containerId} rcon-cli ${rconConfig} "${command}"`);
 
       if (stderr) {
         return {
@@ -386,7 +391,7 @@ export class ServerManagementService {
       // Execute docker-compose commands from the directory containing the docker-compose.yml
       const composeDir = this.getMcDataPath(serverId);
 
-      if(await this.getServerStatus(serverId) !== 'not_found') {
+      if ((await this.getServerStatus(serverId)) !== 'not_found') {
         await execAsync('docker-compose down', { cwd: composeDir });
       }
 

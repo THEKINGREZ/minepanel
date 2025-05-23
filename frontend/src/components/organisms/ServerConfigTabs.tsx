@@ -104,7 +104,7 @@ export const ServerConfigTabs: FC<ServerConfigTabsProps> = ({ serverId, config, 
             </TabsContent>
 
             <TabsContent value="commands" className="space-y-4 mt-0">
-              <CommandsTab serverId={serverId} serverStatus={serverStatus} />
+              <CommandsTab serverId={serverId} serverStatus={serverStatus} rconPort={config.rconPort} rconPassword={config.rconPassword} />
             </TabsContent>
           </div>
         </Tabs>

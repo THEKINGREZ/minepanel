@@ -56,13 +56,21 @@ export interface ServerConfig {
   gid: string;
 
   // Backup configuration
-  enableBackup?: boolean;
-  backupInterval?: string;
-  backupMethod?: string;
-  backupInitialDelay?: string;
-  backupPruneDays?: string;
-  backupDestDir?: string;
-  backupName?: string;
+  enableBackup: boolean;
+  backupInterval: string;
+  backupMethod: "tar" | "rsync" | "restic" | "rclone";
+  backupInitialDelay: string;
+  backupPruneDays: string;
+  backupDestDir: string;
+  backupName: string;
+  backupOnStartup: boolean;
+  pauseIfNoPlayers: boolean;
+  playersOnlineCheckInterval: string;
+  rconRetries: string;
+  rconRetryInterval: string;
+  backupIncludes: string;
+  backupExcludes: string;
+  tarCompressMethod: "gzip" | "bzip2" | "zstd";
 
   useAikarFlags: boolean;
   enableJmx: boolean;

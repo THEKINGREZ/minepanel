@@ -161,8 +161,8 @@ export class ServerManagementController {
   }
 
   @Post(':id/command')
-  async executeCommand(@Param('id') id: string, @Body() body: { command: string }) {
-    return this.managementService.executeCommand(id, body.command);
+  async executeCommand(@Param('id') id: string, @Body() body: { command: string; rconPort: string; rconPassword?: string }) {
+    return this.managementService.executeCommand(id, body.command, body.rconPort, body.rconPassword);
   }
 
   @Post(':id/start')
