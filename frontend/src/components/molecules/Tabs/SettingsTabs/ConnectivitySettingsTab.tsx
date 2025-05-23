@@ -30,7 +30,7 @@ export const ConnectivitySettingsTab: FC<ConnectivitySettingsTabProps> = ({ conf
             <Label htmlFor="serverPort" className="text-gray-200 font-minecraft text-sm">
               Puerto del Servidor
             </Label>
-            <Input id="serverPort" type="number" value={config.port || 25565} onChange={(e) => updateConfig("port", parseInt(e.target.value))} placeholder="25565" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+            <Input id="serverPort" type="number" value={config.port || 25565} onChange={(e) => updateConfig("port", String(e.target.value))} placeholder="25565" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
             <p className="text-xs text-gray-400">Puerto en el que escuchará el servidor. El puerto por defecto es 25565.</p>
           </div>
 
@@ -38,7 +38,7 @@ export const ConnectivitySettingsTab: FC<ConnectivitySettingsTabProps> = ({ conf
             <Label htmlFor="playerIdleTimeout" className="text-gray-200 font-minecraft text-sm">
               Tiempo de Inactividad de Jugadores (minutos)
             </Label>
-            <Input id="playerIdleTimeout" type="number" value={config.playerIdleTimeout || 0} onChange={(e) => updateConfig("playerIdleTimeout", parseInt(e.target.value))} placeholder="0" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+            <Input id="playerIdleTimeout" type="number" value={config.playerIdleTimeout || 0} onChange={(e) => updateConfig("playerIdleTimeout", String(e.target.value))} placeholder="0" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
             <p className="text-xs text-gray-400">Tiempo en minutos antes de expulsar a jugadores inactivos (0 para desactivar)</p>
           </div>
 
@@ -86,11 +86,11 @@ export const ConnectivitySettingsTab: FC<ConnectivitySettingsTabProps> = ({ conf
             <Label htmlFor="opPermissionLevel" className="text-gray-200 font-minecraft text-sm">
               Nivel de Permisos de OPs
             </Label>
-            <Select value={config.opPermissionLevel?.toString() || "4"} onValueChange={(value) => updateConfig("opPermissionLevel", parseInt(value))}>
+            <Select value={config.opPermissionLevel?.toString() || "4"} onValueChange={(value) => updateConfig("opPermissionLevel", String(value))}>
               <SelectTrigger id="opPermissionLevel" className="bg-gray-800/70 border-gray-700/50 focus:ring-emerald-500/30">
                 <SelectValue placeholder="Selecciona nivel" />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700">
+              <SelectContent className="bg-gray-800 border-gray-700 text-gray-200">
                 <SelectItem value="1">Nivel 1 (Mínimo)</SelectItem>
                 <SelectItem value="2">Nivel 2</SelectItem>
                 <SelectItem value="3">Nivel 3</SelectItem>
@@ -139,7 +139,7 @@ export const ConnectivitySettingsTab: FC<ConnectivitySettingsTabProps> = ({ conf
                   <Label htmlFor="rconPort" className="text-gray-200 font-minecraft text-sm">
                     Puerto RCON
                   </Label>
-                  <Input id="rconPort" type="number" value={config.rconPort || 25575} onChange={(e) => updateConfig("rconPort", parseInt(e.target.value))} placeholder="25575" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+                  <Input id="rconPort" type="number" value={config.rconPort || 25575} onChange={(e) => updateConfig("rconPort", String(e.target.value))} placeholder="25575" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
                 </div>
 
                 <div className="space-y-2">

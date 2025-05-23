@@ -28,7 +28,7 @@ export const PerformanceSettingsTab: FC<PerformanceSettingsTabProps> = ({ config
               </Label>
               <span className="bg-gray-800/90 px-2 py-1 rounded text-xs font-mono">{config.viewDistance || "10"} chunks</span>
             </div>
-            <Slider id="view-distance" min={2} max={32} step={1} value={[Number(config.viewDistance || 10)]} onValueChange={(value: number[]) => updateConfig("viewDistance", value[0])} className="my-4" />
+            <Slider id="view-distance" min={2} max={32} step={1} value={[Number(config.viewDistance || 10)]} onValueChange={(value: number[]) => updateConfig("viewDistance", String(value[0]))} className="my-4" />
             <p className="text-xs text-gray-400">Determina cuántos chunks se cargan alrededor de cada jugador. Valores más bajos mejoran el rendimiento.</p>
           </div>
 
@@ -39,7 +39,7 @@ export const PerformanceSettingsTab: FC<PerformanceSettingsTabProps> = ({ config
               </Label>
               <span className="bg-gray-800/90 px-2 py-1 rounded text-xs font-mono">{config.simulationDistance || 10} chunks</span>
             </div>
-            <Slider id="simulation-distance" min={2} max={32} step={1} value={[Number(config.simulationDistance || 10)]} onValueChange={(value: number[]) => updateConfig("simulationDistance", value[0])} className="my-4" />
+            <Slider id="simulation-distance" min={2} max={32} step={1} value={[Number(config.simulationDistance || 10)]} onValueChange={(value: number[]) => updateConfig("simulationDistance", String(value[0]))} className="my-4" />
             <p className="text-xs text-gray-400">Determina hasta dónde actualiza el servidor (mobs, cultivos, etc.). Puede ser menor que la distancia de visión.</p>
           </div>
 

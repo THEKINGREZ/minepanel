@@ -95,7 +95,7 @@ export const AdvancedTab: FC<AdvancedTabProps> = ({ config, updateConfig, onSave
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <Input id="playerIdleTimeout" type="number" value={config.playerIdleTimeout} onChange={(e) => updateConfig("playerIdleTimeout", e.target.value)} placeholder="60" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+            <Input id="playerIdleTimeout" type="number" value={config.playerIdleTimeout} onChange={(e) => updateConfig("playerIdleTimeout", String(e.target.value))} placeholder="60" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
             <p className="text-xs text-gray-400">Tiempo en minutos antes de expulsar a jugadores inactivos (0 para desactivar)</p>
           </div>
 
