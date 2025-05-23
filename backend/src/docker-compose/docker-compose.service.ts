@@ -562,32 +562,9 @@ export class DockerComposeService {
             },
           },
         },
-        'init-filebrowser': {
-          image: 'filebrowser/filebrowser',
-          entrypoint: 'sh -c',
-          command: ['chown -R 1000: /database'],
-          restart: 'no',
-          volumes: ['./filebrowser-db:/database'],
-        },
-        filebrowser: {
-          image: 'filebrowser/filebrowser',
-          depends_on: {
-            'init-filebrowser': {
-              condition: 'service_completed_successfully',
-            },
-          },
-          user: '1000:1000',
-          environment: {
-            FB_DATABASE: '/database/filebrowser.db',
-          },
-          volumes: ['./:/srv', './filebrowser-db:/database'],
-          ports: [config.id === 'daily' ? '25580:80' : '25581:80'],
-          restart: 'unless-stopped',
-        },
       },
       volumes: {
         'mc-data': {},
-        'filebrowser-db': {},
       },
     };
 
