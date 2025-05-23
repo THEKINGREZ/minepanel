@@ -121,7 +121,7 @@ export function LogsTab({ serverId }: Readonly<LogsTabProps>) {
                 <div className="flex flex-col items-center gap-3">
                   <RefreshCcw className="h-5 w-5 animate-spin text-gray-400" />
                   <span className="text-gray-400 font-minecraft text-sm">Cargando logs...</span>
-                  <Image src="/images/loading-block.png" alt="Loading" width={32} height={32} className="animate-pulse" />
+                  <Image src="/images/loading-cube.webp" alt="Loading" width={32} height={32} className="animate-pulse" />
                 </div>
               </div>
             ) : (

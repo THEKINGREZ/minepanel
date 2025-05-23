@@ -173,7 +173,7 @@ export const CommandsTab: FC<CommandsTabProps> = ({ serverId, serverStatus, rcon
         {response && (
           <div className="space-y-2">
             <div className="text-gray-300 font-minecraft text-sm mb-1 flex items-center gap-2">
-              <Image src="/images/redstone-comparator.png" alt="Respuesta" width={16} height={16} className="opacity-90" />
+              <Image src="/images/redstone.webp" alt="Respuesta" width={16} height={16} className="opacity-90" />
               Respuesta del Servidor
             </div>
             <div className="relative mt-1">

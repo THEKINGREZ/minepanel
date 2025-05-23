@@ -352,9 +352,9 @@ export class ServerManagementService {
         };
       }
 
-      let rconConfig = `-P ${rconPort}`;
+      let rconConfig = `--port ${rconPort}`;
       if (rconPassword) {
-        rconConfig += ` -p ${rconPassword}`;
+        rconConfig += ` --password ${rconPassword}`;
       }
 
       // Ejecutar el comando en la consola RCON del servidor Minecraft
