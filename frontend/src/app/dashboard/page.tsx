@@ -352,19 +352,12 @@ export default function Dashboard() {
                       </div>
                     </CardContent>
                     <CardFooter>
-                      {server.status === "not_found" ? (
-                        <Button className="w-full gap-1 bg-emerald-600 hover:bg-emerald-700 font-minecraft text-white" disabled>
+                      <Link href={`/dashboard/${server.id}`} className="w-full">
+                        <Button className="w-full gap-1 bg-emerald-600 hover:bg-emerald-700 font-minecraft text-white">
                           Configurar
                           <ArrowRight className="h-4 w-4" />
                         </Button>
-                      ) : (
-                        <Link href={`/dashboard/${server.id}`} className="w-full">
-                          <Button className="w-full gap-1 bg-emerald-600 hover:bg-emerald-700 font-minecraft text-white">
-                            Configurar
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      )}
+                      </Link>
                     </CardFooter>
                   </Card>
                 </motion.div>
