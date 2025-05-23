@@ -679,11 +679,7 @@ export class DockerComposeService {
       dockerComposeConfig.services.backup = {
         image: 'itzg/mc-backup',
         container_name: `${config.id}-backup`,
-        depends_on: {
-          mc: {
-            condition: 'service_healthy',
-          },
-        },
+        depends_on: ['mc'],
         environment: backupEnvironment,
         volumes: [
           './mc-data:/data:ro', // Read-only access to minecraft data
