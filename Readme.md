@@ -88,7 +88,7 @@ NEXT_PUBLIC_API_URL='localhost:8091' # URL of the backend API
 📋 ToDo
 * [ ] Translate the interface to English (currently in Spanish)
 * [ ] Support more modpack platforms (currently supports CurseForge, Forge, Vanilla)
-* [ ] Add backup management system
+* [X] Add backup management system
 * [ ] Implement user roles and permissions
 * [ ] Add API documentation
 * [ ] Create deployment guides (Docker, PM2, etc.)
@@ -97,7 +97,7 @@ NEXT_PUBLIC_API_URL='localhost:8091' # URL of the backend API
 * [X] Basic support for two Minecraft servers
 * [X] Server logs
 * [X] User authentication
-* [ ] Resource usage dashboard
+* [X] Resource usage dashboard
 * [X] Dynamic addition/removal of server instances
 * [ ] Support for other games/containers
 * [ ] Multi-language support (English/Spanish)
