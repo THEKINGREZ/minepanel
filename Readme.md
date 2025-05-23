@@ -68,6 +68,7 @@ pm2 startup
 ```
 
 📂 File Access with Filebrowser
+
 Filebrowser is included for manual inspection and editing of server files through a web interface.
 
 To start Filebrowser:
