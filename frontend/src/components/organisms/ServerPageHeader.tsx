@@ -107,17 +107,17 @@ export function ServerPageHeader({ serverId, serverName, serverStatus, isProcess
         </div>
 
         <div className="ml-auto flex flex-wrap gap-2 mt-3 md:mt-0">
-          {serverStatus === "running" ? (
-            <Button type="button" variant="destructive" onClick={onStopServer} disabled={isProcessing} className="gap-2 bg-red-600 hover:bg-red-700 font-minecraft text-white">
+          {serverStatus === "running" || serverStatus === "starting" ? (
+            <Button type="button" variant="destructive" onClick={onStopServer} className="gap-2 bg-red-600 hover:bg-red-700 font-minecraft text-white">
               <PowerIcon className="h-4 w-4" />
-              {isProcessing ? "Procesando..." : "Detener Servidor"}
+              Detener Servidor
             </Button>
-          ) : serverStatus === "stopped" ? (
-            <Button type="button" variant="default" onClick={onStartServer} disabled={isProcessing} className="gap-2 bg-emerald-600 hover:bg-emerald-700 font-minecraft text-white">
+          ) :  (
+            <Button type="button" variant="default" onClick={onStartServer} className="gap-2 bg-emerald-600 hover:bg-emerald-700 font-minecraft text-white">
               <PowerIcon className="h-4 w-4" />
-              {isProcessing ? "Procesando..." : "Iniciar Servidor"}
+              Iniciar Servidor
             </Button>
-          ) : null}
+          )}
 
           <Button type="button" variant="outline" onClick={onRestartServer} disabled={isProcessing || serverStatus !== "running"} className="gap-2 border-gray-700/50 bg-gray-800/40 text-gray-200 hover:bg-orange-600/20 hover:text-orange-400 hover:border-orange-600/50">
             <RefreshCw className={`h-4 w-4 ${isProcessing ? "animate-spin" : ""}`} />
