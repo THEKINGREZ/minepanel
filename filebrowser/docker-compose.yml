@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  init-filebrowser:
+    image: filebrowser/filebrowser
+    entrypoint: "sh -c"
+    command:
+      - "chown -R 1000: /database"
+    restart: "no"
+    volumes:
+      - ./filebrowser-db:/database
+  filebrowser:
+    image: filebrowser/filebrowser
+    depends_on:
+      init-filebrowser:
+        condition: service_completed_successfully
+    user: "1000:1000"
+    environment:
+      FB_DATABASE: /database/filebrowser.db
+    volumes:
+      # Default FB_ROOT is /srv
+      # In this example, the left-side needs to be the same as /data volume of mc service
+      - ../servers:/srv
+      - ./filebrowser-db:/database
+    ports:
+      - "25580:80"
+    restart: unless-stopped
