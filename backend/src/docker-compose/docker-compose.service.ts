@@ -21,6 +21,35 @@ export class DockerComposeService {
     return path.join(this.BASE_DIR, serverId, 'mc-data');
   }
 
+  private async findAvailablePort(startPort: number, serverId: string): Promise<number> {
+    try {
+      // Get all server configurations
+      const serverIds = await this.getAllServerIds();
+      const usedPorts = new Set<number>();
+
+      // Collect all ports used by other servers
+      for (const id of serverIds) {
+        if (id === serverId) continue; // Skip current server
+
+        const serverConfig = await this.loadServerConfigFromDockerCompose(id);
+        if (serverConfig && serverConfig.port) {
+          usedPorts.add(parseInt(serverConfig.port));
+        }
+      }
+
+      // Find the next available port starting from startPort
+      let port = startPort;
+      while (usedPorts.has(port)) {
+        port++;
+      }
+
+      return port;
+    } catch (error) {
+      console.error('Error finding available port:', error);
+      return startPort;
+    }
+  }
+
   private async loadServerConfigFromDockerCompose(serverId: string): Promise<ServerConfig> {
     const dockerComposePath = this.getDockerComposePath(serverId);
 
@@ -44,6 +73,8 @@ export class DockerComposeService {
       const resources = mcService.deploy?.resources ?? {};
       const backupEnv = backupService?.environment ?? {};
 
+      const port = mcService.ports?.[0]?.split(':')[0] ?? '25565';
+
       // Extract server config from docker-compose
       const serverConfig: ServerConfig = {
         id: env.ID_MANAGER ?? serverId,
@@ -53,7 +84,7 @@ export class DockerComposeService {
         // General configuration
         serverName: env.SERVER_NAME ?? 'Minecraft Server',
         motd: env.MOTD ?? 'Un servidor de Minecraft increíble',
-        port: env.PORT ?? '25565',
+        port: port,
         difficulty: env.DIFFICULTY ?? 'hard',
         maxPlayers: env.MAX_PLAYERS ?? '10',
         ops: env.OPS ?? '',
@@ -563,6 +594,16 @@ export class DockerComposeService {
       .split('\n')
       .filter((line) => line.trim() !== '')
       .map((line) => line.trim().replace('./mc-data', './mc-data')); // Keep relative path
+
+    // Ensure the port is not already in use by another server
+    const requestedPort = parseInt(config.port || '25565');
+    const availablePort = await this.findAvailablePort(requestedPort, config.id);
+
+    // Update the port if it changed
+    if (availablePort !== requestedPort) {
+      console.log(`Port ${requestedPort} already in use. Using port ${availablePort} for server ${config.id}`);
+      config.port = availablePort.toString();
+    }
 
     // Create Docker Compose configuration
     const dockerComposeConfig: {

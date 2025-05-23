@@ -33,6 +33,12 @@ export const ConnectivitySettingsTab: FC<ConnectivitySettingsTabProps> = ({ conf
             </Label>
             <Input id="serverPort" type="number" value={config.port || 25565} onChange={(e) => updateConfig("port", String(e.target.value))} placeholder="25565" className="bg-gray-800/70 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
             <p className="text-xs text-gray-400">Puerto en el que escuchará el servidor. El puerto por defecto es 25565.</p>
+            <Alert className="bg-amber-900/30 border-amber-800 text-amber-200 mt-2 py-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                ⚠️ Este puerto debe ser distinto al de otros servidores en ejecución para evitar conflictos.
+              </AlertDescription>
+            </Alert>
           </div>
 
           <div className="space-y-2">
