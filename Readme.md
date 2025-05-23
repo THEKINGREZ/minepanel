@@ -17,8 +17,7 @@
 - API backend powered by **NestJS**
 - Control multiple `docker-compose` Minecraft server instances
 - Uses the excellent [`docker-minecraft-server`](https://docker-minecraft-server.readthedocs.io/en/latest/)
-- Initial support for two environments: `daily` and `weekend`
-- Initial support for two instances: `daily` and `weekend`
+- Initial support for many instances
 - Scalable design to support more Docker containers in the future
 - Real-time server status, logs, and controls
 
