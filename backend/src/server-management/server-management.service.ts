@@ -384,9 +384,11 @@ export class ServerManagementService {
       }
 
       // Execute docker-compose commands from the directory containing the docker-compose.yml
-      const composeDir = path.dirname(dockerComposePath);
+      const composeDir = this.getMcDataPath(serverId);
 
-      await execAsync('docker-compose down', { cwd: composeDir });
+      if(await this.getServerStatus(serverId) !== 'not_found') {
+        await execAsync('docker-compose down', { cwd: composeDir });
+      }
 
       // Start the server
       await execAsync('docker-compose up -d', { cwd: composeDir });
