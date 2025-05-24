@@ -5,7 +5,7 @@
 ![Made with NestJS](https://img.shields.io/badge/Backend-NestJS-red)
 ![Made with Next.js](https://img.shields.io/badge/Frontend-Next.js-black)
 
-**MinePanel** is a web-based control panel for managing multiple Minecraft servers running with Docker. Inspired by [Crafty Control](https://craftycontrol.com), but fully customizable and built using modern web technologies.
+**Minecraft Docker Manager** is a web-based control panel for managing multiple Minecraft servers running with Docker. Inspired by [Crafty Control](https://craftycontrol.com), but fully customizable and built using modern web technologies.
 
 ![Dashboard View](./assets/Animation.gif)
 
@@ -28,9 +28,9 @@
 
 ```yaml
 minecraft-server-manager/
-├── frontend/ # Next.js frontend app
-├── backend/ # NestJS backend API
-├── servers/ # docker-compose for Minecraft servers
+├── frontend/         # Next.js frontend app
+├── backend/          # NestJS backend API
+├── servers/          # docker-compose for Minecraft servers
 ├── filebrowser/      # Filebrowser service (manual startup)
 ```
 
@@ -47,7 +47,7 @@ minecraft-server-manager/
 ## 🧑‍💻 Getting Started
 
 ```bash
-git clone https://github.com/Ketbome/minemanager.git
+git clone https://github.com/Ketbome/minecraft-docker-manager.git
 cd minemanager
 
 # Start the backend
