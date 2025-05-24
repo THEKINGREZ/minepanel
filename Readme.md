@@ -7,6 +7,12 @@
 
 **Minecraft Docker Manager** is a web-based control panel for managing multiple Minecraft servers running with Docker. Inspired by [Crafty Control](https://craftycontrol.com), but fully customizable and built using modern web technologies.
 
+🧱 Built on top of the excellent projects by itzg:
+
+- `docker-minecraft-server` – Minecraft server container
+
+- `docker-mc-backup` – Automated backup companion container
+
 ![Dashboard View](./assets/Animation.gif)
 
 ---
@@ -16,7 +22,7 @@
 - Web dashboard built with **Next.js**
 - API backend powered by **NestJS**
 - Control multiple `docker-compose` Minecraft server instances
-- Uses the excellent [`docker-minecraft-server`](https://docker-minecraft-server.readthedocs.io/en/latest/)
+- Uses the excellent [`docker-minecraft-server`](https://github.com/itzg/docker-minecraft-server)
 - Initial support for many instances
 - Scalable design to support more Docker containers in the future
 - Real-time server status, logs, and controls
@@ -136,4 +142,4 @@ NEXT_PUBLIC_API_URL='localhost:8091' # URL of the backend API
 Distributed under the MIT License. See LICENSE for more information.
 
 📬 Contact
-Created by @Ketbome — Pull requests, issues, and stars are welcome!
+Created by [@Ketbome](https://github.com/Ketbome) — Pull requests, issues, and stars are welcome!
