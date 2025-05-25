@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: minepanel-backend
+    ports:
+      - "8091:8091"
+    environment:
+      - NODE_ENV=production
+      - FRONTEND_URL=http://localhost:3000
+      - CF_API_KEY=${CF_API_KEY}
+      - CLIENT_PASSWORD=${CLIENT_PASSWORD}
+      - CLIENT_USERNAME=${CLIENT_USERNAME}
+    volumes:
+      - ./servers:/app/servers
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - minepanel
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: minepanel-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8091
+    networks:
+      - minepanel
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+networks:
+  minepanel:
+    driver: bridge
+
+volumes:
+  servers_data:
+    driver: local
