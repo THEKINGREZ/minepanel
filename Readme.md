@@ -1,145 +1,166 @@
-# Minecraft Server Manager – Docker-based Minecraft Server Manager
+# Minecraft Server Manager
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue)
 ![Made with NestJS](https://img.shields.io/badge/Backend-NestJS-red)
 ![Made with Next.js](https://img.shields.io/badge/Frontend-Next.js-black)
 
-**Minecraft Docker Manager** is a web-based control panel for managing multiple Minecraft servers running with Docker. Inspired by [Crafty Control](https://craftycontrol.com), but fully customizable and built using modern web technologies.
+A web-based tool for managing multiple Minecraft servers using Docker. Because managing servers from the terminal can be a real headache.
 
-🧱 Built on top of the excellent projects by itzg:
-
-- `docker-minecraft-server` – Minecraft server container
-
-- `docker-mc-backup` – Automated backup companion container
+This project is built on top of the amazing work by [itzg](https://github.com/itzg):
+- `docker-minecraft-server` – The most popular Minecraft server container
+- `docker-mc-backup` – Automated backup system
 
 ![Dashboard View](./assets/Animation.gif)
 
----
+## Why another server manager?
 
-## 🚀 Features
+After trying several solutions, I wanted something that was:
+- Easy to set up and use
+- Modern (no 2000s-era interfaces)
+- Flexible for handling multiple servers
+- That wouldn't give me headaches
 
-- Web dashboard built with **Next.js**
-- API backend powered by **NestJS**
-- Control multiple `docker-compose` Minecraft server instances
-- Uses the excellent [`docker-minecraft-server`](https://github.com/itzg/docker-minecraft-server)
-- Initial support for many instances
-- Scalable design to support more Docker containers in the future
-- Real-time server status, logs, and controls
-- 🔧 **Manual file access and editing via Filebrowser**
+## What you can do
 
----
+- **Intuitive web panel** - Built with Next.js, no ugly interfaces
+- **Robust API** - NestJS backend that handles everything
+- **Multiple servers** - Manage as many as your server can handle
+- **Real-time logs** - See what's happening without SSH
+- **File management** - Edit configurations from your browser
+- **Automatic backups** - Because nobody wants to lose their world
 
-## 🗂️ Repository Structure
+## Project structure
 
-```yaml
+```
 minecraft-server-manager/
-├── frontend/         # Next.js frontend app
-├── backend/          # NestJS backend API
-├── servers/          # docker-compose for Minecraft servers
-├── filebrowser/      # Filebrowser service (manual startup)
+├── frontend/         # The pretty face (Next.js)
+├── backend/          # The brain (NestJS)
+├── servers/          # Where your servers live
+└── filebrowser/      # For manual file handling
 ```
 
----
+## Before you start
 
-## ⚙️ Requirements
+You need to have installed:
+- Docker and Docker Compose
+- Node.js (version 18 or higher)
+- Git (obviously)
+- The desire to manage servers like a pro
 
-- Docker + Docker Compose
-- Node.js (v18+ recommended)
-- Git
+## Installation
 
----
-
-## 🧑‍💻 Getting Started
-
+### Step 1: Download the project
 ```bash
 git clone https://github.com/Ketbome/minecraft-docker-manager.git
-cd minemanager
+cd minecraft-server-manager
+```
 
-# Start the backend
+### Step 2: Set up the backend
+```bash
 cd backend
 npm install
 npm run build
-pm2 start npm --name "backend" -- run start:prod
 
-# Start the frontend
+# Using PM2 (recommended for production)
+pm2 start npm --name "minecraft-backend" -- run start:prod
+```
+
+### Step 3: Set up the frontend
+```bash
 cd ../frontend
 npm install
 npm run build
-pm2 start npm --name "frontend" -- run start
-
-# pm2 save
-pm2 save
-pm2 startup
+pm2 start npm --name "minecraft-frontend" -- run start
 ```
 
-📂 File Access with Filebrowser
+### Step 4: Save PM2 configuration
+```bash
+pm2 save
+pm2 startup  # Follow the instructions that appear
+```
 
-Filebrowser is included for manual inspection and editing of server files through a web interface.
+## File browser
 
-To start Filebrowser:
+Includes Filebrowser for when you need to edit files manually (which always happens).
 
+To start it:
 ```bash
 cd filebrowser
 docker-compose up -d
-Then, access it in your browser at:
-http://localhost:25580
-```
-Default credentials:
-
-User: `admin`
-
-Password: `admin`
-
-⚠️ Make sure to change the default credentials after first login.
-
-Filebrowser will allow you to:
-
-Browse individual Minecraft server files
-
-Edit configuration files (e.g., server.properties, ops.json, add mods, etc.)
-
-Upload/download mods, plugins, or world data
-
-
-## 🔐 Environment Variables
-
-### Backend (.env)
-
-```
-FRONTEND_URL= # URL of the frontend application
-CF_API_KEY= # CurseForge API key for authentication
-CLIENT_PASSWORD= # Password for the client
-CLIENT_USERNAME= # Username for the client
 ```
 
-### Frontend (.env.local)
+Then go to: `http://localhost:25580`
 
+**Default credentials:**
+- Username: `admin`
+- Password: `admin`
+
+> ⚠️ **Important**: Change these credentials immediately after first login
+
+With Filebrowser you can:
+- Browse through your server files
+- Edit `server.properties`, `ops.json`, etc.
+- Upload mods, plugins, or worlds
+- Make quick changes without complications
+
+## Environment variables
+
+### Backend (`.env` file)
+```env
+FRONTEND_URL=http://localhost:3000
+CF_API_KEY=your_curseforge_api_key
+CLIENT_PASSWORD=your_super_secret_password
+CLIENT_USERNAME=your_username
 ```
-NEXT_PUBLIC_API_URL='localhost:8091' # URL of the backend API
+
+### Frontend (`.env.local` file)
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8091
 ```
 
+## What's still missing
 
-📋 ToDo
-* [ ] Translate the interface to English (currently in Spanish)
-* [ ] Support more modpack platforms (currently supports CurseForge, Forge, Vanilla)
-* [X] Add backup management system
-* [ ] Implement user roles and permissions
-* [ ] Add API documentation
-* [ ] Create deployment guides (Docker, PM2, etc.)
+- [ ] Translate everything to English (currently in Spanish)
+- [ ] Support for more modpack platforms
+- [x] Backup system (already done!)
+- [ ] User roles and permissions
+- [ ] API documentation
+- [ ] More detailed deployment guides
+- [ ] Improved responsive design
 
-📈 Roadmap
-* [X] Basic support for two Minecraft servers
-* [X] Server logs
-* [X] User authentication
-* [X] Resource usage dashboard
-* [X] Dynamic addition/removal of server instances
-* [ ] Support for other games/containers
-* [ ] Multi-language support (English/Spanish)
-* [ ] Mobile-responsive design improvements
+## Roadmap (what's coming)
 
-❓ License
-Distributed under the MIT License. See LICENSE for more information.
+**Already working:**
+- ✅ Basic support for multiple servers
+- ✅ Real-time logs
+- ✅ User authentication
+- ✅ Resource usage dashboard
+- ✅ Dynamic server addition/removal
 
-📬 Contact
-Created by [@Ketbome](https://github.com/Ketbome) — Pull requests, issues, and stars are welcome!
+**In the oven:**
+- 🔄 Multi-language interface
+- 🔄 Mobile design improvements
+
+## Contributing
+
+Found a bug? Have a great idea? Pull requests are welcome!
+
+You can also:
+- Report issues in Issues
+- Give a star if you like the project
+- Share it with other server administrators
+
+## License
+
+MIT License - basically you can do whatever you want with the code.
+
+## Contact
+
+Created by [@Ketbome](https://github.com/Ketbome)
+
+Questions? Suggestions? Just want to chat about Minecraft? Open an issue or send a message.
+
+---
+
+*This project was born out of the frustration of managing Minecraft servers for friends and the community. If it helps you, I'm glad!*
