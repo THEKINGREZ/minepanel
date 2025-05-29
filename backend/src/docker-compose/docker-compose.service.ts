@@ -32,7 +32,7 @@ export class DockerComposeService {
         if (id === serverId) continue; // Skip current server
 
         const serverConfig = await this.loadServerConfigFromDockerCompose(id);
-        if (serverConfig && serverConfig.port) {
+        if (serverConfig?.port) {
           usedPorts.add(parseInt(serverConfig.port));
         }
       }
@@ -97,7 +97,7 @@ export class DockerComposeService {
         gameMode: env.MODE ?? 'survival',
         seed: env.SEED,
         levelType: env.LEVEL_TYPE ?? 'minecraft:default',
-        hardcore: env.HARDCORE === 'true',
+        hardcore: env.HARDCORE === 'false',
         spawnAnimals: env.SPAWN_ANIMALS !== 'false',
         spawnMonsters: env.SPAWN_MONSTERS !== 'false',
         spawnNpcs: env.SPAWN_NPCS !== 'false',
@@ -306,7 +306,7 @@ export class DockerComposeService {
       cfSlug: '',
       cfFile: '',
       cfApiKey: process.env.CF_API_KEY || '',
-      cfSync: true,
+      cfSync: false,
       cfForceInclude: '',
       cfExclude: '',
       cfFilenameMatcher: '',
