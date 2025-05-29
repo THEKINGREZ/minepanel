@@ -109,6 +109,7 @@ export const AdvancedResourcesTab: FC<AdvancedResourcesTabProps> = ({ config, up
       </div>
 
       {/* Auto-Pause Section */}
+      {/* Auto-Pause Section */}
       <div className="p-4 rounded-md bg-gray-800/50 border border-gray-700/50 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -132,6 +133,21 @@ export const AdvancedResourcesTab: FC<AdvancedResourcesTabProps> = ({ config, up
           </div>
           <Switch id="enableAutoPause" checked={config.enableAutoPause || false} onCheckedChange={handleAutoPauseChange} disabled={config.enableAutoStop} />
         </div>
+
+        {/* Warning about mod compatibility */}
+        {config.enableAutoPause && (
+          <div className="flex items-start gap-2 p-3 bg-amber-900/30 border border-amber-700/50 rounded">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg className="h-4 w-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="text-xs text-amber-200">
+              <p className="font-medium">⚠️ Advertencia sobre compatibilidad con mods:</p>
+              <p className="mt-1">Si el servidor tiene mods instalados, la función Auto-Pause puede causar problemas al intentar despertar el servidor. Algunos mods no son compatibles con esta característica y pueden provocar que el servidor se cuelgue o crashee durante el proceso de despertar. Se recomienda usar esta función solo en servidores Vanilla o probar cuidadosamente la compatibilidad antes de activarla en producción.</p>
+            </div>
+          </div>
+        )}
 
         {config.enableAutoPause && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">

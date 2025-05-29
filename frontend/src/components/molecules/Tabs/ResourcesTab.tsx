@@ -30,16 +30,16 @@ export const ResourcesTab: FC<ResourcesTabProps> = ({ config, updateConfig, onSa
       <CardContent className="space-y-6">
         <Tabs defaultValue="memory" className="w-full">
           <div className="overflow-x-auto custom-scrollbar">
-            <TabsList className="grid grid-cols-3 mb-6 w-full bg-gray-800/70 border border-gray-700/50 rounded-md p-1">
-              <TabsTrigger value="memory" className="font-minecraft text-sm data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500">
+            <TabsList className="grid grid-cols-3 mb-6 w-full bg-gray-800/70 border border-gray-700/50 rounded-md p-1 text-gray-200">
+              <TabsTrigger value="memory" className="text-gray-200 font-minecraft text-sm data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500">
                 <Image src="/images/emerald.webp" alt="Memoria" width={16} height={16} className="mr-2" />
                 Memoria y CPU
               </TabsTrigger>
-              <TabsTrigger value="jvm" className="font-minecraft text-sm data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500">
+              <TabsTrigger value="jvm" className="text-gray-200 font-minecraft text-sm data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500">
                 <Image src="/images/diamond.webp" alt="JVM" width={16} height={16} className="mr-2" />
                 Opciones de JVM
               </TabsTrigger>
-              <TabsTrigger value="advanced" className="font-minecraft text-sm data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500">
+              <TabsTrigger value="advanced" className="text-gray-200 font-minecraft text-sm data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500">
                 <Image src="/images/observer.webp" alt="Avanzado" width={16} height={16} className="mr-2" />
                 Opciones Avanzadas
               </TabsTrigger>
