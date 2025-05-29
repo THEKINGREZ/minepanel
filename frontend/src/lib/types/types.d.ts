@@ -91,6 +91,7 @@ export interface ServerConfig {
   stopDelay: string;
   execDirectly: boolean;
   envVars: string;
+  extraPorts: string[];
 
   // Forge specific
   forgeBuild?: string;

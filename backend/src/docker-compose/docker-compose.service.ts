@@ -74,6 +74,7 @@ export class DockerComposeService {
       const backupEnv = backupService?.environment ?? {};
 
       const port = mcService.ports?.[0]?.split(':')[0] ?? '25565';
+      const extraPorts = mcService.ports?.slice(1) || [];
 
       // Extract server config from docker-compose
       const serverConfig: ServerConfig = {
@@ -173,6 +174,7 @@ export class DockerComposeService {
         stopDelay: env.STOP_SERVER_ANNOUNCE_DELAY ?? '60',
         execDirectly: env.EXEC_DIRECTLY === 'true',
         envVars: '',
+        extraPorts: extraPorts,
       };
 
       // Add CurseForge specific config
@@ -296,6 +298,7 @@ export class DockerComposeService {
       stopDelay: '60',
       execDirectly: true,
       envVars: '',
+      extraPorts: [],
 
       // CurseForge specific
       cfMethod: 'url',
@@ -642,7 +645,7 @@ export class DockerComposeService {
           tty: true,
           stdin_open: true,
           container_name: config.id,
-          ports: [`${config.port}:25565`],
+          ports: [`${config.port}:25565`, ...(config.extraPorts || [])],
           environment,
           volumes,
           restart: config.restartPolicy,

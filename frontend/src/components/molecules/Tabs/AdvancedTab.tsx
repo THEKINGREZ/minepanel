@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, HelpCircle } from "lucide-react";
+import { Save, HelpCircle, Network, Plus, Trash2 } from "lucide-react";
 import { ServerConfig } from "@/lib/types/types";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import Image from "next/image";
@@ -19,6 +19,33 @@ interface AdvancedTabProps {
 }
 
 export const AdvancedTab: FC<AdvancedTabProps> = ({ config, updateConfig, onSave }) => {
+  const [newPort, setNewPort] = useState("");
+
+  const addExtraPort = () => {
+    if (newPort.trim() && !config.extraPorts?.includes(newPort.trim())) {
+      const currentPorts = config.extraPorts || [];
+      let port = newPort.trim();
+      if (!newPort.includes(":")) {
+        port = `${newPort}:${newPort}`;
+      }
+      updateConfig("extraPorts", [...currentPorts, port]);
+      setNewPort("");
+    }
+  };
+
+  const removeExtraPort = (index: number) => {
+    const currentPorts = config.extraPorts || [];
+    const updatedPorts = currentPorts.filter((_, i) => i !== index);
+    updateConfig("extraPorts", updatedPorts);
+  };
+
+  const updateExtraPort = (index: number, value: string) => {
+    const currentPorts = config.extraPorts || [];
+    const updatedPorts = [...currentPorts];
+    updatedPorts[index] = value;
+    updateConfig("extraPorts", updatedPorts);
+  };
+
   return (
     <Card className="bg-gray-900/60 border-gray-700/50 shadow-lg">
       <CardHeader className="pb-3">
@@ -51,6 +78,79 @@ export const AdvancedTab: FC<AdvancedTabProps> = ({ config, updateConfig, onSave
           </div>
           <Input id="dockerImage" value={config.dockerImage} onChange={(e) => updateConfig("dockerImage", e.target.value)} placeholder="java17" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
           <p className="text-xs text-gray-400">Imagen Docker a utilizar (por defecto: itzg/minecraft-server:latest)</p>
+        </div>
+
+        <div className="space-y-4 p-5 rounded-md bg-gray-800/70 border border-gray-700/50">
+          <div className="flex items-center gap-2">
+            <Network className="h-5 w-5 text-emerald-400" />
+            <h3 className="text-emerald-400 font-minecraft text-md">Puertos Adicionales</h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                    <HelpCircle className="h-4 w-4 text-gray-400" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                  <p>Configura puertos adicionales para exponer servicios extra del servidor</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          {/* Add new port */}
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <Input placeholder="8080:8080 o 9000:9000/tcp" value={newPort} onChange={(e) => setNewPort(e.target.value)} onKeyPress={(e) => e.key === "Enter" && addExtraPort()} className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
+              <p className="text-xs text-gray-400 mt-1">Formato: puerto_host:puerto_contenedor[/protocolo]</p>
+            </div>
+            <Button type="button" onClick={addExtraPort} className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={!newPort.trim()}>
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* List of extra ports */}
+          {config.extraPorts && config.extraPorts.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-gray-200 font-minecraft text-sm">Puertos Configurados</Label>
+              {config.extraPorts.map((port, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <div className="flex-1">
+                    <Input value={port} onChange={(e) => updateExtraPort(index, e.target.value)} className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" placeholder="puerto_host:puerto_contenedor" />
+                  </div>
+                  <Button type="button" variant="destructive" size="icon" onClick={() => removeExtraPort(index)} className="bg-red-600 hover:bg-red-700">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(!config.extraPorts || config.extraPorts.length === 0) && (
+            <div className="text-center py-4">
+              <p className="text-gray-400 text-sm">No hay puertos adicionales configurados</p>
+              <p className="text-gray-500 text-xs mt-1">Los puertos adicionales son útiles para plugins que requieren conexiones específicas</p>
+            </div>
+          )}
+
+          {/* Examples */}
+          <div className="bg-gray-900/50 p-3 rounded border border-gray-600/50">
+            <Label className="text-gray-300 font-minecraft text-xs">Ejemplos de configuración:</Label>
+            <div className="text-xs text-gray-400 mt-2 space-y-1">
+              <div>
+                <code className="bg-gray-800 px-1 rounded">24454:24454/udp</code> - Puerto mod de Chat voice
+              </div>
+              <div>
+                <code className="bg-gray-800 px-1 rounded">9000:9000/tcp</code> - Puerto TCP específico
+              </div>
+              <div>
+                <code className="bg-gray-800 px-1 rounded">25566:25566/udp</code> - Puerto UDP para plugins
+              </div>
+              <div>
+                <code className="bg-gray-800 px-1 rounded">8123:8123</code> - Dynmap u otros plugins web
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">

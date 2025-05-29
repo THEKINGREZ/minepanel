@@ -100,6 +100,7 @@ const defaultConfig: ServerConfig = {
   stopDelay: "60",
   execDirectly: true,
   envVars: "",
+  extraPorts: [],
 
   // CurseForge specific
   cfMethod: "url",

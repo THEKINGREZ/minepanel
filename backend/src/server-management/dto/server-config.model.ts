@@ -325,6 +325,11 @@ export class ServerConfigDto {
   @IsOptional()
   forgeBuild?: string;
 
+  // Ports
+  @IsString({ each: true })
+  @IsOptional()
+  extraPorts: string[];
+
   // CurseForge specific
   @IsEnum(['url', 'slug', 'file'])
   @IsOptional()
