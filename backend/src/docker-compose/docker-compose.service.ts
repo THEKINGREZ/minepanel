@@ -97,7 +97,7 @@ export class DockerComposeService {
         gameMode: env.MODE ?? 'survival',
         seed: env.SEED,
         levelType: env.LEVEL_TYPE ?? 'minecraft:default',
-        hardcore: env.HARDCORE === 'false',
+        hardcore: env.HARDCORE === 'true',
         spawnAnimals: env.SPAWN_ANIMALS !== 'false',
         spawnMonsters: env.SPAWN_MONSTERS !== 'false',
         spawnNpcs: env.SPAWN_NPCS !== 'false',
