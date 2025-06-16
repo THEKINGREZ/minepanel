@@ -182,7 +182,7 @@ export class DockerComposeService {
         serverConfig.cfMethod = env.CF_SERVER_MOD ? 'file' : env.CF_SLUG ? 'slug' : 'url';
         serverConfig.cfUrl = env.CF_PAGE_URL ?? '';
         serverConfig.cfSlug = env.CF_SLUG ?? '';
-        serverConfig.cfFile = env.CF_SERVER_MOD ?? '';
+        serverConfig.cfFile = env.CF_FILE_ID ?? '';
         serverConfig.cfSync = env.CF_FORCE_SYNCHRONIZE === 'true';
         serverConfig.cfForceInclude = env.CF_FORCE_INCLUDE_MODS ?? '';
         serverConfig.cfExclude = env.CF_EXCLUDE_MODS ?? '';
