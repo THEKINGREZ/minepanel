@@ -43,7 +43,14 @@ export const logout = () => {
 
 export const isAuthenticated = (): boolean => {
   if (typeof window === "undefined") return false;
-  return !!localStorage.getItem("token");
+
+  try {
+    const token = localStorage.getItem("token");
+    return !!token;
+  } catch (error) {
+    console.error("Error checking authentication:", error);
+    return false;
+  }
 };
 
 export const setupAxiosInterceptors = () => {
@@ -63,7 +70,7 @@ export const setupAxiosInterceptors = () => {
         logout();
         window.location.href = "/";
       }
-      return Promise.reject(error);
+      return Promise.reject(error instanceof Error ? error : new Error(error.message || 'Authentication error'));
     }
   );
 };
