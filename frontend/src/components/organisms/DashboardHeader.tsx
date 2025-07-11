@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, User, Bell, Search, ChevronDown } from "lucide-react";
+import { LogOut, Settings, User, Bell, ChevronDown } from "lucide-react";
 import { logout } from "@/services/auth/auth.service";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -33,15 +33,7 @@ export function DashboardHeader() {
 
   return (
     <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="sticky top-0 z-40 w-full border-b border-gray-700/60 bg-gray-900/95 backdrop-blur-md shadow-lg">
-      <div className="flex h-16 items-center justify-between px-6">
-        {/* Search Bar */}
-        <div className="flex items-center flex-1 max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input type="text" placeholder="Buscar servidores..." className="w-full pl-10 pr-4 py-2 bg-gray-800/60 border border-gray-700/60 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-          </div>
-        </div>
-
+      <div className="flex h-16 items-center justify-end px-6">
         {/* Right side */}
         <div className="flex items-center gap-4">
           {/* Status indicator */}
