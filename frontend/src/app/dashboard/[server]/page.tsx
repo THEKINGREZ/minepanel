@@ -153,7 +153,7 @@ export default function ServerConfig() {
           </div>
           <div className="bg-gray-800/40 rounded-lg p-3 border border-gray-700/30">
             <p className="text-gray-400 mb-1">Puerto</p>
-            <p className="text-white font-medium">{config.serverPort || "25565"}</p>
+            <p className="text-white font-medium">{config.port || "25565"}</p>
           </div>
         </div>
       </motion.div>

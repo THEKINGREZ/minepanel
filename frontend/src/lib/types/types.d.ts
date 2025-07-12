@@ -1,5 +1,4 @@
 export interface ServerConfig {
-  serverPort: string;
   id: string;
   active: boolean;
   serverType: "VANILLA" | "FORGE" | "AUTO_CURSEFORGE" | "SPIGOT" | "FABRIC" | "MAGMA" | "PAPER" | "QUILT";
