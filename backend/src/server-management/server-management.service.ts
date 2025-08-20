@@ -39,13 +39,13 @@ export class ServerManagementService {
         return false;
       }
 
-      // Execute docker-compose commands from the directory containing the docker-compose.yml
+      // Execute docker compose commands from the directory containing the docker-compose.yml
       const composeDir = path.dirname(dockerComposePath);
 
       // Stop the server if it's running
-      await execAsync('docker-compose down', { cwd: composeDir });
+      await execAsync('docker compose down', { cwd: composeDir });
       // Start the server
-      await execAsync('docker-compose up -d', { cwd: composeDir });
+      await execAsync('docker compose up -d', { cwd: composeDir });
 
       return true;
     } catch (error) {
@@ -62,7 +62,7 @@ export class ServerManagementService {
       if (await fs.pathExists(dockerComposePath)) {
         // Stop the server first
         const composeDir = path.dirname(dockerComposePath);
-        await execAsync('docker-compose down', { cwd: composeDir });
+        await execAsync('docker compose down', { cwd: composeDir });
       }
 
       if (await fs.pathExists(serverDataDir)) {
@@ -108,7 +108,7 @@ export class ServerManagementService {
         return 'stopped';
       }
 
-      // If docker-compose file exists but no container, consider it stopped
+      // If docker compose file exists but no container, consider it stopped
       if (await fs.pathExists(this.getDockerComposePath(serverId))) {
         return 'stopped';
       }
@@ -218,12 +218,12 @@ export class ServerManagementService {
         return false;
       }
 
-      // If docker-compose exists, stop the server first
+      // If docker compose exists, stop the server first
       if (await fs.pathExists(dockerComposePath)) {
         const composeDir = path.dirname(dockerComposePath);
         try {
           // Stop any running containers
-          await execAsync('docker-compose down', { cwd: composeDir });
+          await execAsync('docker compose down', { cwd: composeDir });
         } catch (error) {
           console.warn(`Warning: Could not stop server ${serverId} before deletion:`, error);
           // Continue with deletion even if stopping fails
@@ -388,15 +388,15 @@ export class ServerManagementService {
         return false;
       }
 
-      // Execute docker-compose commands from the directory containing the docker-compose.yml
+      // Execute docker compose commands from the directory containing the docker-compose.yml
       const composeDir = this.getMcDataPath(serverId);
 
       if ((await this.getServerStatus(serverId)) !== 'not_found') {
-        await execAsync('docker-compose down', { cwd: composeDir });
+        await execAsync('docker compose down', { cwd: composeDir });
       }
 
       // Start the server
-      await execAsync('docker-compose up -d', { cwd: composeDir });
+      await execAsync('docker compose up -d', { cwd: composeDir });
 
       return true;
     } catch (error) {
@@ -413,11 +413,11 @@ export class ServerManagementService {
         return false;
       }
 
-      // Execute docker-compose commands from the directory containing the docker-compose.yml
+      // Execute docker compose commands from the directory containing the docker-compose.yml
       const composeDir = path.dirname(dockerComposePath);
 
       // Stop the server
-      await execAsync('docker-compose down', { cwd: composeDir });
+      await execAsync('docker compose down', { cwd: composeDir });
 
       return true;
     } catch (error) {
