@@ -10,9 +10,9 @@ export class ServerConfigDto {
   @IsOptional()
   active?: boolean;
 
-  @IsEnum(['VANILLA', 'FORGE', 'AUTO_CURSEFORGE', 'SPIGOT', 'FABRIC', 'MAGMA', 'PAPER', 'QUILT'])
+  @IsEnum(['VANILLA', 'FORGE', 'AUTO_CURSEFORGE', 'CURSEFORGE', 'SPIGOT', 'FABRIC', 'MAGMA', 'PAPER', 'QUILT'])
   @IsOptional()
-  serverType?: 'VANILLA' | 'FORGE' | 'AUTO_CURSEFORGE' | 'SPIGOT' | 'FABRIC' | 'MAGMA' | 'PAPER' | 'QUILT';
+  serverType?: 'VANILLA' | 'FORGE' | 'AUTO_CURSEFORGE' | 'CURSEFORGE' | 'SPIGOT' | 'FABRIC' | 'MAGMA' | 'PAPER' | 'QUILT';
 
   // General configuration
   @IsString()
@@ -378,6 +378,23 @@ export class ServerConfigDto {
   @IsString()
   @IsOptional()
   cfSetLevelFrom?: string;
+
+  // Manual CurseForge (deprecated) specific
+  @IsString()
+  @IsOptional()
+  cfServerMod?: string;
+
+  @IsString()
+  @IsOptional()
+  cfBaseDir?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  useModpackStartScript?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  ftbLegacyJavaFixer?: boolean;
 }
 
 export class UpdateServerConfigDto extends PartialType(ServerConfigDto) {}

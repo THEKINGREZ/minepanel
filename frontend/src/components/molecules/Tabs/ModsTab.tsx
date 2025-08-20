@@ -21,9 +21,10 @@ interface ModsTabProps {
 
 export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
   const isCurseForge = config.serverType === "AUTO_CURSEFORGE";
+  const isManualCurseForge = config.serverType === "CURSEFORGE";
   const isForge = config.serverType === "FORGE";
 
-  if (!isCurseForge && !isForge) {
+  if (!isCurseForge && !isForge && !isManualCurseForge) {
     return (
       <Card className="bg-gray-900/60 border-gray-700/50 shadow-lg">
         <CardHeader className="pb-3">
@@ -50,7 +51,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
           <Image src="/images/gold.webp" alt="Mods" width={24} height={24} className="opacity-90" />
           Configuración de Mods
         </CardTitle>
-        <CardDescription className="text-gray-300">{isCurseForge ? "Configura un modpack de CurseForge para tu servidor" : "Configura los detalles de Forge para tu servidor"}</CardDescription>
+        <CardDescription className="text-gray-300">{isCurseForge ? "Configura un modpack de CurseForge para tu servidor" : isManualCurseForge ? "Configura modpacks de CurseForge manuales (modo obsoleto)" : "Configura los detalles de Forge para tu servidor"}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -63,6 +64,130 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
             <Input id="forgeBuild" value={config.forgeBuild} onChange={(e) => updateConfig("forgeBuild", e.target.value)} placeholder="43.2.0" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
             <p className="text-xs text-gray-400">Número de build de Forge para la versión de Minecraft seleccionada</p>
           </div>
+        )}
+
+        {isManualCurseForge && (
+          <>
+            <div className="bg-amber-900/30 border border-amber-700/30 rounded-md p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-amber-300 font-minecraft">Función obsoleta (Deprecated)</p>
+                  <p className="text-xs text-amber-200/80 mt-1">
+                    Este método manual para CurseForge está obsoleto. Se recomienda usar &quot;CurseForge Modpack&quot; (AUTO_CURSEFORGE) para nuevas instalaciones.
+                    Este modo requiere que subas manualmente los archivos de modpack al servidor.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="cfServerMod" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                  <Image src="/images/chest.webp" alt="Modpack" width={16} height={16} />
+                  Archivo del Modpack (CF_SERVER_MOD)
+                </Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                        <HelpCircle className="h-4 w-4 text-gray-400" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-md bg-gray-800 border-gray-700 text-gray-200">
+                      <p>Ruta completa al archivo .zip del modpack en el contenedor.</p>
+                      <p className="mt-1 text-xs">Ejemplo: /modpacks/SkyFactory_4_Server_4.1.0.zip</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="cfServerMod" 
+                value={config.cfServerMod || ""} 
+                onChange={(e) => updateConfig("cfServerMod", e.target.value)} 
+                placeholder="/modpacks/SkyFactory_4_Server_4.1.0.zip" 
+                className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" 
+              />
+              <p className="text-xs text-gray-400">Ruta al archivo ZIP del modpack de CurseForge dentro del contenedor</p>
+            </div>
+
+            <div className="space-y-2 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="cfBaseDir" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                  <Image src="/images/ender_chest.webp" alt="Directorio" width={16} height={16} />
+                  Directorio Base (CF_BASE_DIR)
+                </Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 p-0 bg-transparent hover:bg-gray-700/50">
+                        <HelpCircle className="h-4 w-4 text-gray-400" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
+                      <p>Directorio donde se expandirá el modpack. Por defecto: /data/FeedTheBeast</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <Input 
+                id="cfBaseDir" 
+                value={config.cfBaseDir || "/data/FeedTheBeast"} 
+                onChange={(e) => updateConfig("cfBaseDir", e.target.value)} 
+                placeholder="/data/FeedTheBeast" 
+                className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" 
+              />
+              <p className="text-xs text-gray-400">Directorio donde se extraerá y ejecutará el modpack</p>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="useModpackStartScript" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                  <Image src="/images/command-block.webp" alt="Script" width={16} height={16} />
+                  Usar Script de Inicio del Modpack
+                </Label>
+                <Switch 
+                  id="useModpackStartScript" 
+                  checked={config.useModpackStartScript ?? true} 
+                  onCheckedChange={(checked) => updateConfig("useModpackStartScript", checked)} 
+                />
+              </div>
+              <p className="text-xs text-gray-400">Si se desactiva, evita usar el script de inicio incluido en el modpack y usa la lógica estándar del servidor</p>
+            </div>
+
+            <div className="space-y-3 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="ftbLegacyJavaFixer" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                  <Image src="/images/redstone.webp" alt="Java Fixer" width={16} height={16} />
+                  FTB Legacy Java Fixer
+                </Label>
+                <Switch 
+                  id="ftbLegacyJavaFixer" 
+                  checked={config.ftbLegacyJavaFixer ?? false} 
+                  onCheckedChange={(checked) => updateConfig("ftbLegacyJavaFixer", checked)} 
+                />
+              </div>
+              <p className="text-xs text-gray-400">Activa la corrección para modpacks que fallan con &quot;unable to launch forgemodloader&quot;</p>
+            </div>
+
+            <div className="space-y-2 p-4 rounded-md bg-gray-800/50 border border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="cfApiKeyManual" className="text-gray-200 font-minecraft text-sm flex items-center gap-2">
+                  <Image src="/images/diamond.webp" alt="API Key" width={16} height={16} />
+                  API Key de CurseForge (CF_API_KEY)
+                </Label>
+              </div>
+              <Input 
+                id="cfApiKeyManual" 
+                value={config.cfApiKey || ""} 
+                onChange={(e) => updateConfig("cfApiKey", e.target.value)} 
+                placeholder="$2a$10$Iao..." 
+                type="password" 
+                className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" 
+              />
+              <p className="text-xs text-gray-400">API Key opcional para compatibilidad con algunos modpacks</p>
+            </div>
+          </>
         )}
 
         {isCurseForge && (

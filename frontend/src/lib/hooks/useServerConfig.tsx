@@ -115,6 +115,12 @@ const defaultConfig: ServerConfig = {
   cfParallelDownloads: "4",
   cfOverridesSkipExisting: false,
   cfSetLevelFrom: "",
+
+  // Manual CurseForge (deprecated) specific
+  cfServerMod: "",
+  cfBaseDir: "/data/FeedTheBeast",
+  useModpackStartScript: true,
+  ftbLegacyJavaFixer: false,
 };
 
 export function useServerConfig(serverId: string) {

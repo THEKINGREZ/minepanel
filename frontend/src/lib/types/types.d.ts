@@ -1,7 +1,7 @@
 export interface ServerConfig {
   id: string;
   active: boolean;
-  serverType: "VANILLA" | "FORGE" | "AUTO_CURSEFORGE" | "SPIGOT" | "FABRIC" | "MAGMA" | "PAPER" | "QUILT";
+  serverType: "VANILLA" | "FORGE" | "AUTO_CURSEFORGE" | "CURSEFORGE" | "SPIGOT" | "FABRIC" | "MAGMA" | "PAPER" | "QUILT";
 
   // General configuration
   serverName: string;
@@ -109,4 +109,10 @@ export interface ServerConfig {
   cfParallelDownloads?: string;
   cfOverridesSkipExisting?: boolean;
   cfSetLevelFrom?: string;
+
+  // Manual CurseForge (deprecated) specific
+  cfServerMod?: string;
+  cfBaseDir?: string;
+  useModpackStartScript?: boolean;
+  ftbLegacyJavaFixer?: boolean;
 }

@@ -193,6 +193,15 @@ export class DockerComposeService {
         serverConfig.cfApiKey = env.CF_API_KEY ?? '';
       }
 
+      // Add Manual CurseForge specific config (deprecated)
+      if (serverConfig.serverType === 'CURSEFORGE') {
+        serverConfig.cfServerMod = env.CF_SERVER_MOD ?? '';
+        serverConfig.cfBaseDir = env.CF_BASE_DIR ?? '/data';
+        serverConfig.useModpackStartScript = env.USE_MODPACK_START_SCRIPT !== 'false';
+        serverConfig.ftbLegacyJavaFixer = env.FTB_LEGACYJAVAFIXER === 'true';
+        serverConfig.cfApiKey = env.CF_API_KEY ?? '';
+      }
+
       return serverConfig;
     } catch (error) {
       console.error(`Error loading config for server ${serverId}:`, error);
@@ -313,6 +322,12 @@ export class DockerComposeService {
       cfParallelDownloads: '4',
       cfOverridesSkipExisting: false,
       cfSetLevelFrom: '',
+
+      // Manual CurseForge (deprecated) specific
+      cfServerMod: '',
+      cfBaseDir: '/data',
+      useModpackStartScript: true,
+      ftbLegacyJavaFixer: false,
     };
   }
 
@@ -412,7 +427,6 @@ export class DockerComposeService {
       MAX_PLAYERS: config.maxPlayers,
       OPS: config.ops,
       TZ: config.tz || 'UTC',
-      TYPE: config.serverType.toUpperCase(),
       ONLINE_MODE: String(config.onlineMode),
       PVP: String(config.pvp),
       ENABLE_COMMAND_BLOCK: String(config.commandBlock),
@@ -515,6 +529,15 @@ export class DockerComposeService {
     }
 
     // Add type-specific environment variables
+    // Set TYPE based on server type
+    if (config.serverType === 'AUTO_CURSEFORGE') {
+      environment['TYPE'] = 'AUTO_CURSEFORGE';
+    } else if (config.serverType === 'CURSEFORGE') {
+      environment['TYPE'] = 'CURSEFORGE';
+    } else {
+      environment['TYPE'] = config.serverType.toUpperCase();
+    }
+
     if (config.serverType === 'FORGE' && config.forgeBuild) {
       environment['FORGE_VERSION'] = config.forgeBuild;
     }
@@ -568,6 +591,26 @@ export class DockerComposeService {
 
       if (config.cfSetLevelFrom) {
         environment['CF_SET_LEVEL_FROM'] = config.cfSetLevelFrom;
+      }
+    } else if (config.serverType === 'CURSEFORGE') {
+      // Manual CurseForge (deprecated)
+      environment['TYPE'] = 'CURSEFORGE';
+      if (config.cfServerMod) {
+        environment['CF_SERVER_MOD'] = config.cfServerMod;
+      }
+      if (config.cfBaseDir) {
+        environment['CF_BASE_DIR'] = config.cfBaseDir;
+      }
+      if (config.useModpackStartScript === false) {
+        environment['USE_MODPACK_START_SCRIPT'] = 'false';
+      }
+      if (config.ftbLegacyJavaFixer) {
+        environment['FTB_LEGACYJAVAFIXER'] = 'true';
+      }
+      if (config.cfApiKey) {
+        environment['CF_API_KEY'] = config.cfApiKey;
+      } else {
+        environment['CF_API_KEY'] = process.env.CF_API_KEY;
       }
     } else {
       environment['VERSION'] = config.minecraftVersion;

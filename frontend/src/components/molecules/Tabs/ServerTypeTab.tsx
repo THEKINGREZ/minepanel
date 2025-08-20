@@ -27,7 +27,7 @@ export const ServerTypeTab: FC<ServerTypeTabProps> = ({ config, updateConfig, on
       </CardHeader>
 
       <CardContent>
-        <RadioGroup value={config.serverType} onValueChange={(value: "VANILLA" | "FORGE" | "AUTO_CURSEFORGE") => updateConfig("serverType", value)} className="space-y-4">
+        <RadioGroup value={config.serverType} onValueChange={(value: "VANILLA" | "FORGE" | "AUTO_CURSEFORGE" | "CURSEFORGE") => updateConfig("serverType", value)} className="space-y-4">
           <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }} className={`flex items-start space-x-4 rounded-md p-4 ${config.serverType === "VANILLA" ? "bg-emerald-600/10 border border-emerald-600/30" : "bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/60"}`}>
             <div className="relative flex items-center justify-center w-10 h-10 rounded-md bg-gray-800/70 border border-gray-700/50 flex-shrink-0">
               <Image src="/images/grass.webp" alt="Vanilla" width={24} height={24} />
@@ -70,6 +70,22 @@ export const ServerTypeTab: FC<ServerTypeTabProps> = ({ config, updateConfig, on
                 </Label>
               </div>
               <p className="text-sm text-gray-300 mt-1">Instala automáticamente modpacks de CurseForge. Se puede configurar mediante URL, Slug o ZIP del modpack.</p>
+            </div>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.01 }} transition={{ duration: 0.2 }} className={`flex items-start space-x-4 rounded-md p-4 ${config.serverType === "CURSEFORGE" ? "bg-amber-600/10 border border-amber-600/30" : "bg-gray-800/40 border border-gray-700/50 hover:bg-gray-800/60"}`}>
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-md bg-gray-800/70 border border-gray-700/50 flex-shrink-0">
+              <Image src="/images/book.webp" alt="CurseForge Manual" width={24} height={24} />
+              <div className="absolute -top-1 -right-1 bg-amber-500 text-black text-xs px-1 rounded text-[8px] font-bold">LEGACY</div>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="CURSEFORGE" id="curseforge-manual" className="border-amber-600/50" />
+                <Label htmlFor="curseforge-manual" className="text-base font-medium text-gray-100 font-minecraft">
+                  CurseForge Manual (Deprecated)
+                </Label>
+              </div>
+              <p className="text-sm text-gray-300 mt-1">Modo manual para modpacks de CurseForge. Utiliza archivos ZIP precargados. Función obsoleta, recomendamos usar CurseForge Modpack.</p>
             </div>
           </motion.div>
         </RadioGroup>
