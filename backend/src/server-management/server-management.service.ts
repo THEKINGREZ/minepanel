@@ -308,27 +308,279 @@ export class ServerManagementService {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
-  async getServerLogs(serverId: string, lines: number = 100): Promise<{ logs: string }> {
+  async getServerLogs(serverId: string, lines: number = 100): Promise<{ 
+    logs: string; 
+    hasErrors: boolean; 
+    lastUpdate: Date;
+    status: 'running' | 'stopped' | 'starting' | 'not_found';
+    metadata?: {
+      totalLines: number;
+      errorCount: number;
+      warningCount: number;
+    }
+  }> {
     try {
       // Check if the server exists
       if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
-        return { logs: 'Server not found' };
+        return { 
+          logs: 'Server not found',
+          hasErrors: false,
+          lastUpdate: new Date(),
+          status: 'not_found'
+        };
       }
 
       // Get container ID using our flexible pattern helper
       const containerId = await this.findContainerId(serverId);
+      const serverStatus = await this.getServerStatus(serverId);
 
       if (!containerId) {
-        return { logs: 'Container not found' };
+        return { 
+          logs: 'Container not found',
+          hasErrors: false,
+          lastUpdate: new Date(),
+          status: serverStatus
+        };
       }
 
-      // Get logs from the container
-      const { stdout: logs } = await execAsync(`docker logs --tail ${lines} ${containerId}`);
+      // Get logs from the container with timestamps
+      const { stdout: logs, stderr } = await execAsync(`docker logs --tail ${lines} --timestamps ${containerId} 2>&1`);
 
-      return { logs };
+      // Analyze logs for errors and warnings
+      const logAnalysis = this.analyzeLogs(logs);
+
+      return { 
+        logs,
+        hasErrors: logAnalysis.hasErrors,
+        lastUpdate: new Date(),
+        status: serverStatus,
+        metadata: {
+          totalLines: logAnalysis.totalLines,
+          errorCount: logAnalysis.errorCount,
+          warningCount: logAnalysis.warningCount
+        }
+      };
     } catch (error) {
       console.error(`Failed to get logs for server ${serverId}:`, error);
-      return { logs: `Error retrieving logs: ${error.message}` };
+      return { 
+        logs: `Error retrieving logs: ${error.message}`,
+        hasErrors: true,
+        lastUpdate: new Date(),
+        status: 'not_found'
+      };
+    }
+  }
+
+  private analyzeLogs(logs: string): {
+    hasErrors: boolean;
+    totalLines: number;
+    errorCount: number;
+    warningCount: number;
+  } {
+    if (!logs) {
+      return {
+        hasErrors: false,
+        totalLines: 0,
+        errorCount: 0,
+        warningCount: 0
+      };
+    }
+
+    const lines = logs.split('\n').filter(line => line.trim());
+    const totalLines = lines.length;
+
+    // Error patterns for Minecraft servers
+    const errorPatterns = [
+      /ERROR/gi,
+      /SEVERE/gi, 
+      /FATAL/gi,
+      /Exception/gi,
+      /java\.lang\./gi,
+      /Caused by:/gi,
+      /\[STDERR\]/gi,
+      /Failed to/gi,
+      /Cannot/gi,
+      /Unable to/gi,
+      /\[Server thread\/ERROR\]/gi,
+      /IllegalArgumentException/gi,
+      /NullPointerException/gi,
+      /OutOfMemoryError/gi,
+      /StackOverflowError/gi,
+      /Connection refused/gi,
+      /Timeout/gi,
+      /Permission denied/gi
+    ];
+
+    // Warning patterns
+    const warningPatterns = [
+      /WARN/gi,
+      /WARNING/gi,
+      /\[Server thread\/WARN\]/gi,
+      /deprecated/gi,
+      /outdated/gi,
+      /could not/gi,
+      /missing/gi,
+      /slow/gi,
+      /lag/gi
+    ];
+
+    let errorCount = 0;
+    let warningCount = 0;
+
+    lines.forEach(line => {
+      // Count errors
+      errorPatterns.forEach(pattern => {
+        if (pattern.test(line)) {
+          errorCount++;
+        }
+      });
+
+      // Count warnings (but don't double count errors as warnings)
+      if (!errorPatterns.some(pattern => pattern.test(line))) {
+        warningPatterns.forEach(pattern => {
+          if (pattern.test(line)) {
+            warningCount++;
+          }
+        });
+      }
+    });
+
+    return {
+      hasErrors: errorCount > 0,
+      totalLines,
+      errorCount,
+      warningCount
+    };
+  }
+
+  async getServerLogsStream(serverId: string, lines: number = 100, since?: string): Promise<{ 
+    logs: string; 
+    hasErrors: boolean; 
+    lastUpdate: Date;
+    status: 'running' | 'stopped' | 'starting' | 'not_found';
+    metadata?: {
+      totalLines: number;
+      errorCount: number;
+      warningCount: number;
+    }
+  }> {
+    try {
+      // Check if the server exists
+      if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
+        return { 
+          logs: 'Server not found',
+          hasErrors: false,
+          lastUpdate: new Date(),
+          status: 'not_found'
+        };
+      }
+
+      // Get container ID using our flexible pattern helper
+      const containerId = await this.findContainerId(serverId);
+      const serverStatus = await this.getServerStatus(serverId);
+
+      if (!containerId) {
+        return { 
+          logs: 'Container not found',
+          hasErrors: false,
+          lastUpdate: new Date(),
+          status: serverStatus
+        };
+      }
+
+      // Build docker logs command with optional since parameter
+      let dockerCommand = `docker logs --tail ${lines} --timestamps`;
+      if (since) {
+        dockerCommand += ` --since ${since}`;
+      }
+      dockerCommand += ` ${containerId} 2>&1`;
+
+      // Get logs from the container with timestamps
+      const { stdout: logs, stderr } = await execAsync(dockerCommand);
+
+      // Analyze logs for errors and warnings
+      const logAnalysis = this.analyzeLogs(logs);
+
+      return { 
+        logs,
+        hasErrors: logAnalysis.hasErrors,
+        lastUpdate: new Date(),
+        status: serverStatus,
+        metadata: {
+          totalLines: logAnalysis.totalLines,
+          errorCount: logAnalysis.errorCount,
+          warningCount: logAnalysis.warningCount
+        }
+      };
+    } catch (error) {
+      console.error(`Failed to get logs stream for server ${serverId}:`, error);
+      return { 
+        logs: `Error retrieving logs: ${error.message}`,
+        hasErrors: true,
+        lastUpdate: new Date(),
+        status: 'not_found'
+      };
+    }
+  }
+
+  async getServerLogsSince(serverId: string, timestamp: string, lines: number = 1000): Promise<{ 
+    logs: string; 
+    hasErrors: boolean; 
+    lastUpdate: Date;
+    status: 'running' | 'stopped' | 'starting' | 'not_found';
+    hasNewContent: boolean;
+  }> {
+    try {
+      // Check if the server exists
+      if (!(await fs.pathExists(path.join(this.BASE_DIR, serverId)))) {
+        return { 
+          logs: 'Server not found',
+          hasErrors: false,
+          lastUpdate: new Date(),
+          status: 'not_found',
+          hasNewContent: false
+        };
+      }
+
+      // Get container ID using our flexible pattern helper
+      const containerId = await this.findContainerId(serverId);
+      const serverStatus = await this.getServerStatus(serverId);
+
+      if (!containerId) {
+        return { 
+          logs: 'Container not found',
+          hasErrors: false,
+          lastUpdate: new Date(),
+          status: serverStatus,
+          hasNewContent: false
+        };
+      }
+
+      // Get logs since the specified timestamp
+      const { stdout: logs, stderr } = await execAsync(`docker logs --since ${timestamp} --timestamps ${containerId} 2>&1`);
+
+      // Check if there's new content
+      const hasNewContent = logs.trim().length > 0;
+
+      // Analyze logs for errors and warnings
+      const logAnalysis = this.analyzeLogs(logs);
+
+      return { 
+        logs,
+        hasErrors: logAnalysis.hasErrors,
+        lastUpdate: new Date(),
+        status: serverStatus,
+        hasNewContent
+      };
+    } catch (error) {
+      console.error(`Failed to get logs since ${timestamp} for server ${serverId}:`, error);
+      return { 
+        logs: `Error retrieving logs: ${error.message}`,
+        hasErrors: true,
+        lastUpdate: new Date(),
+        status: 'not_found',
+        hasNewContent: false
+      };
     }
   }
 

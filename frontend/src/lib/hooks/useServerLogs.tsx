@@ -1,20 +1,172 @@
-import { useState } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { getServerLogs } from "@/services/docker/fetchs";
 
+interface LogsError {
+  type: "container_not_found" | "server_not_found" | "connection_error" | "unknown";
+  message: string;
+}
+
+interface LogEntry {
+  id: string;
+  content: string;
+  timestamp: Date;
+  level: "info" | "warn" | "error" | "debug" | "unknown";
+}
+
 export function useServerLogs(serverId: string) {
   const [logs, setLogs] = useState<string>("");
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [lineCount, setLineCount] = useState<number>(100);
+  const [lineCount, setLineCount] = useState<number>(500); // Increased default
+  const [error, setError] = useState<LogsError | null>(null);
+  const [hasErrors, setHasErrors] = useState<boolean>(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [isRealTime, setIsRealTime] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [levelFilter, setLevelFilter] = useState<string>("all");
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const previousLogsRef = useRef<string>("");
+
+  // Parse log level from content
+  const parseLogLevel = useCallback((content: string): "info" | "warn" | "error" | "debug" | "unknown" => {
+    const upperContent = content.toUpperCase();
+    if (upperContent.includes("[ERROR]") || upperContent.includes("ERROR") || upperContent.includes("SEVERE") || upperContent.includes("FATAL")) {
+      return "error";
+    }
+    if (upperContent.includes("[WARN]") || upperContent.includes("WARNING") || upperContent.includes("WARN")) {
+      return "warn";
+    }
+    if (upperContent.includes("[DEBUG]") || upperContent.includes("DEBUG")) {
+      return "debug";
+    }
+    if (upperContent.includes("[INFO]") || upperContent.includes("INFO")) {
+      return "info";
+    }
+    return "unknown";
+  }, []);
+
+  // Parse logs into structured entries
+  const parseLogsToEntries = useCallback((logsContent: string): LogEntry[] => {
+    if (!logsContent) return [];
+    
+    const lines = logsContent.split('\n').filter(line => line.trim());
+    return lines.map((line, index) => ({
+      id: `${Date.now()}-${index}`,
+      content: line,
+      timestamp: new Date(),
+      level: parseLogLevel(line)
+    }));
+  }, [parseLogLevel]);
+
+  // Start real-time updates
+  const startRealTimeUpdates = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(async () => {
+      if (!isRealTime) return;
+      
+      try {
+        const data = await getServerLogs(serverId, lineCount);
+        
+        // Only update if logs have changed
+        if (data.logs !== previousLogsRef.current) {
+          previousLogsRef.current = data.logs;
+          setLogs(data.logs);
+          setLogEntries(parseLogsToEntries(data.logs));
+          setLastUpdate(new Date());
+          
+          // Check for errors in new content
+          const errorPatterns = [
+            /ERROR/gi, /SEVERE/gi, /FATAL/gi, /Exception/gi,
+            /java\.lang\./gi, /Caused by:/gi, /\[STDERR\]/gi,
+            /Failed to/gi, /Cannot/gi, /Unable to/gi
+          ];
+          
+          const logsHaveErrors = errorPatterns.some(pattern => pattern.test(data.logs));
+          setHasErrors(logsHaveErrors);
+        }
+      } catch (error) {
+        console.error("Real-time log update failed:", error);
+      }
+    }, 3000); // Update every 3 seconds
+  }, [serverId, lineCount, isRealTime, parseLogsToEntries]);
+
+  // Stop real-time updates
+  const stopRealTimeUpdates = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  // Toggle real-time mode
+  const toggleRealTime = useCallback(() => {
+    setIsRealTime(prev => {
+      const newValue = !prev;
+      if (newValue) {
+        startRealTimeUpdates();
+      } else {
+        stopRealTimeUpdates();
+      }
+      return newValue;
+    });
+  }, [startRealTimeUpdates, stopRealTimeUpdates]);
 
   const fetchLogs = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await getServerLogs(serverId, lineCount);
-      setLogs(data.logs);
+      
+      // Check for specific error messages in logs
+      if (data.logs.includes("Container not found")) {
+        setError({
+          type: "container_not_found",
+          message: "El contenedor no está ejecutándose o no existe"
+        });
+        setLogs("El servidor no está en ejecución. Inicia el servidor para ver los logs.");
+      } else if (data.logs.includes("Server not found")) {
+        setError({
+          type: "server_not_found",
+          message: "El servidor no existe en el sistema"
+        });
+        setLogs("No se encontró el servidor especificado.");
+      } else if (data.logs.includes("Error retrieving logs:")) {
+        setError({
+          type: "connection_error",
+          message: "Error al conectar con Docker"
+        });
+        setLogs(data.logs);
+      } else {
+        setLogs(data.logs);
+        setLogEntries(parseLogsToEntries(data.logs));
+        setLastUpdate(new Date());
+        previousLogsRef.current = data.logs;
+        
+        // Check for errors in the logs content
+        const errorPatterns = [
+          /ERROR/gi, /SEVERE/gi, /FATAL/gi, /Exception/gi,
+          /java\.lang\./gi, /Caused by:/gi, /\[STDERR\]/gi,
+          /Failed to/gi, /Cannot/gi, /Unable to/gi
+        ];
+        
+        const logsHaveErrors = errorPatterns.some(pattern => pattern.test(data.logs));
+        setHasErrors(logsHaveErrors);
+      }
+      
       return data.logs;
     } catch (error) {
       console.error("Error fetching logs:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+      
+      setError({
+        type: "unknown",
+        message: errorMessage
+      });
+      
       toast.error("Error al obtener los logs del servidor");
       return "";
     } finally {
@@ -22,15 +174,54 @@ export function useServerLogs(serverId: string) {
     }
   };
 
+  // Effect for managing real-time updates
+  useEffect(() => {
+    if (isRealTime) {
+      startRealTimeUpdates();
+    } else {
+      stopRealTimeUpdates();
+    }
+
+    return () => {
+      stopRealTimeUpdates();
+    };
+  }, [isRealTime, startRealTimeUpdates, stopRealTimeUpdates]);
+
   const setLogLines = (lines: number) => {
     setLineCount(lines);
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
+  // Filter logs based on search term and level
+  const filteredLogEntries = logEntries.filter(entry => {
+    const matchesSearch = searchTerm === "" || 
+      entry.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLevel = levelFilter === "all" || entry.level === levelFilter;
+    return matchesSearch && matchesLevel;
+  });
+
   return {
     logs,
+    logEntries,
+    filteredLogEntries,
     loading,
     lineCount,
+    error,
+    hasErrors,
+    lastUpdate,
+    isRealTime,
+    searchTerm,
+    levelFilter,
     fetchLogs,
     setLogLines,
+    clearError,
+    toggleRealTime,
+    setSearchTerm,
+    setLevelFilter,
+    startRealTimeUpdates,
+    stopRealTimeUpdates,
   };
 }

@@ -125,7 +125,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent className="bg-gray-800 border-gray-700 text-gray-200">
-                      <p>Directorio donde se expandirá el modpack. Por defecto: /data/FeedTheBeast</p>
+                      <p>Directorio donde se expandirá el modpack. Por defecto: /data</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

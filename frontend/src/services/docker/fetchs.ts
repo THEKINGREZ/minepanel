@@ -45,11 +45,103 @@ export const getAllServersStatus = async (): Promise<{ [serverId: string]: "runn
   return response.data;
 };
 
-export const getServerLogs = async (serverId: string, limit: number = 100): Promise<{ logs: string }> => {
+export const getServerLogs = async (
+  serverId: string, 
+  limit: number = 100,
+  since?: string,
+  stream?: boolean
+): Promise<{ 
+  logs: string;
+  hasErrors: boolean;
+  lastUpdate: Date;
+  status: 'running' | 'stopped' | 'starting' | 'not_found';
+  metadata?: {
+    totalLines: number;
+    errorCount: number;
+    warningCount: number;
+  }
+}> => {
+  const params: Record<string, string | number> = { lines: limit };
+  
+  if (since) {
+    params.since = since;
+  }
+  
+  if (stream) {
+    params.stream = 'true';
+  }
+
   const response = await api.get(`${API_URL}/servers/${serverId}/logs`, {
-    params: { lines: limit },
+    params,
   });
-  return response.data;
+  
+  // Convert lastUpdate string back to Date if needed
+  const data = response.data;
+  if (data.lastUpdate && typeof data.lastUpdate === 'string') {
+    data.lastUpdate = new Date(data.lastUpdate);
+  }
+  
+  return data;
+};
+
+export const getServerLogsStream = async (
+  serverId: string,
+  lines: number = 500,
+  since?: string
+): Promise<{ 
+  logs: string;
+  hasErrors: boolean;
+  lastUpdate: Date;
+  status: 'running' | 'stopped' | 'starting' | 'not_found';
+  metadata?: {
+    totalLines: number;
+    errorCount: number;
+    warningCount: number;
+  }
+}> => {
+  const params: Record<string, string | number> = { lines };
+  
+  if (since) {
+    params.since = since;
+  }
+
+  const response = await api.get(`${API_URL}/servers/${serverId}/logs/stream`, {
+    params,
+  });
+  
+  // Convert lastUpdate string back to Date if needed
+  const data = response.data;
+  if (data.lastUpdate && typeof data.lastUpdate === 'string') {
+    data.lastUpdate = new Date(data.lastUpdate);
+  }
+  
+  return data;
+};
+
+export const getServerLogsSince = async (
+  serverId: string,
+  timestamp: string,
+  lines: number = 1000
+): Promise<{ 
+  logs: string;
+  hasErrors: boolean;
+  lastUpdate: Date;
+  status: 'running' | 'stopped' | 'starting' | 'not_found';
+  hasNewContent: boolean;
+}> => {
+  const params: Record<string, string | number> = { lines };
+
+  const response = await api.get(`${API_URL}/servers/${serverId}/logs/since/${timestamp}`, {
+    params,
+  });
+  
+  // Convert lastUpdate string back to Date if needed
+  const data = response.data;
+  if (data.lastUpdate && typeof data.lastUpdate === 'string') {
+    data.lastUpdate = new Date(data.lastUpdate);
+  }
+  
+  return data;
 };
 
 export const deleteServer = async (serverId: string): Promise<{ success: boolean; message: string }> => {
