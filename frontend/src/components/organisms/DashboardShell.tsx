@@ -21,7 +21,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
     // Marcar como hidratado para evitar mismatches
     setIsHydrated(true);
 
-    // Verificar autenticación solo después de la hidratación
+    // Check authentication only after hydration
     const checkAuth = () => {
       try {
         if (!isAuthenticated()) {
@@ -35,14 +35,13 @@ export function DashboardShell({ children }: DashboardShellProps) {
       }
     };
 
-    // Pequeño delay para asegurar que la hidratación esté completa
+    // Small delay to ensure hydration is complete
     const timeoutId = setTimeout(checkAuth, 100);
 
     return () => clearTimeout(timeoutId);
   }, [router]);
 
-  // Mostrar loading durante la hidratación y verificación de autenticación
-  // Mostrar loading durante la hidratación y verificación de autenticación
+  // Show loading during hydration and authentication check
   if (!isHydrated || !isAuthChecked) {
     return (
       <div className="flex min-h-screen bg-gray-900 items-center justify-center">
@@ -67,7 +66,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
         {/* Header */}
         <DashboardHeader />
 
-        {/* Área de contenido */}
+        {/* Content area */}
         <main className="flex-1 p-6 overflow-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-7xl mx-auto">
             {children}

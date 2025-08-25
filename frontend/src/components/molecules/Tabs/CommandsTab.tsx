@@ -22,7 +22,7 @@ export const CommandsTab: FC<CommandsTabProps> = ({ serverId, serverStatus, rcon
 
   const isServerRunning = serverStatus === "running";
 
-  // Lista expandida de comandos comunes de Minecraft con categorías
+  // Expanded list of common Minecraft commands with categories
   const allCommands = [
     // Jugadores
     { label: "Listar jugadores", command: "list", category: "jugadores" },
@@ -51,7 +51,7 @@ export const CommandsTab: FC<CommandsTabProps> = ({ serverId, serverStatus, rcon
     { label: "Dar manzanas doradas", command: "give @p minecraft:golden_apple 16", category: "items" },
     { label: "Dar bloque de comandos", command: "give @p minecraft:command_block", category: "items" },
 
-    // Administración
+    // Administration
     { label: "Ver seed del mundo", command: "seed", category: "admin" },
     { label: "Guardar mundo", command: "save-all", category: "admin" },
     { label: "Expulsar a jugador", command: "kick <jugador>", category: "admin" },
@@ -60,7 +60,7 @@ export const CommandsTab: FC<CommandsTabProps> = ({ serverId, serverStatus, rcon
     { label: "Modo spigot timings", command: "timings on", category: "admin" },
   ];
 
-  // Comandos comunes para mostrar como botones rápidos
+  // Common commands to show as quick buttons
   const commonCommands = allCommands.slice(0, 7);
 
   useEffect(() => {

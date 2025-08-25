@@ -21,7 +21,7 @@ export default function Home() {
   const router = useRouter();
   const { t } = useLanguage();
 
-  // Redirigir al dashboard si ya está autenticado
+  // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (isAuthenticated()) {
       router.push("/dashboard");
@@ -55,7 +55,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[url('/images/minecraft-bg-blur.png')] bg-cover bg-center relative">
-      {/* Overlay oscuro para mejorar legibilidad */}
+      {/* Dark overlay to improve readability */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
       <header className="relative z-10 border-b border-gray-800/60 bg-black/30 backdrop-blur-md">
@@ -128,7 +128,7 @@ export default function Home() {
             </Card>
           </motion.div>
 
-          {/* Elementos decorativos de Minecraft */}
+          {/* Minecraft decorative elements */}
           <div className="mt-8 flex justify-center space-x-4">
             <Image src="/images/grass.webp" alt="Grass Block" width={40} height={40} className="animate-bounce" style={{ animationDelay: "0.1s", animationDuration: "2s" }} />
             <Image src="/images/diamond.webp" alt="Diamond" width={40} height={40} className="animate-bounce" style={{ animationDelay: "0.3s", animationDuration: "2.4s" }} />

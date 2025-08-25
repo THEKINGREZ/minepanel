@@ -253,7 +253,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header de la página */}
+      {/* Page header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white font-minecraft flex items-center gap-3">
@@ -426,7 +426,7 @@ export default function Dashboard() {
         )}
       </motion.div>
 
-      {/* Decoración */}
+      {/* Decoration */}
       {servers.length > 0 && (
         <div className="flex justify-center gap-8 pt-8">
           <motion.div animate={{ y: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}>

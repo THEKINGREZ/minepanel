@@ -39,7 +39,7 @@ export class ServerManagementController {
         throw new BadRequestException('Server ID is required');
       }
 
-      // Validar el ID del servidor (solo caracteres alfanuméricos, guiones y guiones bajos)
+      // Validate server ID (only alphanumeric characters, hyphens and underscores)
       if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
         throw new BadRequestException('Server ID can only contain letters, numbers, hyphens, and underscores');
       }
