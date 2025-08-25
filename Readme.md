@@ -138,7 +138,7 @@ NEXT_PUBLIC_DEFAULT_LANGUAGE=en
 
 ## What's still missing
 
-- [x] Translate everything to English
+- [x] Translate everything to English (Done thanks to [ang3lo-azevedo](https://github.com/ang3lo-azevedo))
 - [ ] Support for more modpack platforms
 - [x] Backup system (already done!)
 - [ ] User roles and permissions
