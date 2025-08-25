@@ -73,10 +73,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                 <Info className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-amber-300 font-minecraft">Función obsoleta (Deprecated)</p>
-                  <p className="text-xs text-amber-200/80 mt-1">
-                    Este método manual para CurseForge está obsoleto. Se recomienda usar &quot;CurseForge Modpack&quot; (AUTO_CURSEFORGE) para nuevas instalaciones.
-                    Este modo requiere que subas manualmente los archivos de modpack al servidor.
-                  </p>
+                  <p className="text-xs text-amber-200/80 mt-1">Este método manual para CurseForge está obsoleto. Se recomienda usar &quot;CurseForge Modpack&quot; (AUTO_CURSEFORGE) para nuevas instalaciones. Este modo requiere que subas manualmente los archivos de modpack al servidor.</p>
                 </div>
               </div>
             </div>
@@ -101,13 +98,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <Input 
-                id="cfServerMod" 
-                value={config.cfServerMod || ""} 
-                onChange={(e) => updateConfig("cfServerMod", e.target.value)} 
-                placeholder="/modpacks/SkyFactory_4_Server_4.1.0.zip" 
-                className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" 
-              />
+              <Input id="cfServerMod" value={config.cfServerMod || ""} onChange={(e) => updateConfig("cfServerMod", e.target.value)} placeholder="/modpacks/SkyFactory_4_Server_4.1.0.zip" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
               <p className="text-xs text-gray-400">Ruta al archivo ZIP del modpack de CurseForge dentro del contenedor</p>
             </div>
 
@@ -130,13 +121,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <Input 
-                id="cfBaseDir" 
-                value={config.cfBaseDir || "/data/FeedTheBeast"} 
-                onChange={(e) => updateConfig("cfBaseDir", e.target.value)} 
-                placeholder="/data/FeedTheBeast" 
-                className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" 
-              />
+              <Input id="cfBaseDir" value={config.cfBaseDir || "/data/FeedTheBeast"} onChange={(e) => updateConfig("cfBaseDir", e.target.value)} placeholder="/data/FeedTheBeast" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
               <p className="text-xs text-gray-400">Directorio donde se extraerá y ejecutará el modpack</p>
             </div>
 
@@ -146,11 +131,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                   <Image src="/images/command-block.webp" alt="Script" width={16} height={16} />
                   Usar Script de Inicio del Modpack
                 </Label>
-                <Switch 
-                  id="useModpackStartScript" 
-                  checked={config.useModpackStartScript ?? true} 
-                  onCheckedChange={(checked) => updateConfig("useModpackStartScript", checked)} 
-                />
+                <Switch id="useModpackStartScript" checked={config.useModpackStartScript ?? true} onCheckedChange={(checked) => updateConfig("useModpackStartScript", checked)} />
               </div>
               <p className="text-xs text-gray-400">Si se desactiva, evita usar el script de inicio incluido en el modpack y usa la lógica estándar del servidor</p>
             </div>
@@ -161,11 +142,7 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                   <Image src="/images/redstone.webp" alt="Java Fixer" width={16} height={16} />
                   FTB Legacy Java Fixer
                 </Label>
-                <Switch 
-                  id="ftbLegacyJavaFixer" 
-                  checked={config.ftbLegacyJavaFixer ?? false} 
-                  onCheckedChange={(checked) => updateConfig("ftbLegacyJavaFixer", checked)} 
-                />
+                <Switch id="ftbLegacyJavaFixer" checked={config.ftbLegacyJavaFixer ?? false} onCheckedChange={(checked) => updateConfig("ftbLegacyJavaFixer", checked)} />
               </div>
               <p className="text-xs text-gray-400">Activa la corrección para modpacks que fallan con &quot;unable to launch forgemodloader&quot;</p>
             </div>
@@ -177,15 +154,11 @@ export const ModsTab: FC<ModsTabProps> = ({ config, updateConfig, onSave }) => {
                   API Key de CurseForge (CF_API_KEY)
                 </Label>
               </div>
-              <Input 
-                id="cfApiKeyManual" 
-                value={config.cfApiKey || ""} 
-                onChange={(e) => updateConfig("cfApiKey", e.target.value)} 
-                placeholder="$2a$10$Iao..." 
-                type="password" 
-                className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" 
-              />
+              <Input id="cfApiKeyManual" value={config.cfApiKey || ""} onChange={(e) => updateConfig("cfApiKey", e.target.value)} placeholder="$2a$10$Iao..." type="password" className="bg-gray-800/70 text-gray-200 border-gray-700/50 focus:border-emerald-500/50 focus:ring-emerald-500/30" />
               <p className="text-xs text-gray-400">API Key opcional para compatibilidad con algunos modpacks</p>
+              <p className="text-xs text-amber-300 mt-1 font-minecraft">
+                Si tu API Key contiene <b>$</b>, debes escribirla con doble <b>$</b> (ejemplo: <code>$$2a$$10$$...</code>) en el archivo <b>.env</b>.
+              </p>
             </div>
           </>
         )}

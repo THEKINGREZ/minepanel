@@ -42,7 +42,38 @@ minecraft-server-manager/
 └── filebrowser/      # For manual file handling
 ```
 
-## Before you start
+## Important: Configure your environment variables first
+
+Before running the project, you **must create your `.env` files** for both the backend and frontend:
+
+- Copy `.env.example` to `.env` in the `backend` folder:
+  ```bash
+  cp backend/.env.example backend/.env
+  ```
+- Copy `.env.example` to `.env` in the `frontend` folder:
+  ```bash
+  cp frontend/.env.example frontend/.env
+  ```
+
+Then edit the values according to your environment. **It is not necessary to enter the `CF_API_KEY`.** (You can leave it blank or add a comment.).
+
+> ⚠️ **Security warning:**
+>
+> The default admin password hash is:
+>
+> `$2a$12$/ImficEXuymsxlZap5.92euInslhhQB4Yg/gZS5zusrQ0aanIU2sO`
+>
+> This is for the user `admin`. **You should change this to your own password hash!**
+>
+> - Never use the default hash in production.
+> - To generate a new hash, use a tool like [bcrypt-generator.com](https://bcrypt-generator.com/) or the `bcrypt` library in Node.js.
+> - Example Node.js command:
+>
+>   ```js
+>   require("bcrypt").hashSync("your-new-password", 12);
+>   ```
+>
+> Paste your new hash in the `.env` file.
 
 You need to have installed:
 
@@ -105,7 +136,7 @@ Then go to: `http://localhost:25580`
 - Username: `admin`
 - Password: `admin`
 
-> ⚠️ **Important**: Change these credentials immediately after first login
+> ⚠️ **Important**: Change these credentials in .env
 
 With Filebrowser you can:
 
