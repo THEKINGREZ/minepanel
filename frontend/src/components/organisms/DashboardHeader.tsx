@@ -67,7 +67,7 @@ export function DashboardHeader() {
                     </div>
                   </div>
                   <div className="flex flex-row items-center py-1 text-white px-2">
-                    <LanguageSwitcher /> <p>Change languaje</p>
+                    <LanguageSwitcher /> <p className="px-2">Change languaje</p>
                   </div>
                   <div className="py-2">
                     <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-600/20 transition-colors">
