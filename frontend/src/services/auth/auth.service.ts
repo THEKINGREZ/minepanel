@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import api from "../axios.service";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3002";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const login = async (username: string, password: string) => {
   try {
-    const response = await api.post(`${API_URL}/auth/login`, {
-      username,
-      password,
-    },
-    { withCredentials: true }
-  );
+    const response = await api.post(
+      `${API_URL}/auth/login`,
+      {
+        username,
+        password,
+      },
+      { withCredentials: true }
+    );
 
     if (response.data.access_token) {
       // Save token in localStorage
@@ -18,9 +20,7 @@ export const login = async (username: string, password: string) => {
       localStorage.setItem("username", response.data.username);
 
       // Configure Axios to include token in all future requests
-      api.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${response.data.access_token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${response.data.access_token}`;
 
       return { success: true, data: response.data };
     }
@@ -68,9 +68,8 @@ export const setupAxiosInterceptors = () => {
     (error) => {
       if (error.response?.status === 401) {
         logout();
-        window.location.href = "/";
       }
-      return Promise.reject(error instanceof Error ? error : new Error(error.message || 'Authentication error'));
+      return Promise.reject(error instanceof Error ? error : new Error(error.message || "Authentication error"));
     }
   );
 };
