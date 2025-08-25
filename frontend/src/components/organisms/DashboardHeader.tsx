@@ -4,14 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { LogOut, Settings, User, Bell, ChevronDown } from "lucide-react";
+import { LogOut, ChevronDown } from "lucide-react";
 import { logout } from "@/services/auth/auth.service";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function DashboardHeader() {
   const router = useRouter();
-  const [notifications] = useState(3);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -42,16 +40,6 @@ export function DashboardHeader() {
             <span className="text-sm text-gray-300 font-minecraft">Sistema Activo</span>
           </div>
 
-          {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative p-2 hover:bg-gray-800/60">
-            <Bell className="h-5 w-5 text-gray-400" />
-            {notifications > 0 && (
-              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                {notifications}
-              </Badge>
-            )}
-          </Button>
-
           {/* User Menu */}
           <div className="relative" ref={menuRef}>
             <Button variant="ghost" className="flex items-center gap-3 hover:bg-gray-800/60 p-2" onClick={() => setShowUserMenu(!showUserMenu)}>
@@ -80,15 +68,6 @@ export function DashboardHeader() {
                   </div>
 
                   <div className="py-2">
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-gray-800/60 transition-colors">
-                      <User className="h-4 w-4" />
-                      Perfil
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-sm text-white hover:bg-gray-800/60 transition-colors">
-                      <Settings className="h-4 w-4" />
-                      Configuración
-                    </button>
-                    <hr className="my-2 border-gray-700" />
                     <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-600/20 transition-colors">
                       <LogOut className="h-4 w-4" />
                       Cerrar Sesión
