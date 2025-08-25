@@ -8,6 +8,7 @@ import { Save } from "lucide-react";
 import { ServerConfig } from "@/lib/types/types";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/hooks/useLanguage";
 
 interface ServerTypeTabProps {
   config: ServerConfig;
@@ -16,14 +17,15 @@ interface ServerTypeTabProps {
 }
 
 export const ServerTypeTab: FC<ServerTypeTabProps> = ({ config, updateConfig, onSave }) => {
+  const { t } = useLanguage();
   return (
     <Card className="bg-gray-900/60 border-gray-700/50 shadow-lg">
       <CardHeader className="pb-3">
         <CardTitle className="text-xl text-emerald-400 font-minecraft flex items-center gap-2">
           <Image src="/images/server-icon.png" alt="Server Type" width={24} height={24} className="opacity-90" />
-          Tipo de Servidor
+          {t("serverType")}
         </CardTitle>
-        <CardDescription className="text-gray-300">Selecciona el tipo de servidor de Minecraft que deseas configurar</CardDescription>
+        <CardDescription className="text-gray-300">{t("serverTypeDescription")}</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -39,7 +41,7 @@ export const ServerTypeTab: FC<ServerTypeTabProps> = ({ config, updateConfig, on
                   Vanilla
                 </Label>
               </div>
-              <p className="text-sm text-gray-300 mt-1">Servidor básico de Minecraft sin mods ni plugins. Ideal para jugar en modo supervivencia clásico.</p>
+              <p className="text-sm text-gray-300 mt-1">{t("serverVanilla")}</p>
             </div>
           </motion.div>
 
@@ -54,7 +56,7 @@ export const ServerTypeTab: FC<ServerTypeTabProps> = ({ config, updateConfig, on
                   Forge
                 </Label>
               </div>
-              <p className="text-sm text-gray-300 mt-1">Servidor con soporte para mods usando Forge. Requiere configurar la versión de Forge específica a utilizar.</p>
+              <p className="text-sm text-gray-300 mt-1">{t("serverForge")}</p>
             </div>
           </motion.div>
 
@@ -69,7 +71,7 @@ export const ServerTypeTab: FC<ServerTypeTabProps> = ({ config, updateConfig, on
                   CurseForge Modpack
                 </Label>
               </div>
-              <p className="text-sm text-gray-300 mt-1">Instala automáticamente modpacks de CurseForge. Se puede configurar mediante URL, Slug o ZIP del modpack.</p>
+              <p className="text-sm text-gray-300 mt-1">{t("serverCurseForge")}</p>
             </div>
           </motion.div>
 
@@ -85,7 +87,7 @@ export const ServerTypeTab: FC<ServerTypeTabProps> = ({ config, updateConfig, on
                   CurseForge Manual (Deprecated)
                 </Label>
               </div>
-              <p className="text-sm text-gray-300 mt-1">Modo manual para modpacks de CurseForge. Utiliza archivos ZIP precargados. Función obsoleta, recomendamos usar CurseForge Modpack.</p>
+              <p className="text-sm text-gray-300 mt-1">{t("serverCurseForgeManual")}</p>
             </div>
           </motion.div>
         </RadioGroup>

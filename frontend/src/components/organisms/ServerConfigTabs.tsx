@@ -11,6 +11,7 @@ import { GeneralSettingsTab } from "../molecules/Tabs/GeneralSettingsTab";
 import { ServerTypeTab } from "../molecules/Tabs/ServerTypeTab";
 import { Settings, Server, Cpu, Package, Terminal, ScrollText, Code } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/lib/hooks/useLanguage";
 
 interface ServerConfigTabsProps {
   readonly serverId: string;
@@ -22,6 +23,7 @@ interface ServerConfigTabsProps {
 }
 
 export const ServerConfigTabs: FC<ServerConfigTabsProps> = ({ serverId, config, updateConfig, saveConfig, serverStatus, onClearData }) => {
+  const { t } = useLanguage();
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     await saveConfig();
@@ -36,7 +38,7 @@ export const ServerConfigTabs: FC<ServerConfigTabsProps> = ({ serverId, config, 
             <TabsList className="flex w-max min-w-full h-auto p-1 bg-gray-800/70 border-b border-gray-700/60">
               <TabsTrigger value="type" className="flex text-gray-200 items-center gap-1.5 py-2.5 px-3 data-[state=active]:bg-emerald-600/20 data-[state=active]:text-emerald-400 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500 font-minecraft text-sm whitespace-nowrap">
                 <Server className="h-4 w-4" />
-                <span className="hidden sm:inline">Tipo de Servidor</span>
+                <span className="hidden sm:inline">{t("serverType")}</span>
                 <span className="sm:hidden">Tipo</span>
               </TabsTrigger>
 
