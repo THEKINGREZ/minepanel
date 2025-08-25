@@ -66,7 +66,7 @@ export function DashboardHeader() {
                       <p className="font-medium font-minecraft text-white">Admin</p>
                     </div>
                   </div>
-                  <div className="flex flex-row items-center py-1 text-white">
+                  <div className="flex flex-row items-center py-1 text-white px-2">
                     <LanguageSwitcher /> <p>Change languaje</p>
                   </div>
                   <div className="py-2">
