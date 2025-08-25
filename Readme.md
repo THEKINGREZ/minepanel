@@ -147,24 +147,29 @@ With Filebrowser you can:
 
 ## Environment variables
 
-### Backend (`.env` file)
+### `.env` file
 
 ```env
-FRONTEND_URL=http://localhost:3000
-CF_API_KEY=your_curseforge_api_key
-CLIENT_PASSWORD=your_super_secret_password
-CLIENT_USERNAME=your_username
-```
+# Frontend
+# URL of the backend API
+NEXT_PUBLIC_API_URL=localhost:8091
 
-### Frontend (`.env.local` file)
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8091
+# Backend
+# URL of the frontend application
+FRONTEND_URL=localhost:3000
+# CurseForge API key for authentication
+CF_API_KEY=your-curseforge-api-key
+# Password for the client
+CLIENT_PASSWORD=your-client-password
+# Username for the client
+CLIENT_USERNAME=your-client-username
+# Default language: 'en' or 'es'
+NEXT_PUBLIC_DEFAULT_LANGUAGE=en
 ```
 
 ## What's still missing
 
-- [ ] Translate everything to English (currently in Spanish)
+- [x] Translate everything to English (Done thanks to [ang3lo-azevedo](https://github.com/ang3lo-azevedo))
 - [ ] Support for more modpack platforms
 - [x] Backup system (already done!)
 - [ ] User roles and permissions
@@ -181,10 +186,10 @@ NEXT_PUBLIC_API_URL=http://localhost:8091
 - ✅ User authentication
 - ✅ Resource usage dashboard
 - ✅ Dynamic server addition/removal
+- ✅ Multi-language interface
 
 **In the oven:**
 
-- 🔄 Multi-language interface
 - 🔄 Mobile design improvements
 
 ## Contributing
