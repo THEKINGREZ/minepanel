@@ -158,9 +158,11 @@ NEXT_PUBLIC_API_URL=localhost:8091
 # URL of the frontend application
 FRONTEND_URL=localhost:3000
 # CurseForge API key for authentication
+# If your API key contains '$', you must double each '$' (example: $$2a$$10$$...)
 CF_API_KEY=your-curseforge-api-key
-# Password for the client
-CLIENT_PASSWORD=your-client-password
+# Password for the client (must be a bcrypt hash, e.g. generated with bcrypt-generator.com)
+# Example: $$2a$$12$$.smCPAhCsEHAJopMPSvdQOARSnPc4wNUzF4a6hS/F/JJe8YpaI4y. (for 'hola123')
+CLIENT_PASSWORD=your-bcrypt-password-hash
 # Username for the client
 CLIENT_USERNAME=your-client-username
 # Default language: 'en' or 'es'
