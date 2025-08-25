@@ -8,6 +8,7 @@
 A web-based tool for managing multiple Minecraft servers using Docker. Because managing servers from the terminal can be a real headache.
 
 This project is built on top of the amazing work by [itzg](https://github.com/itzg):
+
 - `docker-minecraft-server` – The most popular Minecraft server container
 - `docker-mc-backup` – Automated backup system
 
@@ -16,6 +17,7 @@ This project is built on top of the amazing work by [itzg](https://github.com/it
 ## Why another server manager?
 
 After trying several solutions, I wanted something that was:
+
 - Easy to set up and use
 - Modern (no 2000s-era interfaces)
 - Flexible for handling multiple servers
@@ -43,6 +45,7 @@ minecraft-server-manager/
 ## Before you start
 
 You need to have installed:
+
 - Docker and Docker Compose
 - Node.js (version 18 or higher)
 - Git (obviously)
@@ -51,12 +54,14 @@ You need to have installed:
 ## Installation
 
 ### Step 1: Download the project
+
 ```bash
 git clone https://github.com/Ketbome/minecraft-docker-manager.git
 cd minecraft-server-manager
 ```
 
 ### Step 2: Set up the backend
+
 ```bash
 cd backend
 npm install
@@ -67,6 +72,7 @@ pm2 start npm --name "minecraft-backend" -- run start:prod
 ```
 
 ### Step 3: Set up the frontend
+
 ```bash
 cd ../frontend
 npm install
@@ -75,6 +81,7 @@ pm2 start npm --name "minecraft-frontend" -- run start
 ```
 
 ### Step 4: Save PM2 configuration
+
 ```bash
 pm2 save
 pm2 startup  # Follow the instructions that appear
@@ -85,6 +92,7 @@ pm2 startup  # Follow the instructions that appear
 Includes Filebrowser for when you need to edit files manually (which always happens).
 
 To start it:
+
 ```bash
 cd filebrowser
 docker-compose up -d
@@ -93,12 +101,14 @@ docker-compose up -d
 Then go to: `http://localhost:25580`
 
 **Default credentials:**
+
 - Username: `admin`
 - Password: `admin`
 
 > ⚠️ **Important**: Change these credentials immediately after first login
 
 With Filebrowser you can:
+
 - Browse through your server files
 - Edit `server.properties`, `ops.json`, etc.
 - Upload mods, plugins, or worlds
@@ -107,6 +117,7 @@ With Filebrowser you can:
 ## Environment variables
 
 ### Backend (`.env` file)
+
 ```env
 FRONTEND_URL=http://localhost:3000
 CF_API_KEY=your_curseforge_api_key
@@ -115,6 +126,7 @@ CLIENT_USERNAME=your_username
 ```
 
 ### Frontend (`.env.local` file)
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8091
 ```
@@ -132,6 +144,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8091
 ## Roadmap (what's coming)
 
 **Already working:**
+
 - ✅ Basic support for multiple servers
 - ✅ Real-time logs
 - ✅ User authentication
@@ -139,6 +152,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8091
 - ✅ Dynamic server addition/removal
 
 **In the oven:**
+
 - 🔄 Multi-language interface
 - 🔄 Mobile design improvements
 
@@ -147,6 +161,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8091
 Found a bug? Have a great idea? Pull requests are welcome!
 
 You can also:
+
 - Report issues in Issues
 - Give a star if you like the project
 - Share it with other server administrators
@@ -163,4 +178,4 @@ Questions? Suggestions? Just want to chat about Minecraft? Open an issue or send
 
 ---
 
-*This project was born out of the frustration of managing Minecraft servers for friends and the community. If it helps you, I'm glad!*
+_This project was born out of the frustration of managing Minecraft servers for friends and the community. If it helps you, I'm glad!_

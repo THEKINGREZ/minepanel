@@ -10,7 +10,7 @@ export function Footer() {
           <motion.div initial={{ rotate: 0 }} whileHover={{ rotate: 180 }} transition={{ duration: 0.6 }}>
             <Image src="/images/compass.webp" alt="Compass" width={24} height={24} className="opacity-80" />
           </motion.div>
-          <p className="text-sm text-gray-300 font-minecraft">&copy; {new Date().getFullYear()} Ketbome. Todos los derechos reservados.</p>
+          <p className="text-sm text-gray-300 font-minecraft">&copy; {new Date().getFullYear()} Hecho con ❤️ Ketbome.</p>
         </div>
 
         <div className="flex space-x-6 text-gray-300">

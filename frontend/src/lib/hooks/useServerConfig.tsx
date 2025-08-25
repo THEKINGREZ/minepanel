@@ -15,7 +15,7 @@ const defaultConfig: ServerConfig = {
   port: "25565",
   difficulty: "hard",
   maxPlayers: "10",
-  ops: "ketbome",
+  ops: "",
   onlineMode: false,
   pvp: true,
   commandBlock: true,

@@ -1,7 +1,7 @@
 import { ServerConfig } from "@/lib/types/types";
 import api from "../axios.service";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://minecraft.ketbome.lat:8091";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const fetchServerConfig = async (serverId: string): Promise<ServerConfig> => {
   const response = await api.get(`${API_URL}/servers/${serverId}`);
@@ -46,41 +46,41 @@ export const getAllServersStatus = async (): Promise<{ [serverId: string]: "runn
 };
 
 export const getServerLogs = async (
-  serverId: string, 
+  serverId: string,
   limit: number = 100,
   since?: string,
   stream?: boolean
-): Promise<{ 
+): Promise<{
   logs: string;
   hasErrors: boolean;
   lastUpdate: Date;
-  status: 'running' | 'stopped' | 'starting' | 'not_found';
+  status: "running" | "stopped" | "starting" | "not_found";
   metadata?: {
     totalLines: number;
     errorCount: number;
     warningCount: number;
-  }
+  };
 }> => {
   const params: Record<string, string | number> = { lines: limit };
-  
+
   if (since) {
     params.since = since;
   }
-  
+
   if (stream) {
-    params.stream = 'true';
+    params.stream = "true";
   }
 
   const response = await api.get(`${API_URL}/servers/${serverId}/logs`, {
     params,
   });
-  
+
   // Convert lastUpdate string back to Date if needed
   const data = response.data;
-  if (data.lastUpdate && typeof data.lastUpdate === 'string') {
+  if (data.lastUpdate && typeof data.lastUpdate === "string") {
     data.lastUpdate = new Date(data.lastUpdate);
   }
-  
+
   return data;
 };
 
@@ -88,19 +88,19 @@ export const getServerLogsStream = async (
   serverId: string,
   lines: number = 500,
   since?: string
-): Promise<{ 
+): Promise<{
   logs: string;
   hasErrors: boolean;
   lastUpdate: Date;
-  status: 'running' | 'stopped' | 'starting' | 'not_found';
+  status: "running" | "stopped" | "starting" | "not_found";
   metadata?: {
     totalLines: number;
     errorCount: number;
     warningCount: number;
-  }
+  };
 }> => {
   const params: Record<string, string | number> = { lines };
-  
+
   if (since) {
     params.since = since;
   }
@@ -108,13 +108,13 @@ export const getServerLogsStream = async (
   const response = await api.get(`${API_URL}/servers/${serverId}/logs/stream`, {
     params,
   });
-  
+
   // Convert lastUpdate string back to Date if needed
   const data = response.data;
-  if (data.lastUpdate && typeof data.lastUpdate === 'string') {
+  if (data.lastUpdate && typeof data.lastUpdate === "string") {
     data.lastUpdate = new Date(data.lastUpdate);
   }
-  
+
   return data;
 };
 
@@ -122,11 +122,11 @@ export const getServerLogsSince = async (
   serverId: string,
   timestamp: string,
   lines: number = 1000
-): Promise<{ 
+): Promise<{
   logs: string;
   hasErrors: boolean;
   lastUpdate: Date;
-  status: 'running' | 'stopped' | 'starting' | 'not_found';
+  status: "running" | "stopped" | "starting" | "not_found";
   hasNewContent: boolean;
 }> => {
   const params: Record<string, string | number> = { lines };
@@ -134,13 +134,13 @@ export const getServerLogsSince = async (
   const response = await api.get(`${API_URL}/servers/${serverId}/logs/since/${timestamp}`, {
     params,
   });
-  
+
   // Convert lastUpdate string back to Date if needed
   const data = response.data;
-  if (data.lastUpdate && typeof data.lastUpdate === 'string') {
+  if (data.lastUpdate && typeof data.lastUpdate === "string") {
     data.lastUpdate = new Date(data.lastUpdate);
   }
-  
+
   return data;
 };
 
