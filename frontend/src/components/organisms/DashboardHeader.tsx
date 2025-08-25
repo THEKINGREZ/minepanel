@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, ChevronDown } from "lucide-react";
 import { logout } from "@/services/auth/auth.service";
 import { motion, AnimatePresence } from "framer-motion";
+import { LanguageSwitcher } from "../ui/language-switcher";
 
 export function DashboardHeader() {
   const router = useRouter();
@@ -63,10 +64,11 @@ export function DashboardHeader() {
                     </div>
                     <div>
                       <p className="font-medium font-minecraft text-white">Admin</p>
-                      <p className="text-sm text-gray-400">admin@minecraft.local</p>
                     </div>
                   </div>
-
+                  <div className="flex flex-row items-center py-1 text-white">
+                    <LanguageSwitcher /> <p>Change languaje</p>
+                  </div>
                   <div className="py-2">
                     <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-600/20 transition-colors">
                       <LogOut className="h-4 w-4" />
