@@ -44,7 +44,18 @@ minecraft-server-manager/
 
 ## Important: Configure your environment variables first
 
-Before running the project, you **must fill in the `.env` file** in the backend folder with your own credentials.
+Before running the project, you **must create your `.env` files** for both the backend and frontend:
+
+- Copy `.env.example` to `.env` in the `backend` folder:
+  ```bash
+  cp backend/.env.example backend/.env
+  ```
+- Copy `.env.example` to `.env` in the `frontend` folder:
+  ```bash
+  cp frontend/.env.example frontend/.env
+  ```
+
+Then edit the values according to your environment. **It is not necessary to enter the `CF_API_KEY`.** (You can leave it blank or add a comment.).
 
 > ⚠️ **Security warning:**
 >
