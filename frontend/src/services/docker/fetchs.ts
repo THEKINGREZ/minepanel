@@ -24,13 +24,13 @@ export const updateServerConfig = async (serverId: string, config: Partial<Serve
 };
 
 export const apiRestartServer = async (serverId: string): Promise<{ success: boolean; message: string }> => {
-  // Corrige esto, estabas pasando withCredentials como cuerpo de la solicitud
+  // Fixed: was passing withCredentials as request body
   const response = await api.post(`${API_URL}/servers/${serverId}/restart`, {});
   return response.data;
 };
 
 export const apiClearServerData = async (serverId: string): Promise<{ success: boolean; message: string }> => {
-  // Corrige esto, estabas pasando withCredentials como cuerpo de la solicitud
+  // Fixed: was passing withCredentials as request body
   const response = await api.post(`${API_URL}/servers/${serverId}/clear-data`, {});
   return response.data;
 };
@@ -172,7 +172,7 @@ export const startServer = async (
     console.error(`Error starting server ${serverId}:`, error);
     return {
       success: false,
-      message: "Error al iniciar el servidor",
+      message: "SERVER_START_ERROR",
     };
   }
 };
@@ -190,7 +190,7 @@ export const stopServer = async (
     console.error(`Error stopping server ${serverId}:`, error);
     return {
       success: false,
-      message: "Error al detener el servidor",
+      message: "SERVER_STOP_ERROR",
     };
   }
 };

@@ -39,7 +39,11 @@ export default function Home() {
         toast.success(t('loginSuccess'));
         router.push("/dashboard");
       } else {
-        toast.error(result.error || t('invalidCredentials'));
+        // Try to translate error message if it's a translation key, otherwise use default
+        const errorMessage = result.error && t(result.error as any) !== result.error 
+          ? t(result.error as any) 
+          : t('invalidCredentials');
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error("Error en login:", error);

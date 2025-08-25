@@ -62,6 +62,10 @@ export const en = {
   serverNotFound: "Server not found",
   connectionError: "Connection error",
   unexpectedError: "Unexpected error",
+  NO_ACCESS_TOKEN: "No access token received",
+  LOGIN_ERROR: "Login error",
+  SERVER_START_ERROR: "Error starting server",
+  SERVER_STOP_ERROR: "Error stopping server",
   
   // Language
   language: "Language",

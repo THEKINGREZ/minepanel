@@ -61,6 +61,10 @@ export const es = {
   serverNotFound: "Servidor no encontrado",
   connectionError: "Error de conexión",
   unexpectedError: "Error inesperado",
+  NO_ACCESS_TOKEN: "No se recibió token de acceso",
+  LOGIN_ERROR: "Error al iniciar sesión",
+  SERVER_START_ERROR: "Error al iniciar el servidor",
+  SERVER_STOP_ERROR: "Error al detener el servidor",
   
   // Language
   language: "Idioma",
