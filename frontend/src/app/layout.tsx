@@ -1,5 +1,6 @@
 import type React from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { LanguageProvider } from "@/lib/hooks/useLanguage";
 import "./globals.css";
 
 export default function RootLayout({
@@ -8,10 +9,12 @@ export default function RootLayout({
   readonly children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="en">
       <body>
-        {children}
-        <Toaster />
+        <LanguageProvider>
+          {children}
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );
