@@ -17,18 +17,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/lib/hooks/useLanguage";
 import Link from "next/link";
-
-// Esquema de validación para el formulario de creación de servidor
-const createServerSchema = z.object({
-  id: z
-    .string()
-    .min(3, { message: "El ID debe tener al menos 3 caracteres" })
-    .max(20, { message: "El ID debe tener máximo 20 caracteres" })
-    .regex(/^[a-zA-Z0-9_-]+$/, {
-      message: "El ID solo puede contener letras, números, guiones y guiones bajos",
-    }),
-});
 
 type ServerInfo = {
   id: string;
@@ -41,6 +31,19 @@ type ServerInfo = {
 };
 
 export default function Dashboard() {
+  const { t } = useLanguage();
+  
+  // Schema with dynamic translations
+  const createServerSchema = z.object({
+    id: z
+      .string()
+      .min(3, { message: t('idMinLength') })
+      .max(20, { message: t('idMaxLength') })
+      .regex(/^[a-zA-Z0-9_-]+$/, {
+        message: t('idInvalidChars'),
+      }),
+  });
+
   const [servers, setServers] = useState<ServerInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingServer, setIsCreatingServer] = useState(false);
