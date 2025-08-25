@@ -50,6 +50,7 @@ export function LogsTab({ serverId }: Readonly<LogsTabProps>) {
     // Initial fetch only
     fetchLogs();
     fetchServerResources();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Auto-scroll to bottom when logs update (only if autoScroll is enabled)

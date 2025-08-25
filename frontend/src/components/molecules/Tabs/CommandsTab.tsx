@@ -71,6 +71,7 @@ export const CommandsTab: FC<CommandsTabProps> = ({ serverId, serverStatus, rcon
     } else {
       setShowSuggestions(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [command]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
