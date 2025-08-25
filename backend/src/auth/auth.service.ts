@@ -5,15 +5,6 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  // Credenciales hardcodeadas para admin
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'admin',
-      password: '$2b$10$Y4NqWhUoeQ5lVSu3Wwm06..zQuGmw8I.CZM/fcIIHT/K58k.4JlrC',
-    },
-  ];
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,

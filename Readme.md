@@ -42,7 +42,27 @@ minecraft-server-manager/
 └── filebrowser/      # For manual file handling
 ```
 
-## Before you start
+## Important: Configure your environment variables first
+
+Before running the project, you **must fill in the `.env` file** in the backend folder with your own credentials.
+
+> ⚠️ **Security warning:**
+>
+> The default admin password hash is:
+>
+> `$2a$12$/ImficEXuymsxlZap5.92euInslhhQB4Yg/gZS5zusrQ0aanIU2sO`
+>
+> This is for the user `admin`. **You should change this to your own password hash!**
+>
+> - Never use the default hash in production.
+> - To generate a new hash, use a tool like [bcrypt-generator.com](https://bcrypt-generator.com/) or the `bcrypt` library in Node.js.
+> - Example Node.js command:
+>
+>   ```js
+>   require("bcrypt").hashSync("your-new-password", 12);
+>   ```
+>
+> Paste your new hash in the `.env` file.
 
 You need to have installed:
 
@@ -105,7 +125,7 @@ Then go to: `http://localhost:25580`
 - Username: `admin`
 - Password: `admin`
 
-> ⚠️ **Important**: Change these credentials immediately after first login
+> ⚠️ **Important**: Change these credentials in .env
 
 With Filebrowser you can:
 
