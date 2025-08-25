@@ -15,8 +15,11 @@ export function useServerStatus(serverId: string) {
   // Helper function to translate error messages
   const translateMessage = (message: string): string => {
     // Try to translate if it's a translation key, otherwise return the original message
-    const translated = t(message as any);
-    return translated !== message ? translated : message;
+    const knownKeys = ['serverStarted', 'serverStopped', 'connectionError', 'unexpectedError', 'SERVER_START_ERROR', 'SERVER_STOP_ERROR'];
+    if (knownKeys.includes(message)) {
+      return t(message as 'serverStarted' | 'serverStopped' | 'connectionError' | 'unexpectedError' | 'SERVER_START_ERROR' | 'SERVER_STOP_ERROR');
+    }
+    return message;
   };
 
   const fetchStatus = useCallback(async () => {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,9 +78,10 @@ export default function Dashboard() {
       isMounted = false;
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchServersFromBackend = async () => {
+  const fetchServersFromBackend = useCallback(async () => {
     setIsLoading(true);
     try {
       const serverList = await fetchServerList();
@@ -103,7 +104,7 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const processServerStatuses = async (serversList: ServerInfo[]): Promise<ServerInfo[]> => {
     if (serversList.length === 0) return [];
@@ -142,7 +143,7 @@ export default function Dashboard() {
     }
   };
 
-  const loadServerInfo = async () => {
+  const loadServerInfo = useCallback(async () => {
     if (servers.length === 0) return;
     try {
       const updatedServers = await processServerStatuses(servers);
@@ -151,7 +152,7 @@ export default function Dashboard() {
       console.error("Error loading server information:", error);
       toast.error("Error al cargar información de los servidores");
     }
-  };
+  }, [servers]);
 
   const handleCreateServer = async (values: z.infer<typeof createServerSchema>) => {
     setIsCreatingServer(true);

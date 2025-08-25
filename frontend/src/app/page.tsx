@@ -40,9 +40,9 @@ export default function Home() {
         router.push("/dashboard");
       } else {
         // Try to translate error message if it's a translation key, otherwise use default
-        const errorMessage = result.error && t(result.error as any) !== result.error 
-          ? t(result.error as any) 
-          : t('invalidCredentials');
+        const errorKey = result.error as string;
+        const hasTranslation = errorKey && ['NO_ACCESS_TOKEN', 'LOGIN_ERROR', 'invalidCredentials'].includes(errorKey);
+        const errorMessage = hasTranslation ? t(errorKey as 'NO_ACCESS_TOKEN' | 'LOGIN_ERROR' | 'invalidCredentials') : t('invalidCredentials');
         toast.error(errorMessage);
       }
     } catch (error) {
