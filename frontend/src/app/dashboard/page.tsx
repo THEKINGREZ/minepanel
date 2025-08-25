@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,18 +17,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/lib/hooks/useLanguage";
 import Link from "next/link";
-
-// Esquema de validación para el formulario de creación de servidor
-const createServerSchema = z.object({
-  id: z
-    .string()
-    .min(3, { message: "El ID debe tener al menos 3 caracteres" })
-    .max(20, { message: "El ID debe tener máximo 20 caracteres" })
-    .regex(/^[a-zA-Z0-9_-]+$/, {
-      message: "El ID solo puede contener letras, números, guiones y guiones bajos",
-    }),
-});
 
 type ServerInfo = {
   id: string;
@@ -41,6 +31,19 @@ type ServerInfo = {
 };
 
 export default function Dashboard() {
+  const { t } = useLanguage();
+  
+  // Schema with dynamic translations
+  const createServerSchema = z.object({
+    id: z
+      .string()
+      .min(3, { message: t('idMinLength') })
+      .max(20, { message: t('idMaxLength') })
+      .regex(/^[a-zA-Z0-9_-]+$/, {
+        message: t('idInvalidChars'),
+      }),
+  });
+
   const [servers, setServers] = useState<ServerInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingServer, setIsCreatingServer] = useState(false);
@@ -75,9 +78,10 @@ export default function Dashboard() {
       isMounted = false;
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchServersFromBackend = async () => {
+  const fetchServersFromBackend = useCallback(async () => {
     setIsLoading(true);
     try {
       const serverList = await fetchServerList();
@@ -100,7 +104,7 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const processServerStatuses = async (serversList: ServerInfo[]): Promise<ServerInfo[]> => {
     if (serversList.length === 0) return [];
@@ -139,7 +143,7 @@ export default function Dashboard() {
     }
   };
 
-  const loadServerInfo = async () => {
+  const loadServerInfo = useCallback(async () => {
     if (servers.length === 0) return;
     try {
       const updatedServers = await processServerStatuses(servers);
@@ -148,7 +152,7 @@ export default function Dashboard() {
       console.error("Error loading server information:", error);
       toast.error("Error al cargar información de los servidores");
     }
-  };
+  }, [servers]);
 
   const handleCreateServer = async (values: z.infer<typeof createServerSchema>) => {
     setIsCreatingServer(true);
@@ -250,7 +254,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header de la página */}
+      {/* Page header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white font-minecraft flex items-center gap-3">
@@ -423,7 +427,7 @@ export default function Dashboard() {
         )}
       </motion.div>
 
-      {/* Decoración */}
+      {/* Decoration */}
       {servers.length > 0 && (
         <div className="flex justify-center gap-8 pt-8">
           <motion.div animate={{ y: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}>

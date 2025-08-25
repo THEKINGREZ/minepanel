@@ -118,7 +118,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
       }
     };
 
-    // Delay para asegurar hidratación completa
+    // Delay to ensure complete hydration
     const timeoutId = setTimeout(() => {
       initializeServers();
     }, 100);
@@ -145,7 +145,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
     },
   ];
 
-  // Mostrar skeleton durante hidratación
+  // Show skeleton during hydration
   if (!isHydrated) {
     return (
       <div className="fixed left-0 top-0 h-full w-64 bg-gray-900/95 backdrop-blur-md border-r border-gray-700/60 shadow-2xl z-50">
@@ -187,7 +187,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
         </div>
       </div>
 
-      {/* Navegación Principal */}
+      {/* Main Navigation */}
       <div className="p-4 space-y-2">
         <AnimatePresence mode="wait">
           {!isCollapsed && (

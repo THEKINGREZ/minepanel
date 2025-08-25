@@ -18,7 +18,7 @@ interface ServerPageHeaderProps {
 export function ServerPageHeader({ serverId, serverName, serverStatus, isProcessing, onStartServer, onStopServer, onRestartServer }: ServerPageHeaderProps) {
   const containerName = serverId;
 
-  // Función para obtener el ícono basado en el estado
+  // Function to get icon based on status
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "running":
@@ -34,7 +34,7 @@ export function ServerPageHeader({ serverId, serverName, serverStatus, isProcess
     }
   };
 
-  // Función para obtener la clase CSS del indicador de estado
+  // Function to get CSS class for status indicator
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "running":
@@ -50,7 +50,7 @@ export function ServerPageHeader({ serverId, serverName, serverStatus, isProcess
     }
   };
 
-  // Función para obtener el texto del estado
+  // Function to get status text
   const getStatusText = (status: string) => {
     switch (status) {
       case "running":

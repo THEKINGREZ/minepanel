@@ -377,7 +377,7 @@ export class DockerComposeService {
   }
 
   async createServer(id: string, config: UpdateServerConfig = {}): Promise<ServerConfig> {
-    // Validar el ID del servidor (solo permitir caracteres alfanuméricos, guiones y guiones bajos)
+    // Validate server ID (only allow alphanumeric characters, hyphens and underscores)
     if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
       throw new Error('El ID del servidor solo puede contener letras, números, guiones y guiones bajos');
     }
@@ -394,7 +394,7 @@ export class DockerComposeService {
     // Crear el directorio de datos de Minecraft
     await fs.ensureDir(path.join(serverPath, 'mc-data'));
 
-    // Crear configuración por defecto y aplicar sobrescrituras
+    // Create default configuration and apply overrides
     const defaultConfig = this.createDefaultConfig(id);
     const serverConfig = { ...defaultConfig, ...config };
 

@@ -137,7 +137,7 @@
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-/* Estilos para el scrollbar personalizado */
+/* Custom scrollbar styles */
 .custom-scrollbar::-webkit-scrollbar {
   height: 6px;
   width: 6px;
@@ -157,7 +157,7 @@
   background: rgba(52, 211, 153, 0.6);
 }
 
-/* Para Firefox */
+/* For Firefox */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(52, 211, 153, 0.4) rgba(31, 41, 55, 0.5);

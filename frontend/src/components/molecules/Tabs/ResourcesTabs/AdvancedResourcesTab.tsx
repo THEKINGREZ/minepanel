@@ -16,7 +16,7 @@ interface AdvancedResourcesTabProps {
 }
 
 export const AdvancedResourcesTab: FC<AdvancedResourcesTabProps> = ({ config, updateConfig }) => {
-  // Función para manejar el cambio de Auto-Stop
+  // Function to handle Auto-Stop change
   const handleAutoStopChange = (checked: boolean) => {
     updateConfig("enableAutoStop", checked);
 
@@ -26,7 +26,7 @@ export const AdvancedResourcesTab: FC<AdvancedResourcesTabProps> = ({ config, up
     }
   };
 
-  // Función para manejar el cambio de Auto-Pause
+  // Function to handle Auto-Pause change
   const handleAutoPauseChange = (checked: boolean) => {
     updateConfig("enableAutoPause", checked);
 

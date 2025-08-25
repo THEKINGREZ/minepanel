@@ -10,8 +10,8 @@ import { LocalStrategy } from './local.strategy';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: 'mineminenomi-secret-key', // En producción, usa variables de entorno
-      signOptions: { expiresIn: '24h' }, // Token válido por 24 horas
+      secret: 'mineminenomi-secret-key', // In production, use environment variables
+      signOptions: { expiresIn: '24h' }, // Token valid for 24 hours
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],

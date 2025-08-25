@@ -5,10 +5,22 @@ import {
   startServer as apiStartServer,
   stopServer as apiStopServer,
 } from "@/services/docker/fetchs";
+import { useLanguage } from "@/lib/hooks/useLanguage";
 
 export function useServerStatus(serverId: string) {
+  const { t } = useLanguage();
   const [status, setStatus] = useState<string>("unknown");
   const [isProcessingAction, setIsProcessingAction] = useState(false);
+
+  // Helper function to translate error messages
+  const translateMessage = (message: string): string => {
+    // Try to translate if it's a translation key, otherwise return the original message
+    const knownKeys = ['serverStarted', 'serverStopped', 'connectionError', 'unexpectedError', 'SERVER_START_ERROR', 'SERVER_STOP_ERROR'];
+    if (knownKeys.includes(message)) {
+      return t(message as 'serverStarted' | 'serverStopped' | 'connectionError' | 'unexpectedError' | 'SERVER_START_ERROR' | 'SERVER_STOP_ERROR');
+    }
+    return message;
+  };
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -35,16 +47,17 @@ export function useServerStatus(serverId: string) {
     try {
       const result = await apiStartServer(serverId);
       if (result.success) {
-        toast.success("Servidor iniciado correctamente");
+        toast.success(t('serverStarted'));
         // Wait a moment and update status
         setTimeout(fetchStatus, 3000);
         return true;
       } else {
-        throw new Error(result.message || "Error al iniciar el servidor");
+        throw new Error(translateMessage(result.message || "SERVER_START_ERROR"));
       }
     } catch (error) {
       console.error("Error starting server:", error);
-      toast.error("Error al iniciar el servidor");
+      const errorMessage = error instanceof Error ? translateMessage(error.message) : t('SERVER_START_ERROR');
+      toast.error(errorMessage);
       return false;
     } finally {
       setIsProcessingAction(false);
@@ -56,16 +69,17 @@ export function useServerStatus(serverId: string) {
     try {
       const result = await apiStopServer(serverId);
       if (result.success) {
-        toast.success("Servidor detenido correctamente");
+        toast.success(t('serverStopped'));
         // Update status
         fetchStatus();
         return true;
       } else {
-        throw new Error(result.message || "Error al detener el servidor");
+        throw new Error(translateMessage(result.message || "SERVER_STOP_ERROR"));
       }
     } catch (error) {
       console.error("Error stopping server:", error);
-      toast.error("Error al detener el servidor");
+      const errorMessage = error instanceof Error ? translateMessage(error.message) : t('SERVER_STOP_ERROR');
+      toast.error(errorMessage);
       return false;
     } finally {
       setIsProcessingAction(false);

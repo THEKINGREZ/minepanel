@@ -35,8 +35,8 @@ export class AuthService {
     };
   }
 
-  // Método auxiliar para generar hash de una contraseña
-  // Solo se usa en desarrollo para generar el hash inicial
+  // Helper method to generate password hash
+  // Only used in development to generate the initial hash
   async generateHash(password: string): Promise<string> {
     const saltRounds = 10;
     return bcrypt.hash(password, saltRounds);
