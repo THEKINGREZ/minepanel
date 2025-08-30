@@ -1,4 +1,4 @@
-# Minecraft Server Manager
+# Minepanel
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Docker Ready](https://img.shields.io/badge/Docker-Ready-blue)
